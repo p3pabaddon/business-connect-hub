@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { SEOHead } from "@/components/SEOHead";
 
 const KayitPage = () => {
   const [searchParams] = useSearchParams();
@@ -48,6 +49,7 @@ const KayitPage = () => {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <SEOHead title="Kayıt Ol" description="RandevuDunyasi'na ücretsiz kayıt olun. Randevu almaya hemen başlayın." />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
           <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">

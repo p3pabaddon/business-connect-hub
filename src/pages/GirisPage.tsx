@@ -40,6 +40,7 @@ const GirisPage = () => {
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <SEOHead title="Giriş Yap" description="RandevuDunyasi hesabınıza giriş yapın. Randevularınızı yönetin." />
       {/* Premium Background */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat scale-105 transition-transform duration-1000"
