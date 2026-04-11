@@ -97,6 +97,30 @@ export default function BusinessDashboard() {
     );
   }
 
+  if (noBusiness) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Building2 className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-xl font-heading text-foreground mb-2">İşletme Bulunamadı</h2>
+          <p className="text-muted-foreground text-sm mb-6">
+            Henüz bir işletme kaydınız bulunmuyor. İşletme paneline erişmek için önce başvuru yapmanız gerekiyor.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={() => navigate("/isletme-basvuru")} className="gap-2">
+              İşletme Başvurusu Yap
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/")}>
+              Ana Sayfa
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#020617] text-slate-300 flex overflow-hidden font-sans selection:bg-primary/30">
       <SEOHead title={`${business?.name || "İşletme"} | Yönetim Paneli`} />
