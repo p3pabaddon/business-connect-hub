@@ -17,6 +17,7 @@ import { turkiyeIller } from "@/lib/turkey-locations";
 import { getBusinesses } from "@/lib/api";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { t } from "@/lib/translations";
+import { SEOHead } from "@/components/SEOHead";
 
 const categories = [
   { value: "all", label: t("isletmeler.all_categories") },
@@ -80,6 +81,7 @@ const IsletmelerPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead title="İşletmeler" description="Türkiye genelinde berber, güzellik salonu, spa ve klinik işletmelerini keşfedin." />
       <Header />
       <main className="flex-1 bg-surface">
         {/* Search Header */}

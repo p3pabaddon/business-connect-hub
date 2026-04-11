@@ -4,6 +4,7 @@ import {
   Settings2, Save, Clock, Trash2, Plus,
   Camera, Briefcase, ExternalLink, ShieldCheck
 } from "lucide-react";
+import { ImageUpload } from "@/components/ImageUpload";
 import { supabase } from "@/lib/supabase";
 import { updateMyBusiness } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -361,7 +362,7 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
             title="Markalama" 
             desc="Logo ve kapak fotoğrafı ayarları."
           >
-             <div className="space-y-6">
+              <div className="space-y-6">
                 <div className="space-y-3">
                    <Label className="text-xs text-slate-500 uppercase font-black tracking-widest">Dükkan Logosu</Label>
                    <div className="flex items-center gap-4">
@@ -372,39 +373,25 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                            <Briefcase className="w-8 h-8 text-slate-700" />
                          )}
                       </div>
-                      <div className="flex-1 space-y-2">
-                         <Input 
-                          placeholder="Logo URL'i" 
-                          value={business.logo || ""}
-                          onChange={(e) => setBusiness({...business, logo: e.target.value})}
-                          className="bg-slate-950 border-slate-800 h-10 rounded-xl text-xs"
+                      <div className="flex-1">
+                         <ImageUpload
+                           onUpload={(url) => setBusiness({...business, logo: url})}
+                           defaultValue={business.logo || ""}
+                           bucket="business-images"
                          />
-                         <p className="text-[10px] text-slate-600 uppercase">Önerilen: 500x500 PNG Kare</p>
                       </div>
                    </div>
                 </div>
 
                 <div className="space-y-3 pt-4 border-t border-slate-800/30">
                    <Label className="text-xs text-slate-500 uppercase font-black tracking-widest">Kapak Fotoğrafı</Label>
-                   <div className="w-full h-32 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden relative group">
-                      {business.cover_image ? (
-                        <img src={business.cover_image} alt="C" className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity" />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                           <Plus className="w-10 h-10 text-slate-800" />
-                        </div>
-                      )}
-                      <div className="absolute inset-x-4 bottom-4">
-                         <Input 
-                          placeholder="Kapak Fotoğrafı URL'i" 
-                          value={business.cover_image || ""}
-                          onChange={(e) => setBusiness({...business, cover_image: e.target.value})}
-                          className="bg-slate-950/80 border-slate-700 h-9 rounded-xl text-[10px] text-white backdrop-blur-sm"
-                         />
-                      </div>
-                   </div>
+                   <ImageUpload
+                     onUpload={(url) => setBusiness({...business, cover_image: url})}
+                     defaultValue={business.cover_image || ""}
+                     bucket="business-images"
+                   />
                 </div>
-             </div>
+              </div>
           </SectionCard>
         </div>
       </div>
