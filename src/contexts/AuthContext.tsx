@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
+import { ensureProfile } from "@/lib/profiles";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
@@ -24,12 +25,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      // Sync profile on login
+      if (session?.user) {
+        ensureProfile(session.user).catch(() => {});
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) {
+        ensureProfile(session.user).catch(() => {});
+      }
     });
 
     return () => subscription.unsubscribe();

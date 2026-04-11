@@ -7,6 +7,7 @@ import { Star } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { checkRateLimit, getRateLimitMessage } from "@/lib/rate-limiter";
 
 interface ReviewModalProps {
   open: boolean;
@@ -27,6 +28,10 @@ export function ReviewModal({ open, onOpenChange, businessId, businessName, appo
 
   const handleSubmit = async () => {
     if (!user || rating === 0) return;
+    if (!checkRateLimit("review")) {
+      toast({ title: "Hata", description: getRateLimitMessage(), variant: "destructive" });
+      return;
+    }
 
     setSubmitting(true);
     const { error } = await supabase.from("reviews").insert({
