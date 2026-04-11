@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
+import { checkRateLimit, getRateLimitMessage } from "@/lib/rate-limiter";
 
 const KayitPage = () => {
   const [searchParams] = useSearchParams();
@@ -26,6 +27,10 @@ const KayitPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!checkRateLimit("register")) {
+      toast({ title: "Hata", description: getRateLimitMessage(), variant: "destructive" });
+      return;
+    }
     setLoading(true);
     const { error } = await signUp(form.email, form.password, {
       full_name: form.name,
