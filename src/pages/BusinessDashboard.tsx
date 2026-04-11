@@ -57,6 +57,14 @@ export default function BusinessDashboard() {
         setNoBusiness(true);
         return;
       }
+      
+      // Check if business is pending approval
+      if (biz.status === "pending" || !biz.is_active) {
+        setBusiness(biz);
+        setLoading(false);
+        return;
+      }
+      
       setBusiness(biz);
 
       const [bizData, servicesRes, staffRes, reviewsRes] = await Promise.all([
