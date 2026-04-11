@@ -81,6 +81,7 @@ const IsletmelerPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead title="İşletmeler" description="Türkiye genelinde berber, güzellik salonu, spa ve klinik işletmelerini keşfedin." />
       <Header />
       <main className="flex-1 bg-surface">
         {/* Search Header */}
