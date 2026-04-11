@@ -19,7 +19,8 @@ import {
   FileText, CheckCircle, Clock, ArrowRight, Wallet,
   Shield, Search, RefreshCw, XCircle, LayoutDashboard,
   Bell, LogOut, Menu, X, ScrollText, Settings, HelpCircle,
-  Eye, Edit, Power, Star, Receipt, CreditCard, Save, Globe, Palette
+  Eye, Edit, Power, Star, Receipt, CreditCard, Save, Globe, Palette,
+  User
 } from "lucide-react";
 
 const ADMIN_EMAILS = ["asrinaltan04@gmail.com", "admin@admin.com", "testadmin@rendezvous.com"];

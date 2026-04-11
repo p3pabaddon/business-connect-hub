@@ -111,7 +111,7 @@ export function FeaturedSalonsSection() {
                     <span className="font-bold text-sm tracking-tight">{salon.rating || "5.0"}</span>
                     <span className="text-muted-foreground text-xs font-medium">({salon.review_count || 0}+)</span>
                   </div>
-                  {salon.is_featured && (
+                  {(salon as any).is_featured && (
                     <div className="absolute top-4 left-4 bg-amber-500 text-white px-3 py-1 rounded-full flex items-center gap-1 shadow-lg animate-pulse z-20">
                       <Zap className="w-3 h-3 fill-white" />
                       <span className="text-[10px] font-black uppercase tracking-widest">Öne Çıkan</span>

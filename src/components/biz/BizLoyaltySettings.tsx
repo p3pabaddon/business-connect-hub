@@ -238,7 +238,7 @@ export const BizLoyaltySettings = ({ businessId }: Props) => {
       </Card>
 
       <div className="flex justify-end p-2">
-        <Button onClick={handleSave} disabled={saving} size="xl" className="shadow-lg shadow-primary/20">
+        <Button onClick={handleSave} disabled={saving} size="lg" className="shadow-lg shadow-primary/20">
           {saving ? "Güncelleniyor..." : (
             <>
               <Save className="w-5 h-5 mr-3" /> Tüm Ayarları Kaydet
