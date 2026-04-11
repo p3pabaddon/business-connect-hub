@@ -111,6 +111,16 @@ const IsletmelerPage = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <Link to="/harita">
+                  <Button variant="outline" className="h-11 gap-2">
+                    <MapPin className="w-4 h-4" /> Harita
+                  </Button>
+                </Link>
+                <Link to="/karsilastir">
+                  <Button variant="outline" className="h-11 gap-2">
+                    <SlidersHorizontal className="w-4 h-4" /> Karşılaştır
+                  </Button>
+                </Link>
                 <Button
                   variant="outline"
                   className="h-11"
