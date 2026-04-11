@@ -41,6 +41,8 @@ export default function BusinessDashboard() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [inventory, setInventory] = useState<any[]>([]);
 
+  const [noBusiness, setNoBusiness] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) navigate("/giris");
     if (user) loadData();
@@ -51,7 +53,8 @@ export default function BusinessDashboard() {
     try {
       const biz = await getMyBusiness();
       if (!biz) {
-        navigate("/isletme-basvuru");
+        setLoading(false);
+        setNoBusiness(true);
         return;
       }
       setBusiness(biz);
