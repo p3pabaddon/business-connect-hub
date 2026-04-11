@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
 import { ScrollToTop } from "./components/layout/ScrollToTop";
@@ -30,38 +32,66 @@ import { QuickBookWidget } from "./components/QuickBookWidget";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <TrafficTracker />
-          <QuickBookWidget />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/isletmeler" element={<IsletmelerPage />} />
-            <Route path="/isletme/:slug" element={<IsletmeDetailPage />} />
-            <Route path="/giris" element={<GirisPage />} />
-            <Route path="/register" element={<KayitPage />} />
-            <Route path="/kayit" element={<KayitPage />} />
-            <Route path="/hakkimizda" element={<HakkimizdaPage />} />
-            <Route path="/iletisim" element={<IletisimPage />} />
-            <Route path="/sss" element={<SSSPage />} />
-            <Route path="/isletme-basvuru" element={<IsletmeBasvuruPage />} />
-            <Route path="/dashboard" element={<BusinessDashboard />} />
-            <Route path="/personel-paneli" element={<StaffDashboardPage />} />
-            <Route path="/profil" element={<ProfilPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/isletmeler-icin" element={<ForBusinessesPage />} />
-            <Route path="/hq" element={<HqDashboard />} />
-            <Route path="/hq/login" element={<HqLoginPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <TrafficTracker />
+            <QuickBookWidget />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/isletmeler" element={<IsletmelerPage />} />
+              <Route path="/isletme/:slug" element={<IsletmeDetailPage />} />
+              <Route path="/giris" element={<GirisPage />} />
+              <Route path="/register" element={<KayitPage />} />
+              <Route path="/kayit" element={<KayitPage />} />
+              <Route path="/hakkimizda" element={<HakkimizdaPage />} />
+              <Route path="/iletisim" element={<IletisimPage />} />
+              <Route path="/sss" element={<SSSPage />} />
+              <Route path="/isletme-basvuru" element={<IsletmeBasvuruPage />} />
+              <Route path="/isletmeler-icin" element={<ForBusinessesPage />} />
+              <Route path="/hq/login" element={<HqLoginPage />} />
+
+              {/* Protected routes - requires login */}
+              <Route path="/profil" element={
+                <ProtectedRoute>
+                  <ProfilPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <BusinessDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/personel-paneli" element={
+                <ProtectedRoute>
+                  <StaffDashboardPage />
+                </ProtectedRoute>
+              } />
+
+              {/* Admin routes - requires admin email */}
+              <Route path="/admin" element={
+                <AdminRoute>
+                  <AdminPage />
+                </AdminRoute>
+              } />
+              <Route path="/hq" element={
+                <AdminRoute>
+                  <HqDashboard />
+                </AdminRoute>
+              } />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
