@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { SEOHead } from "@/components/SEOHead";
+import { checkRateLimit, getRateLimitMessage } from "@/lib/rate-limiter";
 
 const GirisPage = () => {
   const [email, setEmail] = useState("");
@@ -19,6 +20,10 @@ const GirisPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!checkRateLimit("login")) {
+      toast({ title: "Hata", description: getRateLimitMessage(), variant: "destructive" });
+      return;
+    }
     setLoading(true);
     const { error } = await signIn(email, password);
     setLoading(false);
