@@ -26,8 +26,11 @@ import ForBusinessesPage from "./pages/ForBusinessesPage";
 import HqDashboard from "./pages/HqDashboard";
 import HqLoginPage from "./pages/HqLoginPage";
 import NotFound from "./pages/NotFound";
+import KarsilastirmaPage from "./pages/KarsilastirmaPage";
+import HaritaPage from "./pages/HaritaPage";
 import { TrafficTracker } from "./components/TrafficTracker";
 import { QuickBookWidget } from "./components/QuickBookWidget";
+import { ChatbotWidget } from "./components/ChatbotWidget";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +44,7 @@ const App = () => (
           <BrowserRouter>
             <TrafficTracker />
             <QuickBookWidget />
+            <ChatbotWidget />
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
@@ -55,6 +59,8 @@ const App = () => (
               <Route path="/isletme-basvuru" element={<IsletmeBasvuruPage />} />
               <Route path="/isletmeler-icin" element={<ForBusinessesPage />} />
               <Route path="/hq/login" element={<HqLoginPage />} />
+              <Route path="/karsilastir" element={<KarsilastirmaPage />} />
+              <Route path="/harita" element={<HaritaPage />} />
 
               {/* Protected routes - requires login */}
               <Route path="/profil" element={
