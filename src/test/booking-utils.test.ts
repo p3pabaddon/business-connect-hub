@@ -25,15 +25,15 @@ describe("generateTimeSlots", () => {
 describe("isSlotOccupied", () => {
   it("should detect occupied slot", () => {
     const occupied = [
-      { appointment_time: "10:00:00", duration: 30, staff_id: "s1" },
+      { appointment_time: "10:00:00", staff_id: "s1" },
     ];
-    expect(isSlotOccupied("10:00", occupied, 30, "s1")).toBe(true);
+    expect(isSlotOccupied("10:00", occupied, "s1", 1)).toBe(true);
   });
 
   it("should not flag unoccupied slot", () => {
     const occupied = [
-      { appointment_time: "10:00:00", duration: 30, staff_id: "s1" },
+      { appointment_time: "10:00:00", staff_id: "s1" },
     ];
-    expect(isSlotOccupied("11:00", occupied, 30, "s1")).toBe(false);
+    expect(isSlotOccupied("11:00", occupied, "s1", 1)).toBe(false);
   });
 });
