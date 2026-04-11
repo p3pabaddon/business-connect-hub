@@ -100,8 +100,8 @@ const IsletmeBasvuruPage = () => {
     if (error) {
       toast({ title: "Başvuru hatası", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Başvurunuz alındı!", description: "İşletmeniz oluşturuldu. Dashboard'a yönlendiriliyorsunuz." });
-      navigate("/dashboard");
+      toast({ title: "Başvurunuz alındı!", description: "İşletmeniz onay sürecine alındı. Onaylandığında size bildirilecektir." });
+      navigate("/");
     }
   };
 
