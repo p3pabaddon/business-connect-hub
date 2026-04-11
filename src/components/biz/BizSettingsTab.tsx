@@ -4,6 +4,7 @@ import {
   Settings2, Save, Clock, Trash2, Plus,
   Camera, Briefcase, ExternalLink, ShieldCheck
 } from "lucide-react";
+import { ImageUpload } from "@/components/ImageUpload";
 import { supabase } from "@/lib/supabase";
 import { updateMyBusiness } from "@/lib/api";
 import { cn } from "@/lib/utils";
