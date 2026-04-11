@@ -19,6 +19,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { t } from "@/lib/translations";
+import { SEOHead } from "@/components/SEOHead";
 
 const businessTypes = [
   { value: "Berber", key: "barber" },

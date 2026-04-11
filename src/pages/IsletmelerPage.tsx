@@ -17,6 +17,7 @@ import { turkiyeIller } from "@/lib/turkey-locations";
 import { getBusinesses } from "@/lib/api";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { t } from "@/lib/translations";
+import { SEOHead } from "@/components/SEOHead";
 
 const categories = [
   { value: "all", label: t("isletmeler.all_categories") },
