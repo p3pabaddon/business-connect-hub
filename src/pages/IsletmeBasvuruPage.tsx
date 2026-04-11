@@ -83,7 +83,8 @@ const IsletmeBasvuruPage = () => {
       city: selectedIl || null,
       district: selectedIlce || null,
       address: form.address || null,
-      is_active: true,
+      is_active: false,
+      status: "pending",
       working_hours: {
         Pazartesi: "09:00 - 18:00",
         Salı: "09:00 - 18:00",
