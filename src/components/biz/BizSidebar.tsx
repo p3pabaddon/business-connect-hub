@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium";
+type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" | "staff-performance";
 
 interface Props {
   activeTab: BizTab;
@@ -38,6 +38,7 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
       items: [
         { id: "calendar", label: "Randevu Takvimi", icon: Calendar },
         { id: "catalog", label: "Hizmet & Personel", icon: ShoppingBag },
+        { id: "staff-performance", label: "Personel Performansı", icon: BarChart3 },
         { id: "inventory", label: "Stok & Envanter", icon: Package },
       ]
     },
