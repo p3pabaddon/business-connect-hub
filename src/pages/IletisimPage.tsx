@@ -40,22 +40,22 @@ const IletisimPage = () => {
               </div>
             </div>
             <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-card">
-              <form className="space-y-5">
+              <form className="space-y-5" aria-label="İletişim formu">
                 <div>
-                  <Label>{t("contact.form_name")}</Label>
-                  <Input placeholder={t("contact.form_name_placeholder")} className="mt-1.5" />
+                  <Label htmlFor="contact-name">{t("contact.form_name")}</Label>
+                  <Input id="contact-name" placeholder={t("contact.form_name_placeholder")} className="mt-1.5" autoComplete="name" />
                 </div>
                 <div>
-                  <Label>{t("contact.form_email")}</Label>
-                  <Input type="email" placeholder={t("contact.form_email_placeholder")} className="mt-1.5" />
+                  <Label htmlFor="contact-email">{t("contact.form_email")}</Label>
+                  <Input id="contact-email" type="email" placeholder={t("contact.form_email_placeholder")} className="mt-1.5" autoComplete="email" />
                 </div>
                 <div>
-                  <Label>{t("contact.form_subject")}</Label>
-                  <Input placeholder={t("contact.form_subject_placeholder")} className="mt-1.5" />
+                  <Label htmlFor="contact-subject">{t("contact.form_subject")}</Label>
+                  <Input id="contact-subject" placeholder={t("contact.form_subject_placeholder")} className="mt-1.5" />
                 </div>
                 <div>
-                  <Label>{t("contact.form_message")}</Label>
-                  <Textarea placeholder={t("contact.form_message_placeholder")} className="mt-1.5 min-h-[120px]" />
+                  <Label htmlFor="contact-message">{t("contact.form_message")}</Label>
+                  <Textarea id="contact-message" placeholder={t("contact.form_message_placeholder")} className="mt-1.5 min-h-[120px]" />
                 </div>
                 <Button type="submit" className="w-full">{t("contact.send")}</Button>
               </form>
