@@ -129,6 +129,29 @@ export default function BusinessDashboard() {
     );
   }
 
+  // Show pending approval state
+  if (business && (business.status === "pending" || !business.is_active)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Loader2 className="w-8 h-8 text-warning animate-spin" />
+          </div>
+          <h2 className="text-xl font-heading text-foreground mb-2">Başvurunuz İnceleniyor</h2>
+          <p className="text-muted-foreground text-sm mb-2">
+            <strong>{business.name}</strong> işletmeniz onay sürecindedir.
+          </p>
+          <p className="text-muted-foreground text-xs mb-6">
+            Başvurunuz en kısa sürede değerlendirilecek ve size bildirilecektir.
+          </p>
+          <Button variant="outline" onClick={() => navigate("/")}>
+            Ana Sayfaya Dön
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#020617] text-slate-300 flex overflow-hidden font-sans selection:bg-primary/30">
       <SEOHead title={`${business?.name || "İşletme"} | Yönetim Paneli`} />
