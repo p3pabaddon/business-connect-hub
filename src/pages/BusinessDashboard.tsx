@@ -17,7 +17,7 @@ import { BizSettingsTab } from "@/components/biz/BizSettingsTab";
 import { BizPremiumHub } from "@/components/biz/BizPremiumHub";
 import { WaitlistManager } from "@/components/dashboard/WaitlistManager";
 import { SEOHead } from "@/components/SEOHead";
-import { Loader2, Bell, Search, UserCircle, Settings, Menu } from "lucide-react";
+import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
