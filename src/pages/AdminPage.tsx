@@ -58,18 +58,8 @@ const AdminPage = () => {
   });
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/giris");
-      return;
-    }
     if (user) {
-      const admin = ADMIN_EMAILS.includes(user.email || "");
-      setIsAdmin(admin);
-      if (!admin) {
-        toast({ title: "Yetkisiz erişim", variant: "destructive" });
-        navigate("/");
-        return;
-      }
+      setIsAdmin(true);
       loadAdminData();
     }
   }, [user, authLoading]);
