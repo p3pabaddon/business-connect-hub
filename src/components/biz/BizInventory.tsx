@@ -88,65 +88,65 @@ export function BizInventory({ businessId }: { businessId: string }) {
       {/* Header & Stats */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-heading font-black text-white flex items-center gap-3">
+          <h2 className="text-3xl font-heading font-black text-foreground flex items-center gap-3">
             <Package className="w-8 h-8 text-primary" />
             Envanter & Stok
           </h2>
-          <p className="text-slate-500 text-sm mt-1">Dükkan malzemelerini yönetin ve kritik stokları takip edin.</p>
+          <p className="text-muted-foreground text-sm mt-1 font-medium">Dükkan malzemelerini yönetin ve kritik stokları takip edin.</p>
         </div>
         
         <div className="flex items-center gap-3">
-           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl px-4 py-2 flex items-center gap-3">
+           <div className="bg-card border border-border rounded-2xl px-4 py-2 flex items-center gap-3 shadow-sm">
               <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
-                 <AlertTriangle className="w-5 h-5 text-amber-500" />
+                 <AlertTriangle className="w-5 h-5 text-amber-600" />
               </div>
               <div>
-                 <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Kritik Stok</p>
-                 <p className="text-xl font-black text-white leading-none mt-1">{lowStockCount}</p>
+                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Kritik Stok</p>
+                 <p className="text-xl font-black text-foreground leading-none mt-1">{lowStockCount}</p>
               </div>
            </div>
 
            <Dialog>
              <DialogTrigger asChild>
-               <Button className="rounded-2xl h-14 px-6 gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
+               <Button className="rounded-2xl h-14 px-6 gap-2 bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 font-bold transition-all hover:scale-105 active:scale-95">
                  <Plus className="w-5 h-5" />
                  Yeni Ürün Ekle
                </Button>
              </DialogTrigger>
-             <DialogContent className="bg-[#0f172a] border-slate-800 text-white">
+             <DialogContent className="bg-background border-border text-foreground rounded-3xl overflow-hidden shadow-2xl">
                <DialogHeader>
-                 <DialogTitle>Yeni Envanter Kalemi</DialogTitle>
+                 <DialogTitle className="text-2xl font-black tracking-tight">Yeni Envanter Kalemi</DialogTitle>
                </DialogHeader>
                <div className="space-y-4 py-4">
                  <div className="space-y-2">
-                   <Label>Ürün Adı</Label>
+                   <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Ürün Adı</Label>
                    <Input 
                     placeholder="Örn: Saç Boyası (Kızıl)" 
-                    className="bg-slate-900 border-slate-800"
+                    className="bg-muted/50 border-border h-12 rounded-xl focus:ring-primary/20"
                     value={newItem.name}
                     onChange={(e) => setNewItem({...newItem, name: e.target.value})}
                    />
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
-                     <Label>Mevcut Miktar</Label>
+                     <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Mevcut Miktar</Label>
                      <Input 
                       type="number" 
-                      className="bg-slate-900 border-slate-800"
+                      className="bg-muted/50 border-border h-12 rounded-xl focus:ring-primary/20"
                       value={newItem.quantity}
                       onChange={(e) => setNewItem({...newItem, quantity: parseInt(e.target.value)})}
                      />
                    </div>
                    <div className="space-y-2">
-                     <Label>Birim</Label>
+                     <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Birim</Label>
                      <Select 
                       value={newItem.unit} 
                       onValueChange={(v) => setNewItem({...newItem, unit: v})}
                      >
-                       <SelectTrigger className="bg-slate-900 border-slate-800">
+                       <SelectTrigger className="bg-muted/50 border-border h-12 rounded-xl focus:ring-primary/20">
                          <SelectValue />
                        </SelectTrigger>
-                       <SelectContent className="bg-[#0f172a] border-slate-800 text-white">
+                       <SelectContent className="bg-background border-border text-foreground rounded-xl shadow-xl">
                          <SelectItem value="adet">Adet</SelectItem>
                          <SelectItem value="ml">Mililitre (ml)</SelectItem>
                          <SelectItem value="gr">Gram (gr)</SelectItem>
@@ -156,18 +156,18 @@ export function BizInventory({ businessId }: { businessId: string }) {
                    </div>
                  </div>
                  <div className="space-y-2">
-                   <Label>Kritik Eşik (Bu sayının altında uyarı verir)</Label>
+                   <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Kritik Eşik (Bu sayının altında uyarı verir)</Label>
                    <Input 
                     type="number" 
-                    className="bg-slate-900 border-slate-800"
+                    className="bg-muted/50 border-border h-12 rounded-xl focus:ring-primary/20"
                     value={newItem.low_stock_threshold}
                     onChange={(e) => setNewItem({...newItem, low_stock_threshold: parseInt(e.target.value)})}
                    />
                  </div>
                </div>
-               <DialogFooter>
-                 <Button variant="outline" className="border-slate-800" onClick={() => {}}>İptal</Button>
-                 <Button onClick={handleAdd}>Ürünü Kaydet</Button>
+               <DialogFooter className="gap-2 sm:gap-0">
+                 <Button variant="outline" className="h-12 rounded-xl border-border font-bold px-6" onClick={() => {}}>İptal</Button>
+                 <Button className="h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold px-8 shadow-md shadow-primary/20" onClick={handleAdd}>Ürünü Kaydet</Button>
                </DialogFooter>
              </DialogContent>
            </Dialog>
@@ -175,20 +175,20 @@ export function BizInventory({ businessId }: { businessId: string }) {
       </div>
 
       {/* Main Content */}
-      <div className="bg-[#0f172a]/50 border border-slate-800/50 rounded-3xl overflow-hidden backdrop-blur-sm">
-        <div className="p-6 border-b border-slate-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm shadow-black/5">
+        <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
            <div className="relative max-w-md w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 placeholder="Ürünlerde ara..." 
-                className="bg-slate-900/50 border-slate-800 pl-10 h-11 text-sm rounded-xl"
+                className="bg-muted/30 border-border pl-10 h-11 text-sm rounded-xl focus:ring-primary/20"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
            </div>
            
            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="text-slate-500 gap-2 hover:text-white" onClick={loadItems}>
+              <Button variant="ghost" size="sm" className="text-muted-foreground gap-2 hover:bg-muted font-bold px-4 h-10 rounded-xl" onClick={loadItems}>
                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                  Yenile
               </Button>
@@ -201,12 +201,12 @@ export function BizInventory({ businessId }: { businessId: string }) {
           </div>
         ) : filtered.length === 0 ? (
           <div className="p-20 text-center space-y-4">
-             <div className="w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center border border-slate-800 mx-auto">
-                <Database className="w-10 h-10 text-slate-700" />
+             <div className="w-20 h-20 bg-muted rounded-3xl flex items-center justify-center border border-border mx-auto shadow-inner">
+                <Database className="w-10 h-10 text-muted-foreground/30" />
              </div>
              <div>
-                <h3 className="text-lg font-bold text-white">Ürün Bulunamadı</h3>
-                <p className="text-slate-500 max-w-xs mx-auto text-sm mt-1">
+                <h3 className="text-lg font-bold text-foreground">Ürün Bulunamadı</h3>
+                <p className="text-muted-foreground max-w-xs mx-auto text-sm mt-1 font-medium">
                    Arama kriterlerinize uygun ürün yok veya henüz envanter eklemediniz.
                 </p>
              </div>
@@ -215,45 +215,45 @@ export function BizInventory({ businessId }: { businessId: string }) {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800/50">
-                  <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-500 tracking-wider">Ürün Bilgisi</th>
-                  <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-500 tracking-wider text-center">Stok Durumu</th>
-                  <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-500 tracking-wider">Miktar Değiştir</th>
-                  <th className="px-6 py-4 text-[10px] uppercase font-bold text-slate-500 tracking-wider text-right">İşlemler</th>
+                <tr className="border-b border-border">
+                  <th className="px-6 py-4 text-[10px] uppercase font-bold text-muted-foreground tracking-widest opacity-80">Ürün Bilgisi</th>
+                  <th className="px-6 py-4 text-[10px] uppercase font-bold text-muted-foreground tracking-widest text-center opacity-80">Stok Durumu</th>
+                  <th className="px-6 py-4 text-[10px] uppercase font-bold text-muted-foreground tracking-widest opacity-80">Miktar Değiştir</th>
+                  <th className="px-6 py-4 text-[10px] uppercase font-bold text-muted-foreground tracking-widest text-right opacity-80">İşlemler</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/30">
+              <tbody className="divide-y divide-border/50">
                 {filtered.map((item) => {
                   const isLow = item.quantity <= item.low_stock_threshold;
                   return (
-                    <tr key={item.id} className="group hover:bg-slate-800/20 transition-colors">
+                    <tr key={item.id} className="group hover:bg-muted/30 transition-colors">
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                            <div className={cn(
-                             "w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 transition-colors",
+                             "w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 transition-colors shadow-inner",
                              item.quantity === 0 ? "bg-rose-500/10 border-rose-500/30" : 
-                             isLow ? "bg-amber-500/10 border-amber-500/20" : "bg-slate-900 border-slate-800"
+                             isLow ? "bg-amber-500/10 border-amber-500/20" : "bg-card border-border"
                            )}>
-                              <ShoppingCart className={cn("w-5 h-5", item.quantity === 0 ? "text-rose-500" : isLow ? "text-amber-500" : "text-slate-500")} />
+                              <ShoppingCart className={cn("w-5 h-5", item.quantity === 0 ? "text-rose-500" : isLow ? "text-amber-500" : "text-muted-foreground/60")} />
                            </div>
                            <div>
-                              <p className="font-bold text-white text-base tracking-tight">{item.name}</p>
-                              <p className="text-xs text-slate-500 font-mono mt-0.5">ID: {item.id.substring(0,8)}</p>
+                              <p className="font-bold text-foreground text-base tracking-tight">{item.name}</p>
+                              <p className="text-[10px] text-muted-foreground font-mono mt-0.5 opacity-60">ID: {item.id.substring(0,8)}</p>
                            </div>
                         </div>
                       </td>
                       <td className="px-6 py-5">
                          <div className="flex flex-col items-center gap-2">
                             <div className="flex items-center gap-2">
-                               <span className="text-2xl font-black text-white">{item.quantity}</span>
-                               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{item.unit}</span>
+                               <span className="text-2xl font-black text-foreground">{item.quantity}</span>
+                               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{item.unit}</span>
                             </div>
                             {item.quantity === 0 ? (
-                              <Badge key="out" className="bg-rose-500 text-white border-rose-600 animate-pulse text-[10px] py-0 px-2 uppercase font-black">STOK YOK</Badge>
+                              <Badge key="out" className="bg-rose-500 text-white border-none animate-pulse text-[9px] py-0.5 px-3 uppercase font-black shadow-md shadow-rose-200">STOK YOK</Badge>
                             ) : isLow ? (
-                              <Badge key="low" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0 px-2">KRİTİK STOK</Badge>
+                              <Badge key="low" className="bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[9px] py-0.5 px-3 font-bold">KRİTİK STOK</Badge>
                             ) : (
-                              <Badge key="ok" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0 px-2 tracking-tighter transition-all opacity-0 group-hover:opacity-100 uppercase">Yeterli Stok</Badge>
+                              <Badge key="ok" className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[9px] py-0.5 px-3 tracking-tighter transition-all opacity-0 group-hover:opacity-100 uppercase font-bold">Yeterli Stok</Badge>
                             )}
                          </div>
                       </td>
@@ -262,7 +262,7 @@ export function BizInventory({ businessId }: { businessId: string }) {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="w-8 h-8 p-0 rounded-lg border-slate-800 hover:bg-slate-800 hover:text-white"
+                              className="w-9 h-9 p-0 rounded-xl border-border bg-background shadow-sm hover:bg-muted hover:text-foreground transition-all active:scale-90"
                               onClick={() => handleUpdateStock(item.id, Math.max(0, item.quantity - 1))}
                             >
                                -
@@ -270,10 +270,10 @@ export function BizInventory({ businessId }: { businessId: string }) {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="w-8 h-8 p-0 rounded-lg border-slate-800 hover:bg-slate-800 hover:text-white"
+                              className="w-9 h-9 p-0 rounded-xl border-border bg-background shadow-sm hover:bg-muted hover:text-foreground transition-all active:scale-90"
                               onClick={() => handleUpdateStock(item.id, item.quantity + 1)}
                             >
-                               +
+                                +
                             </Button>
                          </div>
                       </td>
@@ -281,10 +281,10 @@ export function BizInventory({ businessId }: { businessId: string }) {
                          <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="text-slate-600 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl"
+                          className="text-muted-foreground/40 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors h-10 w-10"
                           onClick={() => handleDelete(item.id)}
                          >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4.5 h-4.5" />
                          </Button>
                       </td>
                     </tr>
@@ -297,17 +297,17 @@ export function BizInventory({ businessId }: { businessId: string }) {
       </div>
 
       {/* Info Banner */}
-      <div className="bg-primary/5 border border-primary/20 rounded-3xl p-6 flex items-start gap-4">
-         <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30 shrink-0">
-            <History className="w-6 h-6 text-primary" />
+      <div className="bg-primary/5 border border-primary/10 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center gap-6 shadow-sm">
+         <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shrink-0 shadow-inner">
+            <History className="w-8 h-8 text-primary" />
          </div>
-         <div>
-            <h4 className="text-lg font-bold text-white leading-none">Akıllı Stok Takibi</h4>
-            <p className="text-sm text-slate-400 mt-2 max-w-2xl">
+         <div className="text-center md:text-left">
+            <h4 className="text-xl font-black text-foreground leading-none tracking-tight">Akıllı Stok Takibi</h4>
+            <p className="text-sm text-muted-foreground mt-3 max-w-2xl font-medium leading-relaxed">
                Envanter sistemimiz bir sonraki aşamada **Otomatik Düşüm** özelliğine sahip olacak. Bir randevu tamamlandığında, kullanılan malzemeler otomatik olarak stoktan düşülecek.
             </p>
          </div>
-         <Button variant="outline" className="ml-auto border-primary/30 text-primary hover:bg-primary/10 rounded-2xl hidden md:flex gap-2">
+         <Button variant="outline" className="md:ml-auto border-primary/20 text-primary hover:bg-primary/5 rounded-2xl flex items-center gap-2 h-12 px-6 font-bold tracking-tight">
             Nasıl Çalışır?
             <ArrowRight className="w-4 h-4" />
          </Button>

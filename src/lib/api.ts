@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 export async function getBusinesses(filters?: { city?: string; category?: string; search?: string }) {
   let query = supabase
     .from("businesses")
-    .select("*")
+    .select("id, name, slug, category, rating, review_count, city, district, logo, cover_image, is_verified, is_featured, is_active")
     .eq("is_active", true)
     .order("is_featured", { ascending: false })
     .order("rating", { ascending: false });
@@ -47,23 +47,26 @@ export async function getBusinessBySlug(slug: string) {
 }
 
 export async function getMyBusiness() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) return null;
 
   const { data, error } = await supabase
     .from("businesses")
     .select("*")
-    .eq("owner_id", user.id)
-    .single();
+    .eq("owner_id", user.id);
 
-  if (error) return null;
-  return data;
+  if (error || !data || data.length === 0) return null;
+  
+  // If multiple businesses exist, we might want to let the user choose eventually,
+  // but for now return the first active one or just the first one.
+  return data[0];
 }
 
 export async function getBusinessAppointments(businessId: string, status?: string) {
   let query = supabase
     .from("appointments")
-    .select("*, staff(name)")
+    .select("id, appointment_date, appointment_time, status, total_price, customer_name, customer_phone, staff(name)")
     .eq("business_id", businessId)
     .order("appointment_date", { ascending: false })
     .order("appointment_time", { ascending: false });
@@ -147,7 +150,7 @@ export async function updateAppointmentStatus(id: string, status: string) {
         waitlist.forEach((entry: any) => {
           sendNotification({
             type: "waitlist_alert",
-            to: entry.id, // Simulation
+            to: entry.customer_id || entry.user_id, // Fixed: use generic identifier
             data: {
               businessName: apt.business?.name,
               date: apt.appointment_date
@@ -159,8 +162,39 @@ export async function updateAppointmentStatus(id: string, status: string) {
   }
 }
 
-export async function joinWaitlist(data: { business_id: string; user_id: string; date: string }) {
-  const { error } = await supabase.from("waitlist").insert(data);
+export async function updateBusinessStatus(id: string, updates: { status?: string, is_active?: boolean }) {
+  const { data, error } = await supabase
+    .from("businesses")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function joinWaitlist(data: { 
+  business_id: string; 
+  user_id: string; 
+  date: string; 
+  customer_name?: string; 
+  customer_phone?: string; 
+  customer_email?: string 
+}) {
+  // Update profiles table as well to make sure we have the data
+  if (data.customer_name || data.customer_phone) {
+    await supabase.from("profiles").update({
+      full_name: data.customer_name,
+      phone: data.customer_phone,
+    }).eq("id", data.user_id);
+  }
+
+  const { error } = await supabase.from("waitlist").insert({
+    business_id: data.business_id,
+    user_id: data.user_id,
+    desired_date: data.date,
+  });
   if (error) throw error;
   return true;
 }
@@ -268,10 +302,10 @@ export async function createAppointment(data: any) {
     total_price: data.total_price || 0,
     notes: data.notes || null,
     status: data.total_price > 0 && data.is_paid ? "confirmed" : "pending",
+    service_name: data.service_name || "",
   };
 
   if (data.staff_id) insertData.staff_id = data.staff_id;
-  if (data.service_name) insertData.service_name = data.service_name;
   if (user?.id) insertData.customer_id = user.id;
 
   const { error } = await supabase.from("appointments").insert(insertData);
@@ -279,38 +313,29 @@ export async function createAppointment(data: any) {
 }
 
 export async function getOccupiedSlots(businessId: string, date: string, staffId?: string) {
-  let query = supabase
-    .from("appointments")
-    .select("appointment_time, staff_id")
-    .eq("business_id", businessId)
-    .eq("appointment_date", date)
-    .in("status", ["pending", "confirmed", "completed"]);
+  try {
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Timeout")), 5000)
+    );
 
-  if (staffId) {
-    query = query.eq("staff_id", staffId);
+    let query = supabase
+      .from("appointments")
+      .select("appointment_time, staff_id")
+      .eq("business_id", businessId)
+      .eq("appointment_date", date)
+      .in("status", ["pending", "confirmed", "completed"]);
+
+    if (staffId) {
+      query = query.eq("staff_id", staffId);
+    }
+
+    const { data, error } = await Promise.race([query, timeout]) as any;
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error("Slot fetch optimization error:", err);
+    return []; // Return empty on error/timeout to unblock UI
   }
-
-  const { data, error } = await query;
-  if (error) throw error;
-  return data;
-}
-
-export async function getAdminSystemStats() {
-  const [bizRes, usersRes, aptsRes, revenueRes] = await Promise.all([
-    supabase.from("businesses").select("id", { count: "exact", head: true }),
-    supabase.from("profiles").select("id", { count: "exact", head: true }),
-    supabase.from("appointments").select("id", { count: "exact", head: true }),
-    supabase.from("appointments").select("total_price").eq("status", "completed"),
-  ]);
-
-  const totalRevenue = (revenueRes.data || []).reduce((sum, a: any) => sum + (Number(a.total_price) || 0), 0);
-
-  return {
-    totalBusinesses: bizRes.count || 0,
-    totalUsers: usersRes.count || 0,
-    totalAppointments: aptsRes.count || 0,
-    totalRevenue,
-  };
 }
 
 // --- Loyalty & Growth Functions ---
@@ -526,7 +551,7 @@ export async function awardReferralReward(businessId: string, referrerId: string
 export async function getPricingRules(businessId: string) {
    const { data, error } = await supabase
      .from("pricing_rules")
-     .select("*")
+     .select("id, rule_name, discount_percentage, day_of_week, start_time, end_time")
      .eq("business_id", businessId)
      .eq("is_active", true);
    
@@ -633,3 +658,21 @@ export async function updateMyBusiness(businessId: string, updates: any) {
   if (error) throw error;
   return data;
 }
+
+export async function getAdminSystemStats() {
+  const [bizRes, userRes, aptRes] = await Promise.all([
+    supabase.from("businesses").select("id", { count: "exact", head: true }),
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase.from("appointments").select("total_price", { count: "exact" }).eq("status", "completed")
+  ]);
+
+  const totalRevenue = (aptRes.data || []).reduce((sum, a) => sum + (Number(a.total_price) || 0), 0);
+
+  return {
+    totalBusinesses: bizRes.count || 0,
+    totalUsers: userRes.count || 0,
+    totalAppointments: aptRes.count || 0,
+    totalRevenue
+  };
+}
+

@@ -81,17 +81,21 @@ export interface Review {
 
 export interface PromoCode {
   id: string;
-  business_id: string;
+  business_id?: string;
+  customer_id?: string;
   code: string;
   title?: string;
-  discount_type: "percentage" | "fixed";
+  discount_type: "percent" | "fixed";
   discount_value: number;
   is_active: boolean;
+  is_used?: boolean;
   valid_from?: string;
   valid_until?: string;
+  expires_at?: string;
   max_uses?: number;
   used_count?: number;
   created_at?: string;
+  business?: { name: string };
 }
 
 export interface Coupon {
@@ -157,4 +161,14 @@ export interface BusinessApplication {
   created_at: string;
   reviewed_at?: string;
   reviewed_by?: string;
+}
+
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  role: "user" | "admin" | "business_owner" | "hq_staff";
+  created_at: string;
+  updated_at: string;
 }

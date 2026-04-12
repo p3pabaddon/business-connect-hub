@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 
-export function generateTimeSlots(startTime: string, endTime: string, interval: number = 30): string[] {
+export function generateTimeSlots(startTime: string, endTime: string, interval: number = 30, breakStart?: string, breakEnd?: string): string[] {
   const slots: string[] = [];
   
   if (!startTime || !endTime) return [];
@@ -29,14 +29,27 @@ export function generateTimeSlots(startTime: string, endTime: string, interval: 
   end.setHours(endH, endM, 0, 0);
 
   while (current < end) {
-    slots.push(format(current, "HH:mm"));
+    const timeStr = format(current, "HH:mm");
+    
+    // Check if within break
+    let isBreak = false;
+    if (breakStart && breakEnd) {
+      if (timeStr >= breakStart && timeStr < breakEnd) {
+        isBreak = true;
+      }
+    }
+
+    if (!isBreak) {
+      slots.push(timeStr);
+    }
+    
     current.setMinutes(current.getMinutes() + interval);
   }
 
   return slots;
 }
 
-export function getWorkingHoursForDay(workingHours: any, date: Date | undefined): { start: string; end: string } | null {
+export function getWorkingHoursForDay(workingHours: any, date: Date | undefined): { start: string; end: string, breakStart?: string, breakEnd?: string } | null {
   if (!workingHours || !date) return null;
 
   const dayNameEN = format(date, "EEEE").toLowerCase();
@@ -78,7 +91,12 @@ export function getWorkingHoursForDay(workingHours: any, date: Date | undefined)
   }
 
   if (!start || !end) return null;
-  return { start, end };
+  return { 
+    start, 
+    end, 
+    breakStart: hours.break_start || hours.breakStart, 
+    breakEnd: hours.break_end || hours.breakEnd 
+  };
 }
 
 /**

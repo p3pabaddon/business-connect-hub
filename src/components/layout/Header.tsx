@@ -17,7 +17,7 @@ import {
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin, isBusinessOwner } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -94,14 +94,16 @@ export function Header() {
                   <DropdownMenuItem onClick={() => navigate("/profil")}>
                     <User className="w-4 h-4 mr-2" /> {t("common.profile")}
                   </DropdownMenuItem>
-                  {["asrinaltan04@gmail.com", "admin@admin.com", "testadmin@rendezvous.com"].includes(user.email || "") && (
+                  {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate("/admin")} className="text-primary font-semibold bg-primary/5">
                       <Shield className="w-4 h-4 mr-2" /> {t("common.admin_panel")}
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                    <LayoutDashboard className="w-4 h-4 mr-2" /> {t("common.dashboard")}
-                  </DropdownMenuItem>
+                  {isBusinessOwner && (
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                      <LayoutDashboard className="w-4 h-4 mr-2" /> {t("common.dashboard")}
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                     <LogOut className="w-4 h-4 mr-2" /> {t("common.logout")}
@@ -163,14 +165,16 @@ export function Header() {
                 >
                   {t("common.profile")}
                 </Link>
-                  <Link
-                    to="/dashboard"
-                    className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {t("common.dashboard")}
-                  </Link>
-                  {["asrinaltan04@gmail.com", "admin@admin.com", "testadmin@rendezvous.com", "info@randevudunyasi.com"].includes(user.email || "") && (
+                  {isBusinessOwner && (
+                    <Link
+                      to="/dashboard"
+                      className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {t("common.dashboard")}
+                    </Link>
+                  )}
+                  {isAdmin && (
                     <Link
                       to="/admin"
                       className="block px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10 rounded-md"

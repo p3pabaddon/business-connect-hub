@@ -47,38 +47,38 @@ export function BizReviews({ reviews, onRefresh }: Props) {
       
       {/* Review Metrics Sidebar */}
       <div className="lg:col-span-1 space-y-8">
-         <div className="bg-[#0f172a]/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 space-y-8">
+         <div className="bg-card border border-border rounded-3xl p-8 space-y-8 shadow-sm">
             <div className="text-center space-y-2">
-               <p className="text-6xl font-black text-white tracking-tighter">{averageRating}</p>
+               <p className="text-6xl font-black text-foreground tracking-tighter">{averageRating}</p>
                <div className="flex justify-center gap-1">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star 
                       key={s} 
                       className={cn(
                         "w-5 h-5",
-                        Number(averageRating) >= s ? "fill-amber-500 text-amber-500" : "text-slate-700"
+                        Number(averageRating) >= s ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
                       )} 
                     />
                   ))}
                </div>
-               <p className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">{reviews.length} Değerlendirme</p>
+               <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">{reviews.length} Değerlendirme</p>
             </div>
 
             <div className="space-y-3">
                {ratingSummary.map((item, i) => (
                  <div key={i} className="flex items-center gap-4 group">
-                    <span className="text-[10px] font-bold text-slate-500 w-2">{item.stars}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground w-2">{item.stars}</span>
                     <Progress 
                       value={reviews.length > 0 ? (item.count / reviews.length) * 100 : 0} 
-                      className="h-1.5 bg-slate-900 overflow-hidden" 
+                      className="h-1.5 bg-muted overflow-hidden" 
                     />
-                    <span className="text-[10px] font-mono text-slate-600 w-8">{item.count}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground/60 w-8">{item.count}</span>
                  </div>
                ))}
             </div>
 
-            <div className="pt-6 border-t border-slate-800 space-y-4">
-               <div className="p-4 bg-primary/10 border border-primary/20 rounded-2xl flex items-center gap-3">
+            <div className="pt-6 border-t border-border space-y-4">
+               <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl flex items-center gap-3">
                   <Sparkles className="w-5 h-5 text-primary" />
                   <p className="text-[10px] text-primary font-bold leading-tight">Yorumlara cevap vermek müşteri sadakatini %25 arttırır.</p>
                </div>
@@ -87,77 +87,79 @@ export function BizReviews({ reviews, onRefresh }: Props) {
       </div>
 
       {/* Review Feed */}
-      <div className="lg:col-span-3 bg-[#0f172a]/50 backdrop-blur-md border border-slate-800 rounded-3xl overflow-hidden flex flex-col h-[700px]">
-         <div className="p-8 border-b border-slate-800 flex items-center justify-between bg-slate-950/20 sticky top-0 z-10">
-            <h3 className="font-bold text-white flex items-center gap-3 lowercase tracking-widest">
+      <div className="lg:col-span-3 bg-card border border-border rounded-3xl overflow-hidden flex flex-col h-[700px] shadow-sm">
+         <div className="p-8 border-b border-border flex items-center justify-between bg-muted/20 sticky top-0 z-10">
+            <h3 className="font-bold text-foreground flex items-center gap-3 uppercase tracking-widest text-sm">
                <MessageSquare className="w-5 h-5 text-primary" /> YORUM AKIŞI
             </h3>
          </div>
 
          <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-6">
             {reviews.map((rev, i) => (
-               <div key={rev.id || i} className="p-8 bg-slate-950/40 border border-slate-800 rounded-3xl space-y-6 hover:bg-slate-900 transition-all duration-300">
+               <div key={rev.id || i} className="p-8 bg-muted/20 border border-border rounded-3xl space-y-6 hover:bg-muted/40 transition-all duration-300 shadow-sm">
                   <div className="flex items-center justify-between">
-                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center font-black text-slate-600">{(rev.customer_name || "A")[0]}</div>
-                        <div>
-                           <h4 className="font-bold text-white">{rev.customer_name}</h4>
-                           <div className="flex gap-1 mt-1">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <Star 
-                                  key={i} 
-                                  className={cn(
-                                    "w-3 h-3",
-                                    rev.rating > i ? "fill-amber-500 text-amber-500" : "text-slate-700"
-                                  )} 
-                                />
-                              ))}
-                           </div>
-                        </div>
-                     </div>
-                     <span className="text-[10px] text-slate-600 font-mono italic">
+                      <div className="flex items-center gap-6">
+                         <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center font-black text-xl text-primary shadow-sm uppercase">{(rev.customer_name || "A")[0]}</div>
+                         <div>
+                            <h4 className="text-xl font-black text-foreground uppercase tracking-tight">{rev.customer_name}</h4>
+                            <div className="flex gap-1.5 mt-2">
+                               {Array.from({ length: 5 }).map((_, i) => (
+                                 <Star 
+                                   key={i} 
+                                   className={cn(
+                                     "w-4 h-4",
+                                     rev.rating > i ? "fill-amber-500 text-amber-500" : "text-muted-foreground/20"
+                                   )} 
+                                 />
+                               ))}
+                            </div>
+                         </div>
+                      </div>
+                     <span className="text-[10px] text-muted-foreground font-mono italic font-medium">
                        {new Date(rev.created_at).toLocaleDateString('tr-TR')}
                      </span>
                   </div>
 
-                  <p className="text-sm text-slate-400 leading-relaxed italic">"{rev.comment}"</p>
+                   <p className="text-lg text-foreground/90 leading-relaxed font-medium bg-muted/30 p-6 rounded-2xl border border-border/50 italic">
+                     "{rev.comment}"
+                   </p>
 
-                  {rev.reply && (
-                    <div className="p-4 bg-slate-900/50 border-l-2 border-primary rounded-r-xl space-y-2">
-                       <p className="text-[9px] font-bold text-primary uppercase tracking-widest flex items-center gap-2">
-                         <Reply className="w-3 h-3" /> Cevabınız
-                       </p>
-                       <p className="text-xs text-slate-500 italic">{rev.reply}</p>
-                    </div>
-                  )}
+                   {rev.reply && (
+                     <div className="p-6 bg-primary/5 border-l-8 border-primary rounded-r-2xl space-y-3 ml-6 shadow-sm">
+                        <p className="text-xs font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                          <Reply className="w-5 h-5" /> KURUMSAL CEVAP
+                        </p>
+                        <p className="text-sm text-foreground/80 font-semibold italic leading-relaxed">{rev.reply}</p>
+                     </div>
+                   )}
 
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
+                  <div className="flex items-center justify-between pt-4 border-t border-border/50">
                      <div className="flex gap-4">
-                        <button className="flex items-center gap-2 text-[10px] font-bold text-slate-500 hover:text-white transition-colors"><ThumbsUp className="w-4 h-4" /> YARARLI</button>
-                        <button className="flex items-center gap-2 text-[10px] font-bold text-slate-500 hover:text-white transition-colors"><ShieldAlert className="w-4 h-4" /> RAPOR ET</button>
+                        <button className="flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-all uppercase tracking-tight"><ThumbsUp className="w-4 h-4" /> YARARLI</button>
+                        <button className="flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-destructive transition-all uppercase tracking-tight"><ShieldAlert className="w-4 h-4" /> RAPOR ET</button>
                      </div>
                      
                      {replyId === (rev.id || i.toString()) ? (
-                        <div className="flex-1 flex gap-2 ml-4">
+                        <div className="flex-1 flex gap-2 ml-4 animate-in slide-in-from-right-2">
                            <Input 
                              value={replyText}
                              onChange={(e) => setReplyText(e.target.value)}
                              placeholder="Cevabınızı yazın..." 
-                             className="h-10 bg-slate-900 border-slate-800 text-xs" 
+                             className="h-10 bg-background border-border text-xs shadow-sm focus:ring-primary/20" 
                            />
                            <Button 
                              onClick={() => handleReply(rev.id)}
                              disabled={loading || !replyText}
                              size="sm" 
-                             className="bg-primary hover:bg-primary/90 h-10 px-4"
+                             className="bg-primary hover:bg-primary/90 h-10 px-4 text-white shadow-md shadow-primary/10"
                            >
-                              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                              {loading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Send className="w-4 h-4" />}
                            </Button>
                            <Button 
                              onClick={() => setReplyId(null)}
                              variant="ghost" 
                              size="sm" 
-                             className="h-10 px-4 text-slate-500 hover:text-white"
+                             className="h-10 px-4 text-muted-foreground hover:bg-muted font-bold text-[10px]"
                            >
                               İPTAL
                            </Button>
@@ -167,7 +169,7 @@ export function BizReviews({ reviews, onRefresh }: Props) {
                          <Button 
                            onClick={() => setReplyId(rev.id)}
                            size="sm" 
-                           className="bg-primary hover:bg-primary/90 text-[10px] font-bold h-8 px-4"
+                           className="bg-primary hover:bg-primary/90 text-[10px] font-bold h-9 px-6 text-white shadow-lg shadow-primary/20 rounded-xl"
                          >
                             <Reply className="w-3.5 h-3.5 mr-2" /> CEVAPLA
                          </Button>
@@ -175,13 +177,13 @@ export function BizReviews({ reviews, onRefresh }: Props) {
                      )}
                      
                      {rev.reply && !replyId && (
-                        <Badge className="bg-emerald-500/10 text-emerald-500 border-none px-3 py-1 font-bold text-[9px] tracking-widest">CEVAPLANDI</Badge>
+                        <Badge className="bg-emerald-500/10 text-emerald-600 border-none px-4 py-1.5 font-black text-[9px] tracking-widest shadow-sm">CEVAPLANDI</Badge>
                      )}
                   </div>
                </div>
             ))}
             {reviews.length === 0 && (
-              <div className="text-center py-20 border-2 border-dashed border-slate-800 rounded-3xl text-slate-600">Henüz yorum yapılmamış.</div>
+              <div className="text-center py-20 border-2 border-dashed border-border rounded-3xl text-muted-foreground font-bold tracking-tight opacity-40">Henüz yorum yapılmamış.</div>
             )}
          </div>
       </div>

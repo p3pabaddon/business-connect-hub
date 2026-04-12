@@ -8,11 +8,11 @@ interface Props {
 
 export function HqAttribution({ data }: Props) {
   return (
-    <div className="bg-[#0f172a]/50 backdrop-blur-md border border-slate-800/50 p-8 rounded-2xl h-full flex flex-col">
+    <div className="bg-card border border-border p-8 rounded-2xl h-full flex flex-col shadow-sm">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h3 className="text-xl font-heading font-bold text-white tracking-tight">Acquisition Intelligence</h3>
-          <p className="text-sm text-slate-500 mt-1">Hangi kanalların startup büyümesine en çok katkı sağladığını izle.</p>
+          <h3 className="text-xl font-heading font-bold text-foreground tracking-tight">Acquisition Intelligence</h3>
+          <p className="text-sm text-muted-foreground mt-1">Hangi kanalların startup büyümesine en çok katkı sağladığını izle.</p>
         </div>
         <div className="p-2 bg-primary/10 rounded-lg">
           <Share2 className="w-5 h-5 text-primary" />
@@ -38,25 +38,25 @@ export function HqAttribution({ data }: Props) {
                 ))}
               </Pie>
               <Tooltip 
-                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', fontSize: '11px' }}
+                contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '11px' }}
               />
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-2xl font-bold text-white">100%</span>
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest">Total Reach</span>
+            <span className="text-2xl font-bold text-foreground">100%</span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Total Reach</span>
           </div>
         </div>
 
         <div className="flex flex-col justify-center space-y-4">
           {data.map((item) => (
-            <div key={item.source} className="flex items-center justify-between p-3 bg-slate-950/40 rounded-xl border border-white/5 hover:border-primary/20 transition-all group">
+            <div key={item.source} className="flex items-center justify-between p-3 bg-muted/40 rounded-xl border border-border hover:border-primary/20 transition-all group shadow-sm">
               <div className="flex items-center gap-3">
                 <div 
                   className="w-2.5 h-2.5 rounded-full" 
                   style={{ backgroundColor: item.color }}
                 ></div>
-                <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">{item.source}</span>
+                <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">{item.source}</span>
               </div>
               <div className="flex items-center gap-4">
                 <span className="text-xs font-mono text-slate-500">{item.count} hits</span>
@@ -68,8 +68,8 @@ export function HqAttribution({ data }: Props) {
             </div>
           ))}
           <div className="mt-4 p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl flex gap-3">
-            <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-blue-300/80 leading-relaxed">
+            <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+            <p className="text-[11px] text-blue-700 leading-relaxed">
               **Insight:** Instagram trafiği dönüşüm oranında (conversion) Google trafiğine göre %12 daha başarılı. Bu ay influencer partnerliklerini arttırabiliriz.
             </p>
           </div>

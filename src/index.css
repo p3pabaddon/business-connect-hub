@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 20% 98%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -24,7 +24,7 @@
     --accent: 173 82% 32%;
     --accent-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96%;
+    --muted: 210 20% 95%;
     --muted-foreground: 215 16% 47%;
 
     --destructive: 0 84% 60%;
@@ -52,7 +52,7 @@
     --shadow-card-hover: 0 8px 30px rgba(15, 23, 42, 0.08);
     --shadow-dropdown: 0 12px 40px rgba(15, 23, 42, 0.12);
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;

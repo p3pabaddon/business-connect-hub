@@ -4,10 +4,11 @@ import {
   Target, Zap, Activity, Clock, 
   ArrowUpRight, AlertCircle, Package 
 } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { cn } from "@/lib/utils";
 import { BizStats } from "@/lib/biz-api";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   stats: BizStats;
@@ -23,32 +24,30 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
     { label: "Sadakat Oranı", value: `%${stats.retentionRate}`, icon: Activity, color: "text-amber-500", trend: "Stabil" },
   ];
 
-  const chartData = [
-    { time: "09:00", count: 2 },
-    { time: "11:00", count: 5 },
-    { time: "13:00", count: 3 },
-    { time: "15:00", count: 8 },
-    { time: "17:00", count: 12 },
-    { time: "19:00", count: 7 },
-  ];
+  const chartData = stats.dailyRevenue;
+  const pieData = stats.serviceDistribution;
+  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899'];
+
+  const topService = stats.serviceDistribution[0];
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
       {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {kpis.map((kpi, i) => (
-          <div key={i} className="bg-[#0f172a]/40 backdrop-blur-xl border border-slate-800/60 p-6 rounded-2xl hover:bg-slate-900 transition-all duration-300 group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 group-hover:border-primary/30 transition-colors">
-                <kpi.icon className={cn("w-5 h-5", kpi.color)} />
+          <div key={i} className="bg-card border border-border p-8 rounded-[2.5rem] hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-muted/50 rounded-bl-full -mr-12 -mt-12 group-hover:scale-110 transition-transform duration-500" />
+            <div className="flex justify-between items-start mb-6">
+              <div className="p-4 bg-muted/50 rounded-2xl border border-border group-hover:border-primary/20 transition-colors shadow-inner">
+                <kpi.icon className={cn("w-6 h-6", kpi.color)} />
               </div>
-              <Badge variant="outline" className="text-[10px] text-slate-500 border-slate-800 uppercase tracking-tighter">
+              <Badge variant="outline" className="text-[10px] font-black text-muted-foreground border-border uppercase tracking-widest px-3 py-1 bg-background/50 backdrop-blur-sm">
                 {kpi.trend}
               </Badge>
             </div>
-            <div className="space-y-1">
-              <p className="text-3xl font-black text-white tracking-tighter">{kpi.value}</p>
-              <p className="text-[10px] uppercase font-bold text-slate-600 tracking-widest">{kpi.label}</p>
+            <div className="space-y-2">
+              <p className="text-4xl font-black text-foreground tracking-tighter group-hover:translate-x-1 transition-transform">{kpi.value}</p>
+              <p className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.2em] opacity-60">{kpi.label}</p>
             </div>
           </div>
         ))}
@@ -56,80 +55,150 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Chart */}
-        <div className="lg:col-span-2 bg-[#0f172a]/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl h-[400px] flex flex-col">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-3">
-              <Activity className="w-5 h-5 text-primary" /> Randevu Akış Hızı
-            </h3>
-            <div className="flex items-center gap-2 text-[10px] text-slate-500 bg-slate-950 px-3 py-1 rounded-full border border-slate-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-              Canlı Takip Aktif
+        <div className="lg:col-span-2 bg-card border border-border p-10 rounded-[3rem] h-[450px] flex flex-col shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 to-transparent" />
+          <div className="flex items-center justify-between mb-10">
+            <div>
+              <h3 className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-3">
+                <Activity className="w-5 h-5 text-primary" /> Haftalık Ciro Grafiği
+              </h3>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 opacity-60">Son 7 günlük finansal performans</p>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] font-black text-primary bg-primary/5 px-4 py-2 rounded-2xl border border-primary/10">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              CANLI VERİ
             </div>
           </div>
           <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '12px' }}
-                  itemStyle={{ color: '#fff', fontSize: '12px' }}
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '1.5rem', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '12px 16px' }}
+                  itemStyle={{ color: 'hsl(var(--foreground))', fontSize: '13px', fontWeight: '900' }}
+                  labelStyle={{ fontSize: '10px', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', marginBottom: '4px' }}
                 />
-                <Area type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={3} fill="url(#colorCount)" />
+                <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={4} fill="url(#colorCount)" animationDuration={2000} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Action Center */}
-        <div className="bg-[#0f172a]/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl flex flex-col">
-          <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-3">
-            <Zap className="w-5 h-5 text-amber-500" /> Acil İşlemler
+        {/* Action Center or Pie Chart */}
+        <div className="bg-card border border-border p-10 rounded-[3rem] flex flex-col shadow-sm">
+          <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-8 flex items-center gap-3">
+            <Zap className="w-5 h-5 text-amber-500" /> Servis Dağılımı
           </h3>
-          <div className="space-y-4 flex-1">
-            {recentApts.filter(a => a.status === 'pending').length > 0 ? (
-              recentApts.filter(a => a.status === 'pending').slice(0, 3).map((apt, i) => (
-                <div key={i} className="p-4 bg-slate-950/50 border border-slate-800 rounded-xl hover:border-primary/20 transition-all group">
-                   <div className="flex items-center justify-between mb-2">
-                     <span className="text-[10px] text-primary font-bold uppercase tracking-widest">{apt.appointment_time}</span>
-                     <Badge className="bg-amber-500/10 text-amber-500 border-none text-[9px]">BEKLEYEN</Badge>
-                   </div>
-                   <h4 className="text-sm font-bold text-white mb-1">{apt.customer_name}</h4>
-                   <p className="text-[10px] text-slate-500">{apt.notes || "Not bırakılmamış..."}</p>
-                </div>
-              ))
-            ) : inventory.filter(i => i.quantity <= i.low_stock_threshold).length > 0 ? (
-               inventory.filter(i => i.quantity <= i.low_stock_threshold).slice(0, 3).map((item, i) => (
-                <div key={i} className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl hover:border-amber-500/30 transition-all group">
-                   <div className="flex items-center justify-between mb-2">
-                     <div className="flex items-center gap-1.5">
-                       <Package className="w-3 h-3 text-amber-500" />
-                       <span className="text-[10px] text-amber-500 font-bold uppercase tracking-widest">Kritik Stok</span>
-                     </div>
-                     <Badge className="bg-amber-500/10 text-amber-500 border-none text-[9px] uppercase">{item.quantity} {item.unit} Kaldı</Badge>
-                   </div>
-                   <h4 className="text-sm font-bold text-white mb-1">{item.name}</h4>
-                   <p className="text-[10px] text-slate-500">Eşik değerinin ({item.low_stock_threshold}) altına düştü.</p>
-                </div>
-               ))
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center gap-4 text-center opacity-40">
-                <AlertCircle className="w-10 h-10 text-slate-600" />
-                <p className="text-xs text-slate-500">Kritik işlem bulunmuyor.</p>
-              </div>
-            )}
+          <div className="flex-1 min-h-[250px] relative">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+               <div className="text-center">
+                  <p className="text-3xl font-black text-foreground tracking-tighter leading-none">{pieData.length}</p>
+                  <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">KATEGORİ</p>
+               </div>
+            </div>
+            <ResponsiveContainer width="100%" height="100%">
+               <PieChart>
+                 <Pie
+                   data={pieData}
+                   cx="50%"
+                   cy="50%"
+                   innerRadius={70}
+                   outerRadius={100}
+                   paddingAngle={8}
+                   dataKey="value"
+                   strokeWidth={0}
+                 >
+                   {pieData.map((_, index) => (
+                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} style={{ filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.1))" }} />
+                   ))}
+                 </Pie>
+                 <Tooltip 
+                   contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '1rem' }}
+                   itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                 />
+               </PieChart>
+            </ResponsiveContainer>
           </div>
-          <div className="mt-8 pt-6 border-t border-slate-800/50">
-             <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/10 rounded-2xl">
-                <Target className="w-5 h-5 text-primary" />
-                <p className="text-[10px] text-primary/80 leading-relaxed italic">
-                  **CEO Insight:** Bu hafta en çok "Kısa Kesim" hizmeti tercih edildi. Bu hizmete özel bir kampanya dükkan gelirini %4 arttırabilir.
-                </p>
+          <div className="space-y-3 mt-8">
+             {pieData.map((item, i) => (
+               <div key={i} className="flex items-center justify-between p-3 bg-muted/30 rounded-2xl border border-transparent hover:border-border transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wide">{item.name}</span>
+                  </div>
+                  <span className="text-xs font-black text-foreground">₺{item.value.toLocaleString()}</span>
+               </div>
+             ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+           {/* Recent Alerts / Inventory (Restructured) */}
+           <div className="bg-card border border-border p-10 rounded-[3rem] shadow-sm">
+              <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-8 flex items-center gap-3">
+                <Package className="w-5 h-5 text-violet-500" /> Operasyonel Durum
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                 {recentApts.filter(a => a.status === 'pending').slice(0, 2).map((apt, i) => (
+                    <div key={i} className="p-6 bg-muted/30 border border-border rounded-3xl hover:border-primary/20 transition-all shadow-sm group">
+                       <div className="flex items-center justify-between mb-4">
+                         <div className="flex items-center gap-2">
+                            <Clock className="w-3.5 h-3.5 text-primary" />
+                            <span className="text-[10px] text-primary font-black uppercase tracking-widest">{apt.appointment_time}</span>
+                         </div>
+                         <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black px-3 py-1">BEKLEYEN</Badge>
+                       </div>
+                       <h4 className="text-lg font-black text-foreground tracking-tight mb-2 group-hover:text-primary transition-colors">{apt.customer_name}</h4>
+                       <p className="text-[10px] text-muted-foreground font-medium leading-relaxed opacity-60">{apt.notes || "Not bırakılmamış..."}</p>
+                    </div>
+                 ))}
+                 {inventory.filter(i => i.quantity <= i.low_stock_threshold).slice(0, 1).map((item, i) => (
+                    <div key={i} className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-3xl shadow-sm group">
+                       <div className="flex items-center justify-between mb-4">
+                         <div className="flex items-center gap-2">
+                            <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                            <span className="text-[10px] text-amber-600 font-black uppercase tracking-widest">Kritik Stok</span>
+                         </div>
+                         <Badge className="bg-amber-500/10 text-amber-600 border-none text-[9px] font-black px-3 py-1 uppercase">{item.quantity} {item.unit} KALDI</Badge>
+                       </div>
+                       <h4 className="text-lg font-black text-foreground tracking-tight group-hover:text-amber-600 transition-colors uppercase">{item.name}</h4>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <div className="p-10 bg-primary border border-primary/20 rounded-[3rem] h-full flex flex-col justify-center shadow-xl shadow-primary/10 relative overflow-hidden group">
+             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform duration-700">
+                <Target className="w-40 h-40 text-white" />
+             </div>
+             <div className="relative z-10">
+               <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
+                    <Target className="w-6 h-6 text-white" />
+                  </div>
+                  <h4 className="text-xs font-black text-white uppercase tracking-[0.2em]">AI İş Analizi</h4>
+               </div>
+               <p className="text-sm text-white font-medium leading-relaxed italic mb-8 opacity-90">
+                 {topService ? (
+                   `"${topService.name}" hizmetinden elde edilen gelir çok baskın. Personel kapasitesini artırmak geliri %15 yükseltebilir.`
+                 ) : (
+                   "Verilerinizi analiz ediyoruz. Daha fazla randevu verisine ihtiyaç duyuluyor."
+                 )}
+               </p>
+               <Button variant="outline" size="sm" className="w-full h-12 text-[10px] uppercase font-black tracking-widest bg-white text-primary border-none hover:bg-white/90 shadow-lg rounded-2xl">
+                  Aksiyon Al
+               </Button>
              </div>
           </div>
         </div>

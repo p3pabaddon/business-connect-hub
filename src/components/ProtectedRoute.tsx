@@ -26,14 +26,12 @@ export function ProtectedRoute({ children, redirectTo = "/giris" }: ProtectedRou
   return <>{children}</>;
 }
 
-const ADMIN_EMAILS = ["asrinaltan04@gmail.com", "admin@admin.com", "testadmin@rendezvous.com"];
-
 interface AdminRouteProps {
   children: ReactNode;
 }
 
 export function AdminRoute({ children }: AdminRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -47,9 +45,27 @@ export function AdminRoute({ children }: AdminRouteProps) {
     return <Navigate to="/hq/login" replace />;
   }
 
-  if (!ADMIN_EMAILS.includes(user.email || "")) {
+  if (!isAdmin) {
     return <Navigate to="/" replace />;
   }
+
+  return <>{children}</>;
+}
+
+export function BusinessRoute({ children }: { children: ReactNode }) {
+  const { user, loading, isBusinessOwner } = useAuth();
+
+  if (loading) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      );
+  }
+
+  if (!user) return <Navigate to="/giris" replace />;
+  
+  if (!isBusinessOwner) return <Navigate to="/" replace />;
 
   return <>{children}</>;
 }

@@ -5,12 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { t } from "@/lib/translations";
 import { Star, MapPin, Clock, CheckCircle, Phone, Calendar, MessageSquare, Gift, ArrowRight, Reply } from "lucide-react";
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { BookingModal } from "@/components/BookingModal";
 import { ReviewModal } from "@/components/ReviewModal";
 import { ShareButtons } from "@/components/ShareButtons";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { getBusinessBySlug, getLoyaltyProgram, getCustomerLoyalty, joinLoyaltyProgram } from "@/lib/api";
+import { useBusinessBySlug } from "@/hooks/useQueries";
+import { getLoyaltyProgram, getCustomerLoyalty, joinLoyaltyProgram } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { SEOHead } from "@/components/SEOHead";
 import { cn } from "@/lib/utils";
@@ -21,17 +23,23 @@ import { ReviewAISummary } from "@/components/ReviewAISummary";
 const IsletmeDetailPage = () => {
   const { slug } = useParams();
   const { user } = useAuth();
-  const [biz, setBiz] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [loyaltyProgram, setLoyaltyProgram] = useState<any>(null);
-  const [customerLoyalty, setCustomerLoyalty] = useState<any>(null);
   const [joining, setJoining] = useState(false);
 
-  const reloadBusiness = () => {
-    if (slug) getBusinessBySlug(slug).then(setBiz).catch(() => {});
-  };
+  const { data: biz, isLoading: bizLoading, refetch: reloadBusiness } = useBusinessBySlug(slug!);
+
+  const { data: loyaltyProgram } = useQuery({
+    queryKey: ["loyalty", biz?.id],
+    queryFn: () => getLoyaltyProgram(biz!.id),
+    enabled: !!biz?.id,
+  });
+
+  const { data: customerLoyalty, refetch: refetchCustomerLoyalty } = useQuery({
+    queryKey: ["customer-loyalty", biz?.id, user?.id],
+    queryFn: () => getCustomerLoyalty(biz!.id),
+    enabled: !!biz?.id && !!user?.id,
+  });
 
   const handleJoinLoyalty = async () => {
     if (!user) {
@@ -43,10 +51,10 @@ const IsletmeDetailPage = () => {
 
     setJoining(true);
     try {
-      const data = await joinLoyaltyProgram(biz.id);
-      setCustomerLoyalty(data);
+      await joinLoyaltyProgram(biz!.id);
+      refetchCustomerLoyalty();
       toast.success("Müdavim Kartınız Oluşturuldu! ✨", {
-        description: `Artık ${biz.name} işletmesinde randevu aldıkça damga kazanacaksınız.`
+        description: `Artık ${biz!.name} işletmesinde randevu aldıkça damga kazanacaksınız.`
       });
     } catch (err: any) {
       console.error("Loyalty join error:", err);
@@ -58,33 +66,7 @@ const IsletmeDetailPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (slug) {
-      getBusinessBySlug(slug)
-        .then(async (data) => {
-          console.log("Business Data Loaded:", data);
-          console.log("Working Hours:", data?.working_hours);
-          console.log("Reviews:", data?.reviews);
-          setBiz(data);
-          if (data?.reviews) console.log("Reviews found:", data.reviews.length);
-          if (data?.id) {
-            try {
-              const prog = await getLoyaltyProgram(data.id);
-              setLoyaltyProgram(prog);
-              
-              if (user) {
-                const custLog = await getCustomerLoyalty(data.id);
-                setCustomerLoyalty(custLog);
-              }
-            } catch (err) {
-              console.warn("Loyalty system ignored due to sync error:", err);
-            }
-          }
-        })
-        .catch(() => setBiz(null))
-        .finally(() => setLoading(false));
-    }
-  }, [slug, user]);
+  const loading = bizLoading;
 
   if (loading) {
     return (
@@ -437,7 +419,7 @@ const IsletmeDetailPage = () => {
                     className="w-full h-48 rounded-lg border border-border"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
-                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(`${biz.name} ${biz.district} ${biz.city} Türkiye`)}`}
+                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(`${biz.name} ${biz.district} ${biz.city} Türkiye`)}`}
                   />
                 )}
               </div>

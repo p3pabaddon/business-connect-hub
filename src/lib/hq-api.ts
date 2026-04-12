@@ -166,6 +166,7 @@ export const getSystemHealth = () => {
     cpu: Math.floor(Math.random() * 8) + 2,
     memory: Math.floor(Math.random() * 15) + 12,
     dbConnections: Math.floor(Math.random() * 20) + 15,
-    uptime: "14d 8h 24m"
+    uptime: "14d 8h 24m",
+    status: "optimal"
   };
 };

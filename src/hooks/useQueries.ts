@@ -5,7 +5,7 @@ import {
   createAppointment, updateAppointmentStatus,
   getOccupiedSlots, getInventory, updateMyBusiness
 } from "@/lib/api";
-import { getBizAnalytics, getBizCoupons, getBizReviews, getWaitlist } from "@/lib/biz-api";
+import { getBizAnalytics, getBizCoupons, getBizReviews, getWaitlist, getBizServices, getBizStaff } from "@/lib/biz-api";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 
@@ -75,6 +75,22 @@ export function useBizReviews(businessId: string) {
   return useQuery({
     queryKey: ["bizReviews", businessId],
     queryFn: () => getBizReviews(businessId),
+    enabled: !!businessId,
+  });
+}
+
+export function useBizServices(businessId: string) {
+  return useQuery({
+    queryKey: ["bizServices", businessId],
+    queryFn: () => getBizServices(businessId),
+    enabled: !!businessId,
+  });
+}
+
+export function useBizStaff(businessId: string) {
+  return useQuery({
+    queryKey: ["bizStaff", businessId],
+    queryFn: () => getBizStaff(businessId),
     enabled: !!businessId,
   });
 }

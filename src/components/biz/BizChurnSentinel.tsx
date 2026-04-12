@@ -77,69 +77,69 @@ export function BizChurnSentinel({ businessId }: { businessId: string }) {
             <div className="p-2 bg-red-500/10 rounded-lg">
               <ShieldAlert className="w-5 h-5 text-red-500" />
             </div>
-            <h2 className="text-2xl font-heading font-black text-white tracking-tight">Kayıp Müşteri Radarı</h2>
+            <h2 className="text-2xl font-black text-foreground tracking-tight">Kayıp Müşteri Radarı</h2>
           </div>
-          <p className="text-slate-500 max-w-xl text-sm leading-relaxed">
-            Yapay zeka, son 45 gündür gelmeyen ve kaybettiğiniz muhtemel <span className="text-red-400 font-bold">{atRisk.length}</span> müşteriyi tespit etti. 
+          <p className="text-muted-foreground max-w-xl text-sm leading-relaxed font-medium">
+            Yapay zeka, son 45 gündür gelmeyen ve kaybettiğiniz muhtemel <span className="text-red-500 font-bold">{atRisk.length}</span> müşteriyi tespit etti. 
             Onları geri kazanmak için özel teklifler gönderebilirsiniz.
           </p>
         </div>
-        <Button onClick={loadData} variant="outline" className="border-slate-800 hover:bg-slate-800 text-xs h-9 gap-2">
+        <Button onClick={loadData} variant="outline" className="border-border hover:bg-muted text-xs h-10 gap-2 rounded-xl font-bold">
            <Zap className="w-3.5 h-3.5 text-amber-500" /> Yeniden Tara
         </Button>
       </div>
 
       {atRisk.length === 0 ? (
-        <Card className="p-12 border-slate-800/50 bg-slate-900/20 border-dashed flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4">
+        <Card className="p-16 border-border bg-card border-dashed flex flex-col items-center justify-center text-center rounded-[2.5rem] shadow-sm">
+          <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/20 shadow-inner">
             <Zap className="w-8 h-8 text-emerald-500" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-1">Harika! Kayıp Müşteri Yok</h3>
-          <p className="text-slate-500 text-sm max-w-xs">Tüm düzenli müşterileriniz aktif olarak gelmeye devam ediyor.</p>
+          <h3 className="text-xl font-black text-foreground mb-2">Harika! Kayıp Müşteri Yok</h3>
+          <p className="text-muted-foreground text-sm max-w-xs font-medium">Tüm düzenli müşterileriniz aktif olarak gelmeye devam ediyor.</p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {atRisk.map((customer, idx) => (
-            <Card key={idx} className="p-5 bg-slate-900/40 border-slate-800/50 hover:border-red-500/30 transition-all group overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                <AlertTriangle className="w-12 h-12 text-red-500" />
+            <Card key={idx} className="p-6 bg-card border border-border hover:border-red-500/30 transition-all group overflow-hidden relative rounded-3xl shadow-sm">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <AlertTriangle className="w-16 h-16 text-red-500" />
               </div>
 
               <div className="flex items-start gap-4 relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700">
-                  <User className="w-6 h-6 text-slate-400" />
+                <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center shadow-inner">
+                  <User className="w-7 h-7 text-muted-foreground/30" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-white truncate">{customer.name}</h4>
-                  <p className="text-xs text-slate-500 truncate">{customer.phone}</p>
+                  <h4 className="font-black text-foreground truncate text-lg tracking-tight">{customer.name}</h4>
+                  <p className="text-xs text-muted-foreground font-medium truncate">{customer.phone}</p>
                 </div>
               </div>
 
-              <div className="mt-6 space-y-3">
-                <div className="flex justify-between items-center text-[10px] uppercase tracking-wider font-bold">
-                  <span className="text-slate-600">Son Ziyaret</span>
-                  <span className="text-red-400">{format(customer.last_visit, "d MMMM", { locale: tr })}</span>
+              <div className="mt-8 space-y-4">
+                <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-black">
+                  <span className="text-muted-foreground opacity-60">Son Ziyaret</span>
+                  <span className="text-red-500">{format(customer.last_visit, "d MMMM", { locale: tr })}</span>
                 </div>
-                <div className="flex justify-between items-center text-[10px] uppercase tracking-wider font-bold">
-                  <span className="text-slate-600">Toplam Randevu</span>
-                  <span className="text-slate-400">{customer.visit_count} Defa</span>
+                <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-black">
+                  <span className="text-muted-foreground opacity-60">Toplam Randevu</span>
+                  <span className="text-foreground">{customer.visit_count} Defa</span>
                 </div>
                 <div className="pt-2">
-                   <Badge variant="outline" className="bg-red-500/5 border-red-500/20 text-red-400 text-[9px] uppercase tracking-tighter">
+                   <Badge variant="outline" className="bg-red-500/5 border-red-500/20 text-red-600 text-[9px] uppercase tracking-widest font-black px-3 py-1">
                      KRİTİK RİSK: 45+ GÜN
                    </Badge>
                 </div>
               </div>
 
-              <div className="mt-6 flex gap-2 pt-4 border-t border-slate-800/50">
+              <div className="mt-8 flex gap-3 pt-6 border-t border-border/50">
                 <Button 
                   onClick={() => handleWhatsAppAction(customer)}
-                  className="flex-1 h-9 text-[10px] uppercase font-black bg-emerald-600 hover:bg-emerald-500 text-white gap-2 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                  className="flex-1 h-11 text-[10px] uppercase font-black bg-emerald-600 hover:bg-emerald-500 text-white gap-2 shadow-lg shadow-emerald-100 rounded-xl"
                 >
-                  <MessageSquare className="w-3.5 h-3.5" /> Geri Kazan
+                  <MessageSquare className="w-4 h-4" /> Geri Kazan
                 </Button>
-                <Button variant="outline" size="icon" className="h-9 w-9 border-slate-800 hover:bg-slate-800">
-                   <ArrowRight className="w-3.5 h-3.5 text-slate-500" />
+                <Button variant="outline" size="icon" className="h-11 w-11 border-border bg-background rounded-xl hover:bg-muted transition-all">
+                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
                 </Button>
               </div>
             </Card>
@@ -148,21 +148,21 @@ export function BizChurnSentinel({ businessId }: { businessId: string }) {
       )}
 
       {/* Campaign Feature Mini Promo */}
-      <Card className="p-6 bg-gradient-to-br from-primary/10 to-transparent border-primary/20 relative overflow-hidden">
-        <div className="absolute top-1/2 -translate-y-1/2 right-10 opacity-20 hidden lg:block">
-           <Zap className="w-32 h-32 text-primary" strokeWidth={0.5} />
+      <Card className="p-8 bg-primary/5 border border-primary/10 relative overflow-hidden rounded-[2.5rem] shadow-sm">
+        <div className="absolute top-1/2 -translate-y-1/2 right-12 opacity-10 hidden lg:block">
+           <Zap className="w-40 h-40 text-primary" strokeWidth={0.5} />
         </div>
         <div className="relative z-10">
-          <h3 className="text-lg font-black text-white mb-2 italic tracking-tight uppercase">Akıllı Geri Kazanım Kampanyası Başlat</h3>
-          <p className="text-sm text-slate-400 max-w-2xl mb-4">
+          <h3 className="text-xl font-black text-foreground mb-3 italic tracking-tight uppercase">Akıllı Geri Kazanım Kampanyası Başlat</h3>
+          <p className="text-sm text-muted-foreground max-w-2xl mb-6 font-medium leading-relaxed">
             Tüm kayıp müşterilere tek tıkla %30 indirim SMS'i göndererek koltuk doluluk oranınızı artırın. 
             Müşterilerin %15'i genellikle bu tür tekliflere 24 saat içinde yanıt verir.
           </p>
           <Button 
             onClick={() => setCampaignOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-black text-[10px] uppercase h-9 shadow-[0_0_20px_rgba(59,130,246,0.3)] animate-pulse"
+            className="bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase h-11 px-8 shadow-xl shadow-primary/20 animate-pulse rounded-xl"
           >
-            <Sparkles className="w-3.5 h-3.5 mr-2" />
+            <Sparkles className="w-4 h-4 mr-2" />
             Toplu Kampanya Oluştur
           </Button>
         </div>
@@ -170,60 +170,62 @@ export function BizChurnSentinel({ businessId }: { businessId: string }) {
 
       {/* Campaign Launch Dialog */}
       <Dialog open={campaignOpen} onOpenChange={setCampaignOpen}>
-        <DialogContent className="bg-[#0f172a] border-slate-800 text-white max-w-md rounded-[2.5rem]">
-          <DialogHeader>
-            <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30 mb-4">
-               <Zap className="w-8 h-8 text-primary" />
+        <DialogContent className="bg-background border-border text-foreground max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden p-0">
+          <div className="p-8">
+            <DialogHeader>
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 mb-6 shadow-inner">
+                 <Zap className="w-8 h-8 text-primary" />
+              </div>
+              <DialogTitle className="text-3xl font-black text-foreground tracking-tight leading-none">Akıllı Geri Kazanım</DialogTitle>
+              <DialogDescription className="text-muted-foreground font-medium text-base mt-2">
+                 Tespit edilen {atRisk.length} müşteriye özel kampanya başlatmak üzeresiniz.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-8 border-y border-border my-6">
+               <div className="bg-muted/30 rounded-3xl p-6 border border-border shadow-inner">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4">Teklif İçeriği</p>
+                  <div className="space-y-4 font-bold">
+                     <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground/70">İndirim Oranı</span>
+                        <span className="text-sm text-primary">%30 İndirim</span>
+                     </div>
+                     <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground/70">Hedef Kitle</span>
+                        <span className="text-sm text-foreground">{atRisk.length} Kayıp Müşteri</span>
+                     </div>
+                     <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground/70">Kanal</span>
+                        <span className="text-sm text-foreground">WhatsApp & SMS</span>
+                     </div>
+                  </div>
+               </div>
+
+               <div className="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl shadow-sm">
+                  <p className="text-xs text-emerald-600 font-bold italic text-center leading-relaxed">
+                     "Yapay zeka bu kampanyanın işletmeniz için tahmini ₺{atRisk.length * 350} ek gelir yaratacağını öngörüyor."
+                  </p>
+               </div>
             </div>
-            <DialogTitle className="text-2xl font-black text-white">Akıllı Geri Kazanım</DialogTitle>
-            <DialogDescription className="text-slate-500">
-               Tespit edilen {atRisk.length} müşteriye özel kampanya başlatmak üzeresiniz.
-            </DialogDescription>
-          </DialogHeader>
 
-          <div className="space-y-6 py-6 border-y border-slate-800/50 my-2">
-             <div className="bg-slate-900/50 rounded-3xl p-5 border border-slate-800">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Teklif İçeriği</p>
-                <div className="space-y-4">
-                   <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-300">İndirim Oranı</span>
-                      <span className="text-sm font-bold text-white">%30 İndirim</span>
-                   </div>
-                   <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-300">Hedef Kitle</span>
-                      <span className="text-sm font-bold text-white">{atRisk.length} Kayıp Müşteri</span>
-                   </div>
-                   <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-300">Kanal</span>
-                      <span className="text-sm font-bold text-white">WhatsApp & SMS</span>
-                   </div>
-                </div>
-             </div>
-
-             <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                <p className="text-[10px] text-emerald-500 font-bold italic">
-                   "Yapay zeka bu kampanyanın işletmeniz için tahmini ₺{atRisk.length * 350} ek gelir yaratacağını öngörüyor."
-                </p>
-             </div>
+            <DialogFooter className="gap-3 sm:gap-0">
+               <Button 
+                  variant="outline" 
+                  onClick={() => setCampaignOpen(false)}
+                  className="flex-1 border-border rounded-2xl h-14 font-black text-xs transition-colors hover:bg-muted"
+               >
+                  İPTAL
+               </Button>
+               <Button 
+                  onClick={handleLaunchCampaign}
+                  disabled={launching}
+                  className="flex-1 bg-primary hover:bg-primary/90 text-white font-black h-14 rounded-2xl gap-2 shadow-xl shadow-primary/20"
+               >
+                  {launching ? <Loader2 className="w-5 h-5 animate-spin text-white" /> : <Send className="w-5 h-5" />}
+                  KAMPANYAYI BAŞLAT
+               </Button>
+            </DialogFooter>
           </div>
-
-          <DialogFooter>
-             <Button 
-                variant="outline" 
-                onClick={() => setCampaignOpen(false)}
-                className="flex-1 border-slate-800 rounded-2xl h-12"
-             >
-                İPTAL
-             </Button>
-             <Button 
-                onClick={handleLaunchCampaign}
-                disabled={launching}
-                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-black h-12 rounded-2xl gap-2"
-             >
-                {launching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                KAMPANYAYI BAŞLAT
-             </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -101,82 +101,84 @@ export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
-      <div className="relative p-8 rounded-[2.5rem] bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] -mr-32 -mt-32 rounded-full" />
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="relative p-10 rounded-[3rem] bg-gradient-to-br from-slate-900 to-indigo-950 border border-slate-800 overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[120px] -mr-48 -mt-48 rounded-full" />
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-4">
-              <Crown className="w-3 h-3 text-primary animate-pulse" />
-              <span className="text-[10px] font-black tracking-widest text-primary uppercase">Avantajlar Merkezi</span>
+            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <Crown className="w-4 h-4 text-primary animate-pulse" />
+              <span className="text-[10px] font-black tracking-[0.2em] text-primary uppercase">Elite Avantaj Platformu</span>
             </div>
-            <h2 className="text-3xl font-black text-white tracking-tighter mb-2">
-              İşletmenizin Gücünü <span className="text-primary">Artırın!</span>
+            <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tighter mb-4 leading-tight">
+              İşletmenizin Potansiyelini <br/><span className="text-primary italic">Maksimuma Çıkarın!</span>
             </h2>
-            <p className="text-slate-400 text-sm max-w-md">
-              Daha fazla müşteriye ulaşmak ve operasyonunuzu profesyonelleştirmek için premium özellikleri kullanın.
+            <p className="text-slate-300 text-sm lg:text-base max-w-lg font-medium opacity-80">
+              Yapay zeka detekli analizler ve sınırsız operasyonel güç ile rakiplerinizin önüne geçin.
             </p>
           </div>
           
-          <div className="flex flex-col items-center gap-1">
-             <div className="text-4xl font-black text-white">{business.is_premium ? 'VIP' : 'STANDART'}</div>
-             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Güncel Statü</div>
+          <div className="flex flex-col items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[2.5rem] shadow-2xl min-w-[200px]">
+             <div className="text-5xl font-black text-white italic tracking-tighter">{business.is_premium ? 'VIP' : 'ECO'}</div>
+             <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2">GÜNCEL STATÜ</div>
           </div>
         </div>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {plans.map((plan) => (
           <div 
             key={plan.id} 
             className={cn(
-              "relative group flex flex-col p-6 rounded-[2rem] border transition-all duration-500",
+              "relative group flex flex-col p-8 rounded-[3rem] border transition-all duration-500 shadow-sm",
               plan.active 
-                ? "bg-slate-900/80 border-primary/40 shadow-xl shadow-primary/5" 
-                : "bg-slate-900/20 border-slate-800 hover:border-slate-700 hover:bg-slate-900/40"
+                ? "bg-card border-primary/40 shadow-xl shadow-primary/5 ring-1 ring-primary/20" 
+                : "bg-card border-border hover:border-primary/20 hover:shadow-xl"
             )}
           >
             {plan.active && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-6 py-1.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 z-10">
                 AKTİF ÖZELLİK
               </div>
             )}
 
-            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-6", plan.bgColor)}>
-              <plan.icon className={cn("w-6 h-6", plan.color)} />
+            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-8 shadow-inner border", plan.bgColor, "border-white/10")}>
+              <plan.icon className={cn("w-7 h-7", plan.color)} />
             </div>
 
-            <h3 className="text-lg font-black text-white mb-2">{plan.title}</h3>
-            <p className="text-slate-400 text-xs leading-relaxed mb-6">{plan.desc}</p>
+            <h3 className="text-xl font-black text-foreground mb-3 uppercase tracking-tight">{plan.title}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-8 font-medium italic opacity-80">"{plan.desc}"</p>
 
-            <div className="space-y-3 mb-8 flex-1">
+            <div className="space-y-4 mb-10 flex-1">
               {plan.features.map((feature, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-500/60" />
-                  <span className="text-[11px] text-slate-300">{feature}</span>
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-sm">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                  </div>
+                  <span className="text-xs text-foreground/70 font-bold">{feature}</span>
                 </div>
               ))}
             </div>
 
-            <div className="flex items-center justify-between pt-6 border-t border-slate-800/50">
+            <div className="flex items-center justify-between pt-8 border-t border-border/50">
               <div>
-                <span className="text-xl font-black text-white">{plan.price}</span>
-                <span className="text-[10px] text-slate-500 ml-1">/ {plan.period}</span>
+                <span className="text-2xl font-black text-foreground">{plan.price}</span>
+                <span className="text-[10px] font-black text-muted-foreground ml-2 opacity-60">/ {plan.period}</span>
               </div>
               <Button 
                 onClick={() => handlePurchase(plan.id)}
                 disabled={plan.active || !!purchasingId}
                 className={cn(
-                  "px-4 h-9 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                  "px-6 h-11 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
                   plan.active 
-                    ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" 
-                    : "bg-white text-black hover:bg-primary hover:text-white"
+                    ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default" 
+                    : "bg-primary text-white hover:scale-105 active:scale-95 shadow-lg shadow-primary/20"
                 )}
               >
                 {purchasingId === plan.id ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
                 ) : (
-                  plan.active ? "SATIN ALINDI" : "SEÇ"
+                  plan.active ? "KULLANIMDA" : "SATIN AL"
                 )}
               </Button>
             </div>
@@ -185,41 +187,55 @@ export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
       </div>
 
       {/* Account Limits */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 rounded-[2rem] bg-slate-950/50 border border-slate-900">
-           <div className="flex items-center gap-3 mb-6">
-              <Users className="w-5 h-5 text-blue-500" />
-              <h4 className="text-sm font-bold text-white uppercase tracking-tight">Personel Kotası</h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+        <div className="p-8 rounded-[3rem] bg-card border border-border shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[40px] -mr-16 -mt-16 rounded-full group-hover:bg-blue-500/10 transition-colors" />
+           <div className="flex items-center gap-4 mb-8">
+              <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-inner">
+                <Users className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h4 className="text-lg font-black text-foreground uppercase tracking-tight">Personel Kotası</h4>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">Kapasite Yönetimi</p>
+              </div>
            </div>
            
-           <div className="space-y-4">
-              <div className="flex justify-between items-end">
-                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Kullanım</span>
-                 <span className="text-xs font-black text-white">6 / {business.personnel_limit}</span>
+           <div className="space-y-6">
+              <div className="flex justify-between items-end px-1">
+                 <span className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">Kullanım Bilgisi</span>
+                 <span className="text-sm font-black text-foreground bg-muted px-4 py-1 rounded-full border border-border shadow-sm">
+                   6 / {business.personnel_limit}
+                 </span>
               </div>
-              <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
+              <div className="w-full h-3 bg-muted rounded-full overflow-hidden shadow-inner border border-border/50">
                  <div 
-                   className="h-full bg-blue-500 transition-all duration-1000" 
-                   style={{ width: `${(6 / (business.personnel_limit || 2)) * 100}%` }}
+                   className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-1000 shadow-[0_0_15px_rgba(59,130,246,0.5)]" 
+                   style={{ width: `${Math.min(100, (6 / (business.personnel_limit || 2)) * 100)}%` }}
                  />
               </div>
-              <p className="text-[10px] text-slate-500">
-                 Personel sınırınızı artırmak için <strong>Pro Paket</strong>'e geçebilirsiniz.
+              <p className="text-[11px] text-muted-foreground font-medium leading-relaxed italic opacity-80">
+                 Personel sınırınızı tek tıkla artırmak için <span className="text-primary font-black uppercase not-italic">Pro Paket</span>'e geçiş yapın.
               </p>
            </div>
         </div>
 
-        <div className="p-6 rounded-[2rem] bg-slate-950/50 border border-slate-900 flex items-center justify-between">
-           <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                 <BarChart3 className="w-4 h-4 text-emerald-500" />
-                 <span className="text-xs font-bold text-white">Gelişmiş Analitik</span>
+        <div className="p-8 rounded-[3rem] bg-card border border-border shadow-sm hover:shadow-md transition-all flex items-center justify-between group overflow-hidden relative">
+           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[40px] -mr-16 -mt-16 rounded-full group-hover:bg-emerald-500/10 transition-colors" />
+           <div className="flex flex-col gap-3 z-10">
+              <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20 shadow-inner">
+                   <BarChart3 className="w-5 h-5 text-emerald-600" />
+                 </div>
+                 <span className="text-lg font-black text-foreground uppercase tracking-tight">AI Analitik</span>
               </div>
-              <p className="text-[10px] text-slate-500 max-w-[200px]">
-                 Müşteri davranışlarını ve pazar trendlerini AI ile analiz edin.
+              <p className="text-xs text-muted-foreground font-medium max-w-[240px] leading-relaxed italic opacity-80">
+                 Müşteri davranışlarını ve randevu trendlerini yapay zeka ile <span className="text-emerald-600 font-bold not-italic">derinlemesine</span> analiz edin.
               </p>
            </div>
-           <Button variant="outline" className="border-slate-800 rounded-xl text-[10px] font-bold h-9">
+           <Button 
+             variant="outline" 
+             className="border-border hover:border-emerald-500/50 hover:bg-emerald-500/5 rounded-2xl px-6 h-12 text-[10px] font-black uppercase tracking-[0.2em] shadow-sm hover:shadow-lg transition-all active:scale-95 z-10 shrink-0 ml-4"
+           >
               KİLİDİ AÇ
            </Button>
         </div>

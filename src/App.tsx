@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute, AdminRoute, BusinessRoute } from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
@@ -25,6 +25,7 @@ import AdminPage from "./pages/AdminPage";
 import ForBusinessesPage from "./pages/ForBusinessesPage";
 import HqDashboard from "./pages/HqDashboard";
 import HqLoginPage from "./pages/HqLoginPage";
+import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
 import NotFound from "./pages/NotFound";
 import KarsilastirmaPage from "./pages/KarsilastirmaPage";
 import HaritaPage from "./pages/HaritaPage";
@@ -39,8 +40,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
+          <Sonner position="top-right" expand={true} richColors />
           <BrowserRouter>
             <TrafficTracker />
             <QuickBookWidget />
@@ -61,6 +61,7 @@ const App = () => (
               <Route path="/hq/login" element={<HqLoginPage />} />
               <Route path="/karsilastir" element={<KarsilastirmaPage />} />
               <Route path="/harita" element={<HaritaPage />} />
+              <Route path="/oauth/google/callback" element={<GoogleOAuthCallback />} />
 
               {/* Protected routes - requires login */}
               <Route path="/profil" element={
@@ -69,9 +70,9 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/dashboard" element={
-                <ProtectedRoute>
+                <BusinessRoute>
                   <BusinessDashboard />
-                </ProtectedRoute>
+                </BusinessRoute>
               } />
               <Route path="/personel-paneli" element={
                 <ProtectedRoute>

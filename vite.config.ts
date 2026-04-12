@@ -7,12 +7,16 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 7000,
     hmr: {
       overlay: false,
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [react()],
+  define: {
+    'process.env': {},
+  },
+  publicDir: "public",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

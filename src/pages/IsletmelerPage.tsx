@@ -12,9 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, MapPin, Star, CheckCircle, SlidersHorizontal, Zap } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useBusinesses } from "@/hooks/useQueries";
 import { turkiyeIller } from "@/lib/turkey-locations";
-import { getBusinesses } from "@/lib/api";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { t } from "@/lib/translations";
 import { SEOHead } from "@/components/SEOHead";
@@ -41,28 +41,13 @@ const IsletmelerPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortBy, setSortBy] = useState("rating");
   const [minRating, setMinRating] = useState("");
-  const [businesses, setBusinesses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => loadBusinesses(), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery, selectedCity, selectedCategory]);
-
-  const loadBusinesses = async () => {
-    try {
-      const data = await getBusinesses({
-        city: selectedCity,
-        category: selectedCategory,
-        search: searchQuery,
-      });
-      setBusinesses(data || []);
-    } catch {
-      setBusinesses([]);
-    }
-    setLoading(false);
-  };
+  const { data: businesses = [], isLoading: loading } = useBusinesses({
+    city: selectedCity === "all" ? "" : selectedCity,
+    category: selectedCategory === "all" ? "" : selectedCategory,
+    search: searchQuery,
+  });
 
   // Client-side sort & filter
   const filteredBusinesses = businesses
@@ -199,10 +184,10 @@ const IsletmelerPage = () => {
                     <div className="absolute top-3 right-3 z-10">
                       <FavoriteButton businessId={biz.id} />
                     </div>
-                    <div className="h-40 bg-gradient-to-br from-primary/20 to-accent/20 relative">
-                      {biz.image_url && (
-                        <img src={biz.image_url} alt={biz.name} className="w-full h-full object-cover" loading="lazy" />
-                      )}
+                    <div className="flex-shrink-0 w-24 sm:w-32 h-24 sm:h-32 bg-muted relative">
+                    {biz.logo && (
+                      <img src={biz.logo} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    )}
                     </div>
                     <div className="p-5">
                       <div className="flex items-start justify-between mb-2">

@@ -5,6 +5,8 @@ export interface BizStats {
   appointmentsToday: number;
   newCustomersThisWeek: number;
   retentionRate: number;
+  dailyRevenue: { date: string; revenue: number }[];
+  serviceDistribution: { name: string; value: number }[];
 }
 
 export interface CustomerProfile {
@@ -99,18 +101,37 @@ export const getBizAnalytics = async (businessId: string) => {
     }
   });
 
-  // KPIs
-  const newCustomers = Object.values(customerMap).filter(c => {
-    // Basic logic: if total appointments is low or first visit is recent
-    return c.totalAppointments === 1; 
-  }).length;
+  // 4. New Customers calculation
+  const newCustomers = Object.values(customerMap).filter(c => c.totalAppointments === 1).length;
+
+  // 5. Daily Revenue (Last 7 days)
+  const last7Days = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    return d.toISOString().split("T")[0];
+  }).reverse();
+
+  const dailyRevenue = last7Days.map(date => ({
+    date: date.split("-").slice(1).join("/"),
+    revenue: apts
+      .filter(a => a.appointment_date === date && a.status === "completed")
+      .reduce((sum, a) => sum + (Number(a.total_price) || 0), 0)
+  }));
+
+  // 6. Service Distribution
+  const serviceDistribution = serviceStats.map(s => ({
+    name: s.name,
+    value: s.revenue
+  })).sort((a, b) => b.value - a.value).slice(0, 5);
 
   return {
     kpis: { 
       revenueToday, 
       appointmentsToday, 
       newCustomersThisWeek: newCustomers, 
-      retentionRate: customers.length > 0 ? Math.round((customers.filter(c => c.totalAppointments > 1).length / customers.length) * 100) : 0 
+      retentionRate: customers.length > 0 ? Math.round((customers.filter(c => c.totalAppointments > 1).length / customers.length) * 100) : 0,
+      dailyRevenue,
+      serviceDistribution
     },
     customers,
     serviceStats,
@@ -143,6 +164,11 @@ export const deleteService = async (id: string) => {
   if (error) throw error;
 };
 
+export const getBizServices = async (businessId: string) => {
+  const { data } = await supabase.from("services").select("*").eq("business_id", businessId).order("created_at", { ascending: true });
+  return data || [];
+};
+
 // --- STAFF CRUD ---
 export const addStaff = async (businessId: string, name: string, role: string) => {
   const { data, error } = await supabase.from("staff").insert({
@@ -164,6 +190,11 @@ export const updateStaff = async (id: string, updates: { name?: string; role?: s
 export const deleteStaff = async (id: string) => {
   const { error } = await supabase.from("staff").update({ is_active: false }).eq("id", id);
   if (error) throw error;
+};
+
+export const getBizStaff = async (businessId: string) => {
+  const { data } = await supabase.from("staff").select("*").eq("business_id", businessId).order("created_at", { ascending: true });
+  return data || [];
 };
 
 // --- COUPONS CRUD ---

@@ -81,7 +81,7 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
 
   const updateWorkingHour = (day: string, field: string, value: any) => {
     const hours = { ...business.working_hours };
-    if (!hours[day]) hours[day] = { start: "09:00", end: "18:00", closed: false };
+    if (!hours[day]) hours[day] = { start: "09:00", end: "18:00", closed: false, break_start: "12:00", break_end: "13:00" };
     
     hours[day] = { ...hours[day], [field]: value };
     setBusiness({ ...business, working_hours: hours });
@@ -98,20 +98,20 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between bg-slate-900/40 p-6 rounded-3xl border border-slate-800/50 backdrop-blur-md sticky top-0 z-10">
+      <div className="flex items-center justify-between bg-card p-6 rounded-3xl border border-border shadow-sm sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20">
+          <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shadow-inner">
             <Settings2 className="w-7 h-7 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tight">Dükkan Ayarları</h2>
-            <p className="text-slate-500 text-sm">Profilinizi, adresinizi ve çalışma saatlerinizi yönetin.</p>
+            <h2 className="text-2xl font-black text-foreground tracking-tight">Dükkan Ayarları</h2>
+            <p className="text-muted-foreground text-sm font-medium">Profilinizi, adresinizi ve çalışma saatlerinizi yönetin.</p>
           </div>
         </div>
         <Button 
           onClick={handleSave} 
           disabled={saving}
-          className="rounded-2xl h-12 px-8 gap-2 bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-900/20"
+          className="rounded-2xl h-12 px-8 gap-2 bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-200 font-bold transition-all hover:scale-105 active:scale-95"
         >
           {saving ? <Plus className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
           Değişiklikleri Kaydet
@@ -129,25 +129,25 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-slate-400">İşletme Adı</Label>
+                <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">İşletme Adı</Label>
                 <Input 
                   value={business.name} 
                   onChange={(e) => setBusiness({...business, name: e.target.value})}
-                  className="bg-slate-950/50 border-slate-800 focus:border-primary/50 h-12 rounded-xl"
+                  className="bg-muted/30 border-border focus:ring-primary/20 h-12 rounded-xl font-medium"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-400">Kategori</Label>
+                <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Kategori</Label>
                 <Select value={business.category} onValueChange={(v) => setBusiness({...business, category: v})}>
-                  <SelectTrigger className="bg-slate-950/50 border-slate-800 h-12 rounded-xl">
+                  <SelectTrigger className="bg-muted/30 border-border h-12 rounded-xl font-medium">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0f172a] border-slate-800 text-white">
+                  <SelectContent className="bg-background border-border text-foreground rounded-xl shadow-xl">
                     <SelectItem value="berber">Berber</SelectItem>
                     <SelectItem value="guzellik-salonu">Güzellik Salonu</SelectItem>
                     <SelectItem value="spa-masaj">Spa & Masaj</SelectItem>
                     <SelectItem value="kuafor">Kuaför</SelectItem>
-                    <SelectItem value="tirnak">Tırnak Salonu</SelectItem>
+                    <SelectItem value="tirnak">Tırnail Salonu</SelectItem>
                     <SelectItem value="sistem-yonetimi">Sistem Yönetimi</SelectItem>
                     <SelectItem value="dovme-piercing">Dövme & Piercing</SelectItem>
                     <SelectItem value="veteriner">Veteriner</SelectItem>
@@ -156,11 +156,11 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                 </Select>
               </div>
               <div className="md:col-span-2 space-y-2">
-                <Label className="text-slate-400">Kısa Açıklama</Label>
+                <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Kısa Açıklama</Label>
                 <Textarea 
                   value={business.description} 
                   onChange={(e) => setBusiness({...business, description: e.target.value})}
-                  className="bg-slate-950/50 border-slate-800 focus:border-primary/50 rounded-xl min-h-[100px]"
+                  className="bg-muted/30 border-border focus:ring-primary/20 rounded-xl min-h-[100px] font-medium"
                   placeholder="Müşterilere kendinizi tanıtın..."
                 />
               </div>
@@ -175,49 +175,49 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-slate-400">Telefon</Label>
+                <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Telefon</Label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
                   <Input 
                     value={business.phone} 
                     onChange={(e) => setBusiness({...business, phone: e.target.value})}
-                    className="bg-slate-950/50 border-slate-800 pl-10 h-12 rounded-xl"
+                    className="bg-muted/30 border-border pl-10 h-12 rounded-xl font-medium"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-400">E-posta</Label>
+                <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">E-posta</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
                   <Input 
                     value={business.email} 
                     onChange={(e) => setBusiness({...business, email: e.target.value})}
-                    className="bg-slate-950/50 border-slate-800 pl-10 h-12 rounded-xl"
+                    className="bg-muted/30 border-border pl-10 h-12 rounded-xl font-medium"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-400">İl</Label>
+                <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">İl</Label>
                 <Input 
                   value={business.city} 
                   onChange={(e) => setBusiness({...business, city: e.target.value})}
-                  className="bg-slate-950/50 border-slate-800 h-12 rounded-xl"
+                  className="bg-muted/30 border-border h-12 rounded-xl font-medium"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-400">İlçe</Label>
+                <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">İlçe</Label>
                 <Input 
                   value={business.district} 
                   onChange={(e) => setBusiness({...business, district: e.target.value})}
-                  className="bg-slate-950/50 border-slate-800 h-12 rounded-xl"
+                  className="bg-muted/30 border-border h-12 rounded-xl font-medium"
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
-                <Label className="text-slate-400">Tam Adres</Label>
+                <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Tam Adres</Label>
                 <Textarea 
                   value={business.address} 
                   onChange={(e) => setBusiness({...business, address: e.target.value})}
-                  className="bg-slate-950/50 border-slate-800 focus:border-primary/50 rounded-xl"
+                  className="bg-muted/30 border-border focus:ring-primary/20 rounded-xl font-medium"
                 />
               </div>
             </div>
@@ -231,28 +231,30 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
           >
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-slate-400 font-bold">Dükkan URL'i (Slug)</Label>
+                <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Dükkan URL'i (Slug)</Label>
                 <div className="flex items-center gap-2">
-                  <div className="bg-slate-900 border border-slate-800 h-12 rounded-xl px-4 flex items-center text-slate-500 text-sm whitespace-nowrap">
+                  <div className="bg-muted border border-border h-12 rounded-xl px-4 flex items-center text-muted-foreground text-xs font-bold whitespace-nowrap shadow-inner">
                     randevudunyasi.com/isletme/
                   </div>
                   <Input 
                     value={business.slug} 
                     onChange={(e) => setBusiness({...business, slug: e.target.value.toLowerCase().replace(/\s/g, '-')})}
-                    className="bg-slate-950/50 border-slate-800 h-12 rounded-xl font-bold text-primary"
+                    className="bg-muted/30 border-border h-12 rounded-xl font-black text-primary"
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-tighter mt-1">
+                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-2 opacity-60">
                   Dükkan adresini değiştirmek SEO ve linklerinizi etkileyebilir.
                 </p>
               </div>
               
-              <div className="flex items-center justify-between p-4 bg-slate-950/50 border border-slate-800 rounded-2xl">
-                 <div className="flex items-center gap-3">
-                    <ShieldCheck className="w-5 h-5 text-emerald-500" />
+              <div className="flex items-center justify-between p-5 bg-muted/20 border border-border rounded-2xl">
+                 <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20 shadow-inner">
+                       <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                    </div>
                     <div>
-                       <p className="text-sm font-bold text-white">Online Randevu Kabul Et</p>
-                       <p className="text-xs text-slate-500">Müşteriler profilinizden randevu alabilir.</p>
+                       <p className="text-sm font-black text-foreground uppercase tracking-tight">Online Randevu Kabul Et</p>
+                       <p className="text-xs text-muted-foreground font-medium">Müşteriler profilinizden randevu alabilir.</p>
                     </div>
                  </div>
                  <Switch 
@@ -270,38 +272,38 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
           <SectionCard 
             icon={Clock} 
             title="Çalışma Saatleri" 
-            desc="İşletmenizin haftalık mesai düzenini buradan yönetin."
+            desc="Mesai düzenini yönetin."
           >
             <div className="space-y-3">
               {DAYS.map((day) => {
-                const hour = business.working_hours?.[day.key] || { start: "09:00", end: "18:00", closed: false };
+                const hour = business.working_hours?.[day.key] || { start: "09:00", end: "18:00", closed: false, break_start: "12:00", break_end: "13:00" };
                 return (
                   <div 
                     key={day.key} 
                     className={cn(
-                      "group flex items-center justify-between gap-4 p-4 rounded-3xl border transition-all duration-300",
+                      "group flex items-center justify-between gap-4 p-5 rounded-[2rem] border transition-all duration-300",
                       hour.closed 
-                        ? "bg-slate-950/20 border-slate-900/50 opacity-60" 
-                        : "bg-slate-900/40 border-slate-800/80 hover:border-primary/40 hover:bg-slate-900/60 shadow-xl shadow-black/10"
+                        ? "bg-muted/30 border-border/50 opacity-60" 
+                        : "bg-card border-border hover:border-primary/40 hover:bg-muted/5 shadow-sm"
                     )}
                   >
                     {/* Left: Day Info */}
-                    <div className="flex items-center gap-4 flex-1 min-w-[140px]">
+                    <div className="flex items-center gap-4 w-[140px] shrink-0">
                       <div className={cn(
-                        "w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-300",
+                        "w-12 h-12 rounded-2xl flex items-center justify-center border transition-all duration-300 shrink-0 shadow-inner",
                         hour.closed 
-                          ? "bg-slate-950 border-slate-900 text-slate-700" 
-                          : "bg-primary/20 border-primary/30 text-primary"
+                          ? "bg-muted border-border text-muted-foreground/40" 
+                          : "bg-primary/5 border-primary/20 text-primary"
                       )}>
-                        <span className="text-[10px] font-black uppercase tracking-tighter">{day.label.slice(0, 3)}</span>
+                        <span className="text-xs font-black uppercase tracking-tighter">{day.label.slice(0, 3)}</span>
                       </div>
-                      <div>
+                      <div className="flex flex-col">
                         <p className={cn(
-                          "text-sm font-black tracking-tight",
-                          hour.closed ? "text-slate-600" : "text-white"
+                          "text-base font-black tracking-tight leading-none",
+                          hour.closed ? "text-muted-foreground/60" : "text-foreground"
                         )}>{day.label}</p>
                         <p className={cn(
-                          "text-[8px] uppercase font-black tracking-widest",
+                          "text-[9px] uppercase font-black tracking-widest mt-1",
                           hour.closed ? 'text-rose-500/80' : 'text-emerald-500'
                         )}>
                           {hour.closed ? 'KAPALI' : 'AÇIK'}
@@ -310,44 +312,44 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                     </div>
                     
                     {/* Middle: Time Selectors */}
-                    <div className="flex items-center justify-center gap-2 flex-[2]">
+                    <div className="flex-1 flex items-center justify-center px-4">
                       {!hour.closed ? (
-                        <div className="flex items-center gap-2">
-                           <div className="flex flex-col">
-                              <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-0.5">AÇILIŞ</span>
+                        <div className="flex items-center gap-4">
+                           <div className="flex flex-col gap-1.5">
+                              <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest ml-1 opacity-60">AÇILIŞ</span>
                               <Input 
                                 type="time" 
                                 value={hour.start} 
                                 onChange={(e) => updateWorkingHour(day.key, "start", e.target.value)}
-                                className="bg-slate-950/50 border-slate-800 h-9 text-xs w-24 text-center rounded-xl focus:ring-1 focus:ring-primary/20"
+                                className="bg-muted/50 border-border h-10 text-sm w-24 text-center rounded-xl font-bold focus:ring-1 focus:ring-primary/20"
                               />
                            </div>
                            
-                           <div className="mt-3 text-slate-800">–</div>
+                           <div className="mt-6 text-muted-foreground/20 font-light text-xl prose-2xl">–</div>
 
-                           <div className="flex flex-col">
-                              <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-0.5">KAPANIŞ</span>
+                           <div className="flex flex-col gap-1.5">
+                              <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest ml-1 opacity-60">KAPANIŞ</span>
                               <Input 
                                 type="time" 
                                 value={hour.end} 
                                 onChange={(e) => updateWorkingHour(day.key, "end", e.target.value)}
-                                className="bg-slate-950/50 border-slate-800 h-9 text-xs w-24 text-center rounded-xl focus:ring-1 focus:ring-primary/20"
+                                className="bg-muted/50 border-border h-10 text-sm w-24 text-center rounded-xl font-bold focus:ring-1 focus:ring-primary/20"
                               />
                            </div>
                         </div>
                       ) : (
-                        <div className="text-[8px] text-slate-700 font-mono tracking-[0.2em] uppercase italic bg-slate-950/40 px-6 py-2 rounded-xl border border-dashed border-slate-800">
+                        <div className="text-[9px] text-muted-foreground/40 font-mono tracking-[0.3em] uppercase italic bg-muted/30 px-6 py-2 rounded-2xl border border-dashed border-border">
                            MAĞAZA KAPALI
                         </div>
                       ) }
                     </div>
-
+ 
                     {/* Right: Actions */}
-                    <div className="flex items-center justify-end flex-1">
+                    <div className="flex items-center justify-end w-[60px] shrink-0 border-l border-border/50 pl-4">
                         <Switch 
                           checked={!hour.closed} 
                           onCheckedChange={(v) => updateWorkingHour(day.key, "closed", !v)}
-                          className="data-[state=checked]:bg-emerald-500"
+                          className="data-[state=checked]:bg-emerald-500 scale-110"
                         />
                     </div>
                   </div>
@@ -360,17 +362,17 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
           <SectionCard 
             icon={Camera} 
             title="Markalama" 
-            desc="Logo ve kapak fotoğrafı ayarları."
+            desc="Görsel kimlik ayarları."
           >
               <div className="space-y-6">
                 <div className="space-y-3">
-                   <Label className="text-xs text-slate-500 uppercase font-black tracking-widest">Dükkan Logosu</Label>
+                   <Label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Dükkan Logosu</Label>
                    <div className="flex items-center gap-4">
-                      <div className="w-20 h-20 bg-slate-900 border border-slate-800 rounded-3xl flex items-center justify-center overflow-hidden">
+                      <div className="w-20 h-20 bg-muted border border-border rounded-3xl flex items-center justify-center overflow-hidden shadow-inner">
                          {business.logo ? (
                            <img src={business.logo} alt="Logo" className="w-full h-full object-cover" />
                          ) : (
-                           <Briefcase className="w-8 h-8 text-slate-700" />
+                           <Briefcase className="w-8 h-8 text-muted-foreground/20" />
                          )}
                       </div>
                       <div className="flex-1">
@@ -383,8 +385,8 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                    </div>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-slate-800/30">
-                   <Label className="text-xs text-slate-500 uppercase font-black tracking-widest">Kapak Fotoğrafı</Label>
+                <div className="space-y-3 pt-6 border-t border-border">
+                   <Label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Kapak Fotoğrafı</Label>
                    <ImageUpload
                      onUpload={(url) => setBusiness({...business, cover_image: url})}
                      defaultValue={business.cover_image || ""}
@@ -401,14 +403,14 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
 
 function SectionCard({ icon: Icon, title, desc, children }: any) {
   return (
-    <div className="bg-[#0f172a]/40 border border-slate-800/50 rounded-[2.5rem] p-8 backdrop-blur-sm shadow-xl shadow-black/10">
+    <div className="bg-card border border-border rounded-[2.5rem] p-8 shadow-sm">
       <div className="flex items-start gap-4 mb-8">
-        <div className="w-12 h-12 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+        <div className="w-12 h-12 bg-muted border border-border rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
           <Icon className="w-6 h-6 text-primary/70" />
         </div>
         <div>
-          <h3 className="text-xl font-black text-white tracking-tight">{title}</h3>
-          <p className="text-slate-500 text-sm">{desc}</p>
+          <h3 className="text-xl font-black text-foreground tracking-tight leading-none">{title}</h3>
+          <p className="text-muted-foreground text-sm mt-2 font-medium">{desc}</p>
         </div>
       </div>
       {children}

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { getMyBusiness, getBusinessAppointments } from "@/lib/api";
-import { getBizAnalytics, BizStats } from "@/lib/biz-api";
+import { useMyBusiness, useBizAnalytics, useInventory, useBizServices, useBizStaff, useBizReviews } from "@/hooks/useQueries";
+import { VerificationGuard } from "@/components/VerificationGuard";
 import { BizSidebar } from "@/components/biz/BizSidebar";
 import { BizOverview } from "@/components/biz/BizOverview";
 import { BizCRM } from "@/components/biz/BizCRM";
@@ -18,89 +18,63 @@ import { BizPremiumHub } from "@/components/biz/BizPremiumHub";
 import { WaitlistManager } from "@/components/dashboard/WaitlistManager";
 import { StaffPerformance } from "@/components/biz/StaffPerformance";
 import { SEOHead } from "@/components/SEOHead";
-import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2 } from "lucide-react";
+import { BizAiAdvisor } from "@/components/biz/BizAiAdvisor";
+import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2, LayoutDashboard, LogOut } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Logo } from "@/components/layout/Logo";
 
 type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" | "staff-performance";
 
 export default function BusinessDashboard() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<BizTab>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
   
-  const [business, setBusiness] = useState<any>(null);
-  const [stats, setStats] = useState<BizStats | null>(null);
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [services, setServices] = useState<any[]>([]);
-  const [staff, setStaff] = useState<any[]>([]);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [inventory, setInventory] = useState<any[]>([]);
+  const { data: business, isLoading: loading, refetch: reloadBusiness } = useMyBusiness();
+  const { data: bizData, refetch: reloadAnalytics } = useBizAnalytics(business?.id || "");
+  const { data: invData, refetch: reloadInventory } = useInventory(business?.id || "");
+  
+  const stats = bizData?.kpis || null;
+  const customers = bizData?.customers || [];
+  const appointments = bizData?.recentAppointments || [];
+  const inventory = invData || [];
 
-  const [noBusiness, setNoBusiness] = useState(false);
+  const noBusiness = !loading && !business;
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/giris");
-    if (user) loadData();
   }, [user, authLoading]);
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const biz = await getMyBusiness();
-      if (!biz) {
-        setLoading(false);
-        setNoBusiness(true);
-        return;
-      }
-      
-      // Check if business is pending approval
-      if (biz.status === "pending" || !biz.is_active) {
-        setBusiness(biz);
-        setLoading(false);
-        return;
-      }
-      
-      setBusiness(biz);
+  // Compatibility mapping for legacy components that expect 'loadData'
+  const { data: servicesFetch, refetch: reloadServices } = useBizServices(business?.id || "");
+  const { data: staffFetch, refetch: reloadStaff } = useBizStaff(business?.id || "");
+  const { data: reviewsFetch, refetch: reloadReviews } = useBizReviews(business?.id || "");
 
-      const [bizData, servicesRes, staffRes, reviewsRes] = await Promise.all([
-        getBizAnalytics(biz.id),
-        supabase.from("services").select("*").eq("business_id", biz.id),
-        supabase.from("staff").select("*").eq("business_id", biz.id),
-        supabase.from("reviews").select("*").eq("business_id", biz.id).order("created_at", { ascending: false }),
-        supabase.from("inventory").select("*").eq("business_id", biz.id)
-      ]);
+  const services = servicesFetch || [];
+  const staff = staffFetch || [];
+  const reviews = reviewsFetch || [];
 
-      if (bizData) {
-        setStats(bizData.kpis);
-        setCustomers(bizData.customers);
-        setAppointments(bizData.recentAppointments);
-      }
-      setServices(servicesRes.data || []);
-      setStaff(staffRes.data || []);
-      setReviews(reviewsRes.data || []);
-      
-      const { data: invData } = await supabase.from("inventory").select("*").eq("business_id", biz.id);
-      setInventory(invData || []);
-
-    } catch (error) {
-      console.error("Dashboard load error:", error);
-    } finally {
-      setLoading(false);
-    }
+  const loadData = () => {
+    reloadBusiness();
+    reloadAnalytics();
+    reloadInventory();
+    reloadServices();
+    reloadStaff();
+    reloadReviews();
   };
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
            <Loader2 className="w-10 h-10 text-primary animate-spin" />
-          <p className="text-slate-500 font-mono text-xs uppercase tracking-[0.2em]">Yönetici Erişimi Doğrulanıyor...</p>
+          <p className="text-muted-foreground font-mono text-xs uppercase tracking-[0.2em]">Yönetici Erişimi Doğrulanıyor...</p>
         </div>
       </div>
     );
@@ -135,8 +109,8 @@ export default function BusinessDashboard() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center max-w-md">
-          <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Loader2 className="w-8 h-8 text-warning animate-spin" />
+          <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
           </div>
           <h2 className="text-xl font-heading text-foreground mb-2">Başvurunuz İnceleniyor</h2>
           <p className="text-muted-foreground text-sm mb-2">
@@ -153,13 +127,13 @@ export default function BusinessDashboard() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#020617] text-slate-300 flex overflow-hidden font-sans selection:bg-primary/30">
+   return (
+    <div className="min-h-screen bg-background text-foreground flex overflow-hidden font-sans selection:bg-primary/30">
       <SEOHead title={`${business?.name || "İşletme"} | Yönetim Paneli`} />
       
       <BizSidebar 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+        setActiveTab={(tab: any) => setActiveTab(tab)} 
         businessName={business?.name || "İşletme"} 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -175,54 +149,69 @@ export default function BusinessDashboard() {
         )}
 
         {/* Top Header */}
-        <header className="h-16 lg:h-20 border-b border-slate-800/10 px-4 lg:px-8 flex items-center justify-between bg-[#020617]/50 backdrop-blur-md relative z-10">
+        <header className="h-16 lg:h-20 border-b border-border px-4 lg:px-8 flex items-center justify-between bg-background/50 backdrop-blur-md relative z-10">
            <div className="flex items-center gap-3 lg:gap-6 flex-1">
               <button 
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors lg:hidden"
+                className="p-2 hover:bg-muted rounded-lg transition-colors lg:hidden"
               >
-                <Menu className="w-5 h-5 text-slate-500" />
+                <Menu className="w-5 h-5 text-muted-foreground" />
               </button>
-              <div className="hidden lg:flex items-center gap-2 text-xs font-medium text-slate-500">
-                 <span className="text-slate-600">Yönetim Paneli</span>
-                 <span className="text-slate-700">/</span>
-                 <span className="text-primary capitalize">{activeTab}</span>
+              <div className="hidden lg:flex items-center gap-6 text-xs font-medium text-muted-foreground">
+                 <Logo className="h-9" />
+                 <div className="h-6 w-px bg-border mx-2"></div>
+                 <span className="text-muted-foreground uppercase tracking-widest font-black opacity-40">İşletme Kontrol Merkezi</span>
+                 <span className="text-muted-foreground/30 mx-2 text-lg">/</span>
+                 <span className="text-primary capitalize font-bold">{activeTab}</span>
               </div>
               <div className="relative flex-1 max-w-xs hidden sm:block">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                 <Input className="bg-slate-900/30 border-slate-800/50 pl-9 h-9 text-xs" placeholder="Hızlı ara..." />
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                 <Input className="bg-muted/50 border-border pl-9 h-9 text-xs" placeholder="Hızlı ara..." />
               </div>
            </div>
 
            <div className="flex items-center gap-2 lg:gap-4">
-              <div className="hidden sm:flex items-center gap-2 bg-slate-900/50 border border-slate-800 px-3 py-1 rounded-full">
+              <ThemeToggle />
+              
+              <div className="hidden sm:flex items-center gap-2 bg-muted/50 border border-border px-3 py-1 rounded-full">
                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Sistem Aktif</span>
+                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight">Sistem Aktif</span>
               </div>
               
-              <button className="relative p-2 bg-slate-900 border border-slate-800 rounded-xl hover:bg-slate-800 transition-colors group">
-                 <Bell className="w-4 h-4 lg:w-5 lg:h-5 text-slate-400 group-hover:text-primary transition-colors" />
-                 <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full border-2 border-[#020617]"></span>
+              <button className="relative p-2 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group">
+                 <Bell className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                 <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full border-2 border-background"></span>
               </button>
 
-              <div className="h-6 w-[1px] bg-slate-800 mx-1 lg:mx-2"></div>
+              <div className="h-6 w-[1px] bg-border mx-1 lg:mx-2"></div>
 
-              <button className="flex items-center gap-2 p-1 lg:p-1.5 lg:pr-4 bg-slate-900 border border-slate-800 rounded-xl lg:rounded-2xl hover:bg-slate-800 transition-colors group">
-                 <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-lg lg:rounded-xl bg-primary/20 flex items-center justify-center border border-primary/20">
-                    <UserCircle className="w-4 h-4 lg:w-5 lg:h-5 text-primary" />
-                 </div>
-                  <div className="text-left hidden lg:block">
-                    <p className="text-[10px] font-bold text-white uppercase tracking-tighter leading-none">Yönetim</p>
-                    <p className="text-[9px] text-slate-500 font-mono mt-1">Premium İşletme</p>
+               <button 
+                 onClick={() => navigate("/")}
+                 className="flex items-center gap-2 p-1 lg:p-1.5 lg:px-4 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group"
+               >
+                  <LayoutDashboard className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase hidden sm:block">Ana Sayfa</span>
+               </button>
+
+               <button 
+                 onClick={async () => { toast.info("Çıkış yapılıyor..."); await signOut(); navigate("/"); }}
+                 className="flex items-center gap-2 p-1 lg:p-1.5 lg:pr-4 bg-muted/50 border border-border rounded-xl lg:rounded-2xl hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors group"
+               >
+                  <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-lg lg:rounded-xl bg-primary/20 flex items-center justify-center border border-primary/20 group-hover:bg-rose-500/20 group-hover:border-rose-500/20">
+                     <LogOut className="w-4 h-4 lg:w-5 lg:h-5 text-primary group-hover:text-rose-500" />
                   </div>
-              </button>
-           </div>
+                   <div className="text-left hidden lg:block">
+                     <p className="text-[10px] font-bold text-foreground uppercase tracking-tighter leading-none group-hover:text-rose-500">Çıkış Yap</p>
+                     <p className="text-[9px] text-muted-foreground font-mono mt-1">Oturumu Kapat</p>
+                   </div>
+               </button>
+            </div>
         </header>
 
         {/* Dynamic Content Area */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 lg:p-10 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.03),transparent_40%)]">
            <div className="max-w-[1600px] mx-auto">
-              
+              <VerificationGuard>
               {/* Tab Rendering */}
               {activeTab === "overview" && stats && (
                 <BizOverview 
@@ -246,6 +235,12 @@ export default function BusinessDashboard() {
                 />
               )}
 
+              {activeTab === "waitlist" && (
+                <WaitlistManager 
+                   businessId={business?.id}
+                />
+              )}
+
               {activeTab === "marketing" && (
                 <BizMarketing 
                   businessId={business?.id}
@@ -265,7 +260,8 @@ export default function BusinessDashboard() {
                   businessId={business?.id}
                   services={services} 
                   staff={staff} 
-                  personnelLimit={business?.personnel_limit || 2}                  onRefresh={loadData}
+                  personnelLimit={business?.personnel_limit || 2}
+                  onRefresh={loadData}
                 />
               )}
 
@@ -299,10 +295,17 @@ export default function BusinessDashboard() {
                   reviews={reviews}
                 />
               )}
-
+              </VerificationGuard>
            </div>
         </div>
       </main>
+
+      <BizAiAdvisor 
+         businessName={business?.name || "İşletme"}
+         stats={stats}
+         services={services}
+         staff={staff}
+       />
 
       <style dangerouslySetInnerHTML={{ __html: `
         .custom-scrollbar::-webkit-scrollbar {
@@ -312,11 +315,11 @@ export default function BusinessDashboard() {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #1e293b;
+          background: hsl(var(--border));
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #334155;
+          background: hsl(var(--muted-foreground));
         }
       `}} />
     </div>

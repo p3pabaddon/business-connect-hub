@@ -13,6 +13,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { LogOut, LayoutDashboard } from "lucide-react";
 
 const statusMap: Record<string, { label: string; color: string }> = {
   pending: { label: "Bekliyor", color: "bg-yellow-100 text-yellow-800" },
@@ -22,7 +23,7 @@ const statusMap: Record<string, { label: string; color: string }> = {
 };
 
 const StaffDashboardPage = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [staffMember, setStaffMember] = useState<any>(null);
@@ -121,17 +122,36 @@ const StaffDashboardPage = () => {
       <main className="flex-1 bg-surface">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-card border border-border rounded-2xl p-6 mb-8 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center">
-                <span className="text-accent font-heading text-xl">
-                  {staffMember.name.split(" ").map((n: string) => n[0]).join("")}
-                </span>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-6">
+                <div className="w-20 h-20 bg-primary/10 rounded-3xl border border-primary/20 flex items-center justify-center shadow-lg shadow-primary/5">
+                  <span className="text-primary font-black text-2xl uppercase">
+                    {staffMember.name.split(" ").map((n: string) => n[0]).join("")}
+                  </span>
+                </div>
+                <div>
+                  <h1 className="text-3xl font-black text-foreground uppercase tracking-tight">{staffMember.name}</h1>
+                  <p className="text-sm text-muted-foreground font-bold flex items-center gap-2 mt-1 uppercase tracking-widest">
+                    <Briefcase className="w-4 h-4 text-primary" /> {staffMember.role} <span className="text-muted-foreground/30">|</span> {staffMember.business?.name}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-heading text-foreground">{staffMember.name}</h1>
-                <p className="text-muted-foreground flex items-center gap-2">
-                  <Briefcase className="w-4 h-4" /> {staffMember.role} @ {staffMember.business?.name}
-                </p>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate("/")}
+                  className="h-12 px-6 rounded-2xl border-border bg-background hover:bg-muted font-black text-[10px] tracking-widest uppercase flex items-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4" /> ANA SİTE
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={async () => { await signOut(); navigate("/"); }}
+                  className="h-12 px-6 rounded-2xl border-border bg-background hover:bg-rose-500/10 hover:border-rose-500/30 font-black text-[10px] tracking-widest uppercase flex items-center gap-2 group"
+                >
+                  <LogOut className="w-4 h-4 text-rose-500" /> ÇIKIŞ YAP
+                </Button>
               </div>
             </div>
           </div>

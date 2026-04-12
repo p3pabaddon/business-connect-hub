@@ -41,6 +41,7 @@ const ProfilPage = () => {
   const [loyaltyData, setLoyaltyData] = useState<any[]>([]);
   const [promoCodes, setPromoCodes] = useState<any[]>([]);
   const [loyaltyPrograms, setLoyaltyPrograms] = useState<any[]>([]);
+  const [waitlistEntries, setWaitlistEntries] = useState<any[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/giris");
@@ -54,7 +55,7 @@ const ProfilPage = () => {
     if (!user) return;
     setLoading(true);
     try {
-      const [aptsRes, reviewsRes, favsRes, loyaltyRes, promosRes, programsRes] = await Promise.all([
+      const [aptsRes, reviewsRes, favsRes, loyaltyRes, promosRes, programsRes, waitlistRes] = await Promise.all([
         supabase
           .from("appointments")
           .select("*, businesses(name, slug, city)")
@@ -78,7 +79,12 @@ const ProfilPage = () => {
         supabase
           .from("loyalty_programs")
           .select("*")
-          .eq("is_active", true)
+          .eq("is_active", true),
+        supabase
+          .from("waitlist")
+          .select("*, businesses(name, slug, city, image_url)")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
       ]);
       setAppointments(aptsRes.data || []);
       setReviews(reviewsRes.data || []);
@@ -86,6 +92,7 @@ const ProfilPage = () => {
       setLoyaltyData(loyaltyRes.data || []);
       setPromoCodes(promosRes || []);
       setLoyaltyPrograms(programsRes.data || []);
+      setWaitlistEntries(waitlistRes.data || []);
     } catch (err) {
       console.error(err);
       toast({ title: "Veri yüklenemedi", variant: "destructive" });
@@ -115,9 +122,6 @@ const ProfilPage = () => {
     a.status === "completed" || a.status === "cancelled" || a.appointment_date < new Date().toISOString().split("T")[0]
   );
 
-  const hasReviewed = (appointmentId: string) => 
-    reviews.some(r => r.appointment_id === appointmentId);
-
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -130,9 +134,8 @@ const ProfilPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-surface">
+      <main className="flex-1 bg-surface text-foreground">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
-          {/* Profile Header */}
           <div className="bg-card border border-border rounded-xl p-6 mb-8">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
@@ -143,42 +146,24 @@ const ProfilPage = () => {
                   {user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Kullanıcı"}
                 </h1>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
-                <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
-                  <span>{appointments.length} randevu</span>
-                  <span>{reviews.length} yorum</span>
-                  <span>{favorites.length} favori</span>
-                </div>
               </div>
             </div>
           </div>
 
           <Tabs defaultValue="upcoming" className="space-y-6">
             <TabsList className="bg-card border border-border">
-              <TabsTrigger value="upcoming">
-                Yaklaşan ({upcomingAppointments.length})
-              </TabsTrigger>
-              <TabsTrigger value="past">
-                Geçmiş ({pastAppointments.length})
-              </TabsTrigger>
-              <TabsTrigger value="favorites">
-                <Heart className="w-3.5 h-3.5 mr-1" /> Favoriler ({favorites.length})
-              </TabsTrigger>
-              <TabsTrigger value="reviews">
-                Yorumlarım ({reviews.length})
-              </TabsTrigger>
-              <TabsTrigger value="loyalty" className="text-accent font-bold">
-                <Gift className="w-3.5 h-3.5 mr-1" /> Ödüller & Davet
-              </TabsTrigger>
+              <TabsTrigger value="upcoming">Yaklaşan ({upcomingAppointments.length})</TabsTrigger>
+              <TabsTrigger value="notifications">Bildirimler ({waitlistEntries.length})</TabsTrigger>
+              <TabsTrigger value="past">Geçmiş ({pastAppointments.length})</TabsTrigger>
+              <TabsTrigger value="favorites">Favoriler ({favorites.length})</TabsTrigger>
+              <TabsTrigger value="reviews">Yorumlarım ({reviews.length})</TabsTrigger>
+              <TabsTrigger value="loyalty">Ödüller</TabsTrigger>
             </TabsList>
 
             <TabsContent value="upcoming">
               {upcomingAppointments.length === 0 ? (
                 <div className="bg-card border border-border rounded-xl p-8 text-center">
-                  <Calendar className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                   <p className="text-muted-foreground">Yaklaşan randevunuz yok</p>
-                  <Button className="mt-4" onClick={() => navigate("/isletmeler")}>
-                    İşletmeleri Keşfet
-                  </Button>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -186,12 +171,7 @@ const ProfilPage = () => {
                     <div key={apt.id} className="bg-card border border-border rounded-xl p-5">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-foreground">{apt.businesses?.name || "İşletme"}</h3>
-                            <Badge variant={statusMap[apt.status]?.variant || "secondary"}>
-                              {statusMap[apt.status]?.label || apt.status}
-                            </Badge>
-                          </div>
+                          <h3 className="font-semibold text-foreground">{apt.businesses?.name || "İşletme"}</h3>
                           <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3.5 h-3.5" />
@@ -201,17 +181,7 @@ const ProfilPage = () => {
                               <Clock className="w-3.5 h-3.5" />
                               {apt.appointment_time?.slice(0, 5)}
                             </span>
-                            {apt.businesses?.city && (
-                              <span className="flex items-center gap-1">
-                                <MapPin className="w-3.5 h-3.5" />
-                                {apt.businesses.city}
-                              </span>
-                            )}
-                            {apt.total_price && (
-                              <span className="font-medium text-foreground">₺{apt.total_price}</span>
-                            )}
                           </div>
-                          {apt.notes && <p className="text-xs text-muted-foreground mt-1">{apt.notes}</p>}
                         </div>
                         {["pending", "confirmed"].includes(apt.status) && (
                           <Button variant="outline" size="sm" className="text-destructive" onClick={() => cancelAppointment(apt.id)}>
@@ -225,10 +195,37 @@ const ProfilPage = () => {
               )}
             </TabsContent>
 
+            <TabsContent value="notifications">
+              {waitlistEntries.map((entry) => (
+                <div key={entry.id} className="bg-card border border-border rounded-xl p-5 mb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground">{entry.businesses?.name}</h3>
+                      <div className="flex flex-wrap gap-3 mt-1 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {entry.desired_date}
+                        </span>
+                        <Badge variant={entry.is_notified ? "default" : "secondary"}>
+                          {entry.is_notified ? "Müsait - Hemen Alın" : "Sırada Bekliyor"}
+                        </Badge>
+                      </div>
+                    </div>
+                    <Button 
+                      variant={entry.is_notified ? "default" : "outline"} 
+                      size="sm" 
+                      onClick={() => navigate(`/isletme/${entry.businesses?.slug}`)}
+                    >
+                      {entry.is_notified ? "Şimdi Randevu Al" : "İşletmeye Git"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </TabsContent>
+
             <TabsContent value="past">
               {pastAppointments.length === 0 ? (
                 <div className="bg-card border border-border rounded-xl p-8 text-center">
-                  <Clock className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                   <p className="text-muted-foreground">Geçmiş randevunuz yok</p>
                 </div>
               ) : (
@@ -237,46 +234,14 @@ const ProfilPage = () => {
                     <div key={apt.id} className="bg-card border border-border rounded-xl p-5">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-foreground">{apt.businesses?.name || "İşletme"}</h3>
-                            <Badge variant={statusMap[apt.status]?.variant || "secondary"}>
-                              {statusMap[apt.status]?.label || apt.status}
-                            </Badge>
-                          </div>
-                          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5" />
-                              {format(new Date(apt.appointment_date), "d MMMM yyyy", { locale: tr })}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5" />
-                              {apt.appointment_time?.slice(0, 5)}
-                            </span>
-                            {apt.total_price && (
-                              <span className="font-medium text-foreground">₺{apt.total_price}</span>
-                            )}
-                          </div>
+                          <h3 className="font-semibold text-foreground">{apt.businesses?.name || "İşletme"}</h3>
+                          <Badge variant={statusMap[apt.status]?.variant || "secondary"}>
+                            {statusMap[apt.status]?.label || apt.status}
+                          </Badge>
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => navigate(`/isletme/${apt.businesses?.slug}`)}>
-                            <RefreshCw className="w-3.5 h-3.5 mr-1" /> Tekrar Al
-                          </Button>
-                          {apt.status === "completed" && !hasReviewed(apt.id) && (
-                            <Button variant="outline" size="sm" onClick={() => setReviewModal({
-                              open: true,
-                              businessId: apt.business_id,
-                              businessName: apt.businesses?.name || "İşletme",
-                              appointmentId: apt.id,
-                            })}>
-                              <Star className="w-4 h-4 mr-1" /> Değerlendir
-                            </Button>
-                          )}
-                          {hasReviewed(apt.id) && (
-                            <Badge variant="outline" className="text-accent">
-                              <CheckCircle className="w-3 h-3 mr-1" /> Değerlendirildi
-                            </Badge>
-                          )}
-                        </div>
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/isletme/${apt.businesses?.slug}`)}>
+                          <RefreshCw className="w-3.5 h-3.5 mr-1" /> Tekrar Al
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -335,14 +300,14 @@ const ProfilPage = () => {
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold text-foreground text-sm">{review.businesses?.name || "İşletme"}</h3>
                         <div className="flex items-center gap-0.5">
-                          {Array.from({ length: review.rating }).map((_, i) => (
+                          {review.rating && Array.from({ length: review.rating }).map((_, i) => (
                             <Star key={i} className="w-3.5 h-3.5 text-warning fill-warning" />
                           ))}
                         </div>
                       </div>
                       {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
                       <p className="text-xs text-muted-foreground mt-2">
-                        {format(new Date(review.created_at), "d MMMM yyyy", { locale: tr })}
+                         {review.created_at ? format(new Date(review.created_at), "d MMMM yyyy", { locale: tr }) : ""}
                       </p>
                     </div>
                   ))}
