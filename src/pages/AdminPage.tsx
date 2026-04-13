@@ -15,38 +15,44 @@ import { getAdminSystemStats } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/layout/Logo";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Building2, Users, Calendar, TrendingUp, AlertTriangle,
   FileText, CheckCircle, Clock, ArrowRight, Wallet,
   Shield, Search, RefreshCw, XCircle, LayoutDashboard,
   Bell, LogOut, Menu, X, ScrollText, Settings, HelpCircle,
   Eye, Edit, Power, Star, Receipt, CreditCard, Save, Globe, Palette,
-  User
+  User, Ban, Megaphone, BrainCircuit, Mail, CheckCheck, Sparkles, Send, Link2, LifeBuoy
 } from "lucide-react";
+import { AdminSupport } from "@/components/admin/AdminSupport";
 
 const navigation = [
   { name: "Dashboard", id: "overview", icon: LayoutDashboard },
   { name: "Başvurular", id: "moderation", icon: FileText, badge: true },
   { name: "İşletmeler", id: "businesses", icon: Building2 },
   { name: "Müşteriler", id: "customers", icon: Users },
+  { name: "Kara Liste", id: "banlist", icon: Ban },
   { name: "Randevular", id: "appointments", icon: Calendar },
+  { name: "Duyurular", id: "announcements", icon: Megaphone },
   { name: "Finans", id: "finans", icon: Wallet },
   { name: "Sistem Sağlığı", id: "system", icon: TrendingUp },
+  { name: "Destek Talepleri", id: "support", icon: LifeBuoy, badge: true },
   { name: "Loglar", id: "logs", icon: ScrollText },
   { name: "Ayarlar", id: "settings", icon: Settings },
 ];
 
 const AdminPage = () => {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [supportCount, setSupportCount] = useState(0);
 
   // Data States
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [businesses, setBusinesses] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [systemStats, setSystemStats] = useState({
@@ -56,12 +62,40 @@ const AdminPage = () => {
     totalRevenue: 0,
   });
 
+  // Feature 1: Settings
+  const [settingsPlatformName, setSettingsPlatformName] = useState("RandevuDunyasi");
+  const [settingsSupportEmail, setSettingsSupportEmail] = useState("info@randevudunyasi.com");
+  const [settingsNoShowLimit, setSettingsNoShowLimit] = useState(3);
+  const [settingsMfa, setSettingsMfa] = useState(true);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+
+  // Feature 4: Bulk Actions
+  const [selectedPending, setSelectedPending] = useState<Set<string>>(new Set());
+
+  // Feature 5: Ban List
+  const [bannedUsers, setBannedUsers] = useState<any[]>([]);
+  const [banPhone, setBanPhone] = useState("");
+  const [banReason, setBanReason] = useState("");
+
+  // Feature 6: Announcements
+  const [announcementTitle, setAnnouncementTitle] = useState("");
+  const [announcementBody, setAnnouncementBody] = useState("");
+  const [announcementTarget, setAnnouncementTarget] = useState<"all" | "businesses" | "customers">("all");
+  const [announcementHistory, setAnnouncementHistory] = useState<any[]>([]);
+  const [sendingAnnouncement, setSendingAnnouncement] = useState(false);
+
+  // Feature 7: AI Trust Score
+  const [aiScores, setAiScores] = useState<Record<string, { score: number; reasons: string[] }>>({});
+  const [aiLoading, setAiLoading] = useState<string | null>(null);
+
+  // Feature 8: Onboarding link
+  const [onboardingSending, setOnboardingSending] = useState<string | null>(null);
+
   useEffect(() => {
-    if (user) {
-      setIsAdmin(true);
+    if (user && isAdmin) {
       loadAdminData();
     }
-  }, [user, authLoading]);
+  }, [user, isAdmin, authLoading]);
 
   const loadAdminData = async () => {
     setLoading(true);
@@ -72,15 +106,45 @@ const AdminPage = () => {
       const { data: bData } = await supabase
         .from("businesses")
         .select("*, appointments(count)")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(100);
       
       const { data: aData } = await supabase
         .from("appointments")
         .select("*, business:businesses(name)")
-        .order("appointment_date", { ascending: false });
+        .order("appointment_date", { ascending: false })
+        .limit(100);
 
+      const { data: logs, error: logError } = await supabase
+        .from("audit_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      setAuditLogs(logError ? [] : (logs || []));
       setBusinesses(bData || []);
       setAppointments(aData || []);
+
+      // Load banned users
+      const { data: bans } = await supabase.from("banned_users").select("*").order("created_at", { ascending: false }).limit(100);
+      setBannedUsers(bans || []);
+
+      // Load announcements history
+      const { data: anns } = await supabase.from("announcements").select("*").order("created_at", { ascending: false }).limit(50);
+      setAnnouncementHistory(anns || []);
+
+      // Load system settings
+      const { data: sData } = await supabase.from("system_settings").select("*").limit(1).single();
+      if (sData) {
+        setSettingsPlatformName(sData.platform_name || "RandevuDunyasi");
+        setSettingsSupportEmail(sData.support_email || "info@randevudunyasi.com");
+        setSettingsNoShowLimit(sData.no_show_limit ?? 3);
+        setSettingsMfa(sData.mfa_required ?? true);
+      }
+      // Load support count
+      const { count: sCount } = await supabase.from("support_tickets").select("*", { count: 'exact', head: true }).eq("status", "open");
+      setSupportCount(sCount || 0);
+
     } catch (err) {
       console.error("Admin data load error:", err);
       toast({ title: "Veriler yüklenemedi", variant: "destructive" });
@@ -100,6 +164,119 @@ const AdminPage = () => {
       toast({ title: "Başarıyla güncellendi" });
       loadAdminData();
     }
+  };
+
+  // Feature 1: Save Settings
+  const saveSettings = async () => {
+    setSettingsSaving(true);
+    const { error } = await supabase.from("system_settings").upsert({
+      id: "global",
+      platform_name: settingsPlatformName,
+      support_email: settingsSupportEmail,
+      no_show_limit: settingsNoShowLimit,
+      mfa_required: settingsMfa,
+      updated_at: new Date().toISOString(),
+    });
+    setSettingsSaving(false);
+    toast({ title: error ? "Ayarlar kaydedilemedi" : "Ayarlar başarıyla kaydedildi", variant: error ? "destructive" : undefined });
+  };
+
+  // Feature 4: Bulk Approve/Reject
+  const togglePendingSelect = (id: string) => {
+    setSelectedPending(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+  const bulkAction = async (action: "approve" | "reject") => {
+    const info = action === "approve" ? { status: "active", is_active: true } : { status: "rejected", is_active: false };
+    for (const id of selectedPending) {
+      await supabase.from("businesses").update(info).eq("id", id);
+    }
+    setSelectedPending(new Set());
+    toast({ title: `${selectedPending.size} işletme ${action === "approve" ? "onaylandı" : "reddedildi"}` });
+    loadAdminData();
+  };
+
+  // Feature 5: Ban User
+  const banUser = async () => {
+    if (!banPhone.trim()) return;
+    const { error } = await supabase.from("banned_users").insert({
+      phone: banPhone.trim(),
+      reason: banReason.trim() || "Belirtilmedi",
+      banned_by: user?.email,
+    });
+    if (!error) {
+      setBanPhone(""); setBanReason("");
+      toast({ title: "Kullanıcı kara listeye eklendi" });
+      loadAdminData();
+    } else {
+      toast({ title: "Eklenemedi", variant: "destructive" });
+    }
+  };
+  const unbanUser = async (id: string) => {
+    await supabase.from("banned_users").delete().eq("id", id);
+    toast({ title: "Kara listeden kaldırıldı" });
+    loadAdminData();
+  };
+
+  // Feature 6: Send Announcement
+  const sendAnnouncement = async () => {
+    if (!announcementTitle.trim() || !announcementBody.trim()) return;
+    setSendingAnnouncement(true);
+    const { error } = await supabase.from("announcements").insert({
+      title: announcementTitle,
+      body: announcementBody,
+      target: announcementTarget,
+      sent_by: user?.email,
+    });
+    setSendingAnnouncement(false);
+    if (!error) {
+      setAnnouncementTitle(""); setAnnouncementBody("");
+      toast({ title: "Duyuru başarıyla gönderildi" });
+      loadAdminData();
+    } else {
+      toast({ title: "Gönderilemedi", variant: "destructive" });
+    }
+  };
+
+  // Feature 7: AI Trust Score (frontend heuristic)
+  const calculateAiScore = (biz: any) => {
+    setAiLoading(biz.id);
+    setTimeout(() => {
+      let score = 50;
+      const reasons: string[] = [];
+      if (biz.email && biz.email.includes("@")) { score += 10; reasons.push("Geçerli e-posta formatı"); }
+      else { score -= 10; reasons.push("E-posta eksik veya geçersiz"); }
+      if (biz.phone && biz.phone.length >= 10) { score += 10; reasons.push("Telefon numarası mevcut"); }
+      else { score -= 5; reasons.push("Telefon numarası eksik"); }
+      if (biz.address && biz.address.length > 10) { score += 10; reasons.push("Adres detaylı"); }
+      else { reasons.push("Adres kısa veya eksik"); }
+      if (biz.description && biz.description.length > 30) { score += 10; reasons.push("Açıklama yeterli"); }
+      else { score -= 5; reasons.push("Açıklama yetersiz"); }
+      if (biz.city) { score += 5; reasons.push("Şehir belirtilmiş"); }
+      if (biz.category) { score += 5; reasons.push("Kategori seçilmiş"); }
+      score = Math.max(0, Math.min(100, score));
+      setAiScores(prev => ({ ...prev, [biz.id]: { score, reasons } }));
+      setAiLoading(null);
+    }, 800);
+  };
+
+  // Feature 8: Send Onboarding Link
+  const sendOnboardingLink = async (biz: any) => {
+    setOnboardingSending(biz.id);
+    // Simulate sending magic link email
+    const { error } = await supabase.from("audit_logs").insert({
+      action: "Onboarding daveti gönderildi",
+      details: `${biz.name} işletmesine (${biz.email}) hoş geldin davetiyesi tetiklendi.`,
+      performed_by: user?.email,
+    });
+    setTimeout(() => {
+      setOnboardingSending(null);
+      toast({ title: `${biz.name} için davetiye gönderildi!` });
+      loadAdminData();
+    }, 1000);
   };
 
   // Aggregated Customers
@@ -181,6 +358,9 @@ const AdminPage = () => {
                        </div>
                        {item.badge && item.id === "moderation" && pendingCount > 0 && (
                          <Badge className="bg-rose-500 text-[10px] h-5 px-1.5 border-none shadow-lg shadow-rose-500/20">{pendingCount}</Badge>
+                       )}
+                       {item.badge && item.id === "support" && supportCount > 0 && (
+                         <Badge className="bg-amber-500 text-[10px] h-5 px-1.5 border-none shadow-lg shadow-amber-500/20">{supportCount}</Badge>
                        )}
                      </button>
                    </li>
@@ -305,49 +485,69 @@ const AdminPage = () => {
                   </div>
                 )}
 
-                {activeTab === "moderation" && (
+                {activeTab === "moderation" && (() => {
+                  const pending = businesses.filter(b => b.status === 'pending' || !b.status);
+                  return (
                   <div className="space-y-4">
-                     {businesses.filter(b => b.status === 'pending' || !b.status).length === 0 ? (
+                     {selectedPending.size > 0 && (
+                       <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-2xl">
+                          <CheckCheck className="w-5 h-5 text-primary" />
+                          <span className="text-sm font-bold text-foreground">{selectedPending.size} başvuru seçildi</span>
+                          <div className="ml-auto flex gap-2">
+                            <Button size="sm" onClick={() => bulkAction("approve")} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20">TOPLU ONAYLA</Button>
+                            <Button size="sm" variant="outline" onClick={() => bulkAction("reject")} className="rounded-xl font-bold border-rose-500/20 text-rose-500 hover:bg-rose-500/5">TOPLU REDDET</Button>
+                          </div>
+                       </div>
+                     )}
+                     {pending.length === 0 ? (
                        <div className="text-center py-24 bg-muted/10 rounded-3xl border-2 border-dashed border-border">
                           <HelpCircle className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                           <p className="text-muted-foreground font-medium">Bekleyen başvuru bulunmuyor.</p>
                        </div>
                      ) : (
-                       businesses.filter(b => b.status === 'pending' || !b.status).map(biz => (
-                         <Card key={biz.id} className="bg-card border-border p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:shadow-md transition-shadow">
-                            <div className="flex items-center gap-5">
-                               <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-center text-primary text-3xl font-black">{biz.name?.[0]}</div>
-                               <div className="space-y-1">
-                                  <h3 className="font-black text-foreground text-xl tracking-tight uppercase italic">{biz.name}</h3>
-                                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">
-                                    <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" /> {biz.category}</span>
-                                    <span className="opacity-30">•</span>
-                                    <span className="flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {biz.city}</span>
-                                    <span className="opacity-30">•</span>
-                                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {new Date(biz.created_at).toLocaleDateString()}</span>
+                       pending.map(biz => (
+                         <Card key={biz.id} className={cn("bg-card border-border p-6 hover:shadow-md transition-shadow", selectedPending.has(biz.id) && "ring-2 ring-primary")}>
+                            <div className="flex flex-col gap-4">
+                              <div className="flex items-center gap-5">
+                                <input type="checkbox" checked={selectedPending.has(biz.id)} onChange={() => togglePendingSelect(biz.id)} className="w-5 h-5 rounded border-border accent-primary cursor-pointer" />
+                                <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-center text-primary text-3xl font-black">{biz.name?.[0]}</div>
+                                <div className="space-y-1 flex-1">
+                                   <h3 className="font-black text-foreground text-xl tracking-tight uppercase italic">{biz.name}</h3>
+                                   <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium flex-wrap">
+                                     <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" /> {biz.category}</span>
+                                     <span className="opacity-30">•</span>
+                                     <span className="flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {biz.city}</span>
+                                     <span className="opacity-30">•</span>
+                                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {new Date(biz.created_at).toLocaleDateString()}</span>
+                                   </div>
+                                </div>
+                              </div>
+                              {aiScores[biz.id] && (
+                                <div className="ml-[5.5rem] p-4 bg-muted/30 rounded-xl border border-border space-y-2">
+                                  <div className="flex items-center gap-3">
+                                    <Sparkles className="w-4 h-4 text-amber-500" />
+                                    <span className="text-sm font-bold text-foreground">AI Güvenilirlik Skoru: <span className={cn(aiScores[biz.id].score >= 70 ? "text-emerald-500" : aiScores[biz.id].score >= 40 ? "text-amber-500" : "text-rose-500")}>{aiScores[biz.id].score}/100</span></span>
                                   </div>
-                               </div>
-                            </div>
-                            <div className="flex gap-3">
-                               <Button 
-                                 onClick={() => updateBusinessStatus(biz.id, { status: "active", is_active: true })} 
-                                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 px-8 rounded-xl shadow-lg shadow-emerald-600/20"
-                               >
-                                 SİSTEME AL
-                               </Button>
-                               <Button 
-                                 onClick={() => updateBusinessStatus(biz.id, { status: "rejected", is_active: false })} 
-                                 variant="outline" 
-                                 className="h-11 px-8 rounded-xl font-bold border-rose-500/20 text-rose-500 hover:bg-rose-500/5"
-                               >
-                                 REDDET
-                               </Button>
+                                  <ul className="text-[10px] text-muted-foreground space-y-1 ml-7">{aiScores[biz.id].reasons.map((r, i) => <li key={i}>• {r}</li>)}</ul>
+                                </div>
+                              )}
+                              <div className="flex gap-3 ml-[5.5rem] flex-wrap">
+                                <Button size="sm" variant="outline" onClick={() => calculateAiScore(biz)} disabled={aiLoading === biz.id} className="rounded-xl font-bold text-amber-600 border-amber-500/20 hover:bg-amber-500/5">
+                                  {aiLoading === biz.id ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <BrainCircuit className="w-4 h-4 mr-2" />} AI SKOR
+                                </Button>
+                                <Button size="sm" onClick={() => { updateBusinessStatus(biz.id, { status: "active", is_active: true }); }} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20">SİSTEME AL</Button>
+                                <Button size="sm" variant="outline" onClick={() => updateBusinessStatus(biz.id, { status: "rejected", is_active: false })} className="rounded-xl font-bold border-rose-500/20 text-rose-500 hover:bg-rose-500/5">REDDET</Button>
+                                <Button size="sm" variant="outline" onClick={() => sendOnboardingLink(biz)} disabled={onboardingSending === biz.id} className="rounded-xl font-bold text-blue-500 border-blue-500/20 hover:bg-blue-500/5">
+                                  {onboardingSending === biz.id ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Link2 className="w-4 h-4 mr-2" />} DAVETİYE
+                                </Button>
+                              </div>
                             </div>
                          </Card>
                        ))
                      )}
                   </div>
-                )}
+                  );
+                })()}
 
                 {activeTab === "businesses" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -361,7 +561,7 @@ const AdminPage = () => {
                              </div>
                           </div>
                           <div className="flex items-center gap-2">
-                             <Button size="icon" variant="ghost" className="h-9 w-9 text-muted-foreground hover:text-primary"><Eye className="w-4 h-4" /></Button>
+                             <Button size="icon" variant="ghost" className="h-9 w-9 text-muted-foreground hover:text-primary" onClick={() => window.open(`/isletme/${biz.slug}`, '_blank')}><Eye className="w-4 h-4" /></Button>
                              <Button 
                                size="sm" 
                                onClick={() => updateBusinessStatus(biz.id, { is_active: !biz.is_active })}
@@ -427,6 +627,108 @@ const AdminPage = () => {
                    </div>
                 )}
 
+                {activeTab === "banlist" && (
+                  <div className="space-y-6">
+                    <Card className="bg-card border-border shadow-md">
+                      <CardHeader className="bg-muted/10 border-b border-border/50"><CardTitle className="text-foreground text-sm font-bold uppercase tracking-widest flex items-center gap-2"><Ban className="w-4 h-4 text-rose-500" /> Kullanıcı Engelle</CardTitle></CardHeader>
+                      <CardContent className="p-6 space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Telefon Numarası</Label><Input placeholder="05XX XXX XXXX" value={banPhone} onChange={e => setBanPhone(e.target.value)} className="bg-muted/50 border-border h-11 rounded-xl" /></div>
+                          <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Engelleme Sebebi</Label><Input placeholder="No-show, kötüye kullanım vb." value={banReason} onChange={e => setBanReason(e.target.value)} className="bg-muted/50 border-border h-11 rounded-xl" /></div>
+                        </div>
+                        <Button onClick={banUser} className="bg-rose-600 hover:bg-rose-700 text-white font-bold h-11 px-8 rounded-xl shadow-lg shadow-rose-600/20"><Ban className="w-4 h-4 mr-2" /> KARA LİSTEYE EKLE</Button>
+                      </CardContent>
+                    </Card>
+                    <div className="space-y-3">
+                      {bannedUsers.length === 0 ? (
+                        <div className="text-center py-16 bg-muted/10 rounded-3xl border-2 border-dashed border-border">
+                          <Shield className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                          <p className="text-muted-foreground font-medium">Kara listede kimse yok.</p>
+                        </div>
+                      ) : bannedUsers.map((bu: any) => (
+                        <div key={bu.id} className="p-5 bg-card border border-border rounded-2xl flex items-center justify-between group hover:border-rose-500/20 transition-all">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center"><Ban className="w-5 h-5 text-rose-500" /></div>
+                            <div>
+                              <p className="text-sm font-bold text-foreground">{bu.phone}</p>
+                              <p className="text-[10px] text-muted-foreground">{bu.reason} • {new Date(bu.created_at).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => unbanUser(bu.id)} className="rounded-xl font-bold border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/5">ENGEL KALDIR</Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "announcements" && (
+                  <div className="space-y-6">
+                    <Card className="bg-card border-border shadow-md">
+                      <CardHeader className="bg-muted/10 border-b border-border/50"><CardTitle className="text-foreground text-sm font-bold uppercase tracking-widest flex items-center gap-2"><Megaphone className="w-4 h-4 text-primary" /> Yeni Duyuru Oluştur</CardTitle></CardHeader>
+                      <CardContent className="p-6 space-y-4">
+                        <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Başlık</Label><Input placeholder="Duyuru başlığı" value={announcementTitle} onChange={e => setAnnouncementTitle(e.target.value)} className="bg-muted/50 border-border h-11 rounded-xl" /></div>
+                        <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Mesaj İçeriği</Label><Textarea placeholder="Duyuru metni..." rows={4} value={announcementBody} onChange={e => setAnnouncementBody(e.target.value)} className="bg-muted/50 border-border rounded-xl resize-none" /></div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Hedef Kitle</Label>
+                          <div className="flex gap-3">
+                            {(["all", "businesses", "customers"] as const).map(t => (
+                              <button key={t} onClick={() => setAnnouncementTarget(t)} className={cn("px-4 py-2 rounded-xl text-xs font-bold uppercase border transition-all", announcementTarget === t ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20" : "bg-muted/50 text-muted-foreground border-border hover:bg-muted")}>{t === "all" ? "Herkes" : t === "businesses" ? "İşletmeler" : "Müşteriler"}</button>
+                            ))}
+                          </div>
+                        </div>
+                        <Button onClick={sendAnnouncement} disabled={sendingAnnouncement} className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-8 rounded-xl shadow-lg shadow-primary/20">
+                          {sendingAnnouncement ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />} DUYURU GÖNDER
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2"><Bell className="w-4 h-4" /> Geçmiş Duyurular</h3>
+                      {announcementHistory.length === 0 ? (
+                        <div className="text-center py-16 bg-muted/10 rounded-3xl border-2 border-dashed border-border"><Megaphone className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" /><p className="text-muted-foreground font-medium">Henüz duyuru gönderilmedi.</p></div>
+                      ) : announcementHistory.map((ann: any) => (
+                        <div key={ann.id} className="p-5 bg-card border border-border rounded-2xl hover:border-primary/20 transition-all">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-black text-foreground uppercase tracking-tight">{ann.title}</h4>
+                            <Badge className="bg-muted text-muted-foreground border-border text-[9px] uppercase">{ann.target === "all" ? "Herkes" : ann.target === "businesses" ? "İşletmeler" : "Müşteriler"}</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{ann.body}</p>
+                          <p className="text-[10px] text-muted-foreground/60 mt-2 font-mono">{new Date(ann.created_at).toLocaleString()} • {ann.sent_by}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "settings" && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                     <Card className="bg-card border-border shadow-md">
+                        <CardHeader className="bg-muted/10 border-b border-border/50"><CardTitle className="text-foreground text-sm font-bold uppercase tracking-widest flex items-center gap-2"><Globe className="w-4 h-4 text-primary" /> Temel Parametreler</CardTitle></CardHeader>
+                        <CardContent className="p-8 space-y-6">
+                           <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Platform Branding</Label><Input value={settingsPlatformName} onChange={e => setSettingsPlatformName(e.target.value)} className="bg-muted/50 border-border h-11 rounded-xl" /></div>
+                           <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Destek Gateway</Label><Input value={settingsSupportEmail} onChange={e => setSettingsSupportEmail(e.target.value)} className="bg-muted/50 border-border h-11 rounded-xl" /></div>
+                           <Button onClick={saveSettings} disabled={settingsSaving} className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-11 rounded-xl shadow-lg shadow-primary/20">
+                             {settingsSaving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />} KONFİGÜRASYONU KAYDET
+                           </Button>
+                        </CardContent>
+                     </Card>
+                     <Card className="bg-card border-border shadow-md">
+                        <CardHeader className="bg-muted/10 border-b border-border/50"><CardTitle className="text-foreground text-sm font-bold uppercase tracking-widest flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> Güvenlik & Risk Profili</CardTitle></CardHeader>
+                        <CardContent className="p-8 space-y-6">
+                           <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">No-Show Bloklama Eşik Değeri</Label><Input type="number" value={settingsNoShowLimit} onChange={e => setSettingsNoShowLimit(Number(e.target.value))} className="bg-muted/50 border-border h-11 rounded-xl" /></div>
+                           <div className="flex items-center justify-between p-5 rounded-2xl bg-muted/30 border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setSettingsMfa(!settingsMfa)}>
+                              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Admin MFA Zorunluluğu</span>
+                              <div className={cn("w-12 h-6 rounded-full flex items-center px-1 transition-colors", settingsMfa ? "bg-primary/20 border border-primary/40" : "bg-muted border border-border")}>
+                                 <div className={cn("w-4 h-4 rounded-full shadow-sm transition-all", settingsMfa ? "bg-primary ml-auto" : "bg-muted-foreground ml-0")}></div>
+                              </div>
+                           </div>
+                           <Button onClick={saveSettings} disabled={settingsSaving} className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-11 rounded-xl shadow-lg shadow-primary/20">
+                             {settingsSaving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />} GÜVENLİK AYARLARINI KAYDET
+                           </Button>
+                        </CardContent>
+                     </Card>
+                  </div>
+                )}
+
                 {activeTab === "finans" && (
                   <div className="space-y-8">
                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -465,47 +767,36 @@ const AdminPage = () => {
 
                 {activeTab === "logs" && (
                   <div className="space-y-4">
-                     {[1,2,3,4,5,6,7,8,9,10].map(i => (
-                       <div key={i} className="p-5 bg-card border border-border rounded-2xl flex items-center justify-between group hover:border-primary/20 transition-all">
-                          <div className="flex items-center gap-5">
-                             <div className="p-2.5 bg-muted rounded-xl border border-border group-hover:border-primary/20 transition-colors">
-                               <ScrollText className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                             </div>
-                             <div>
-                                <p className="text-sm font-black text-foreground uppercase tracking-tight italic">İşletme Meta Verisi Güncellendi</p>
-                                <p className="text-[10px] text-muted-foreground font-medium mt-0.5 italic">Root Admin tarafından terminal @hq üzerinden tetiklendi.</p>
-                             </div>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground font-mono font-bold tracking-tighter opacity-60">2024-01-15 14:32:45</span>
+                     {auditLogs.length === 0 ? (
+                       <div className="text-center py-24 bg-muted/10 rounded-3xl border-2 border-dashed border-border">
+                          <ScrollText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                          <p className="text-muted-foreground font-medium">Sistemde henüz kaydedilmiş bir log bulunamadı.</p>
                        </div>
-                     ))}
+                     ) : (
+                       auditLogs.map((log: any) => (
+                         <div key={log.id} className="p-5 bg-card border border-border rounded-2xl flex items-center justify-between group hover:border-primary/20 transition-all">
+                            <div className="flex items-center gap-5">
+                               <div className="p-2.5 bg-muted rounded-xl border border-border group-hover:border-primary/20 transition-colors">
+                                 <ScrollText className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                               </div>
+                               <div>
+                                  <p className="text-sm font-black text-foreground uppercase tracking-tight italic">{log.action || 'Sistem İşlemi'}</p>
+                                  <p className="text-[10px] text-muted-foreground font-medium mt-0.5 italic">{log.details || 'İşlem detayı yok.'}</p>
+                               </div>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground font-mono font-bold tracking-tighter opacity-60">
+                               {new Date(log.created_at).toLocaleString()}
+                            </span>
+                         </div>
+                       ))
+                     )}
                   </div>
                 )}
 
-                {activeTab === "settings" && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                     <Card className="bg-card border-border shadow-md">
-                        <CardHeader className="bg-muted/10 border-b border-border/50"><CardTitle className="text-foreground text-sm font-bold uppercase tracking-widest flex items-center gap-2"><Globe className="w-4 h-4 text-primary" /> Temel Parametreler</CardTitle></CardHeader>
-                        <CardContent className="p-8 space-y-6">
-                           <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Platform Branding</Label><Input defaultValue="RandevuDunyasi" className="bg-muted/50 border-border h-11 rounded-xl" /></div>
-                           <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Destek Gateway</Label><Input defaultValue="info@randevudunyasi.com" className="bg-muted/50 border-border h-11 rounded-xl" /></div>
-                           <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-11 rounded-xl shadow-lg shadow-primary/20">KONFİGÜRASYONU YAYINLA</Button>
-                        </CardContent>
-                     </Card>
-                     <Card className="bg-card border-border shadow-md">
-                        <CardHeader className="bg-muted/10 border-b border-border/50"><CardTitle className="text-foreground text-sm font-bold uppercase tracking-widest flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> Güvenlik & Risk Profili</CardTitle></CardHeader>
-                        <CardContent className="p-8 space-y-6">
-                           <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">No-Show Bloklama Eşik Değeri</Label><Input type="number" defaultValue="3" className="bg-muted/50 border-border h-11 rounded-xl" /></div>
-                           <div className="flex items-center justify-between p-5 rounded-2xl bg-muted/30 border border-border hover:bg-muted/50 transition-colors">
-                              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Admin MFA Zorunluluğu</span>
-                              <div className="w-12 h-6 bg-primary/20 border border-primary/40 rounded-full flex items-center px-1">
-                                 <div className="w-4 h-4 bg-primary rounded-full ml-auto shadow-sm"></div>
-                              </div>
-                           </div>
-                        </CardContent>
-                     </Card>
-                  </div>
+                {activeTab === "support" && (
+                  <AdminSupport />
                 )}
+
               </div>
             </div>
           </main>

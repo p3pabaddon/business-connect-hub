@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getBizCoupons, addCoupon, deleteCoupon, getWaitlist, notifyWaitlist } from "@/lib/biz-api";
+import { getBizCoupons, addCoupon, deleteCoupon, getWaitlist, removeFromWaitlist } from "@/lib/biz-api";
 
 interface Props {
   businessId: string;
@@ -27,7 +27,7 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
   const [type, setType] = useState<"percentage" | "fixed">("percentage");
   const [value, setValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [notifying, setNotifying] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<string | null>(null);
 
   useEffect(() => {
     if (businessId) {
@@ -85,16 +85,16 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
     }
   };
 
-  const handleNotify = async (id: string) => {
-    setNotifying(id);
+  const handleRemoveFromWaitlist = async (id: string) => {
+    setRemoving(id);
     try {
-      await notifyWaitlist(id);
+      await removeFromWaitlist(id);
       loadWaitlist();
       if (onRefresh) onRefresh();
     } catch (error) {
-      console.error("Notify waitlist error:", error);
+      console.error("Remove from waitlist error:", error);
     } finally {
-      setNotifying(null);
+      setRemoving(null);
     }
   };
 
@@ -243,24 +243,25 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
                  <div key={entry.id || i} className="p-6 bg-muted/30 border border-border rounded-[2rem] flex items-center justify-between group shadow-sm transition-all hover:bg-white hover:shadow-xl hover:shadow-violet-500/5 border-transparent hover:border-violet-500/10">
                     <div className="flex items-center gap-6">
                        <div className="w-14 h-14 rounded-[1.25rem] bg-card border border-border flex items-center justify-center font-black text-violet-500 uppercase text-lg shadow-inner group-hover:scale-110 transition-transform">
-                         {(entry.customer_name || "A")[0]}
+                         {(entry.user_id || "?").substring(0, 2)}
                        </div>
                        <div>
-                         <h4 className="text-base font-black text-foreground mb-1 tracking-tight group-hover:text-violet-500 transition-colors">{entry.customer_name}</h4>
+                         <h4 className="text-base font-black text-foreground mb-1 tracking-tight group-hover:text-violet-500 transition-colors">{entry.desired_date || "Tarih Yok"}</h4>
                          <div className="flex flex-wrap items-center gap-4 text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
                             <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-violet-500 opacity-60" /> {new Date(entry.created_at).toLocaleDateString('tr-TR')}</span>
-                            <span className="text-foreground/80 font-black">{entry.service_name}</span>
+                            {entry.desired_time && <span className="text-foreground/80 font-black">Saat: {entry.desired_time}</span>}
                          </div>
                        </div>
                     </div>
                     <Button 
-                      onClick={() => handleNotify(entry.id)}
-                      disabled={notifying === entry.id}
+                      onClick={() => handleRemoveFromWaitlist(entry.id)}
+                      disabled={removing === entry.id}
                       size="lg" 
-                      className="bg-violet-600 hover:bg-violet-700 text-white h-11 font-black text-[10px] tracking-widest rounded-xl shadow-lg shadow-violet-500/10 transition-all active:scale-95"
+                      variant="outline"
+                      className="h-11 font-black text-[10px] tracking-widest rounded-xl transition-all active:scale-95 text-rose-500 border-rose-500/20 hover:bg-rose-50"
                     >
-                      {notifying === entry.id ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <BellRing className="w-4 h-4 mr-2" />}
-                      HABER VER
+                      {removing === entry.id ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                      KALDIR
                     </Button>
                  </div>
                ))}

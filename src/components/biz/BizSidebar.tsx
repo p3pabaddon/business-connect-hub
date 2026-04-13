@@ -3,13 +3,17 @@ import {
   BarChart3, Settings, LogOut, 
   ShoppingBag, Star, Megaphone, 
   Menu, X, ShieldCheck, UserCircle,
-  Target, Gift, MessageSquare, Package, Crown
+  Target, Gift, MessageSquare, Package, Crown, PieChart, Image as ImageIcon, LifeBuoy, Sparkles, Ticket, Heart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" | "staff-performance";
+export type BizTab = 
+  | "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" 
+  | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" 
+  | "staff-performance" | "analytics" | "portfolio" | "support" | "appointments" 
+  | "services" | "staff" | "gallery" | "coupons" | "security" | "finance";
 
 interface Props {
   activeTab: BizTab;
@@ -39,7 +43,16 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
         { id: "calendar", label: "Randevu Takvimi", icon: Calendar },
         { id: "catalog", label: "Hizmet & Personel", icon: ShoppingBag },
         { id: "staff-performance", label: "Personel Performansı", icon: BarChart3 },
+        { id: "analytics", label: "Gelişmiş Analytics", icon: PieChart },
         { id: "inventory", label: "Stok & Envanter", icon: Package },
+      ]
+    },
+    {
+      label: "Zeka & Büyüme",
+      items: [
+        { id: "analytics", label: "AI Analitik", icon: Sparkles },
+        { id: "coupons", label: "Kuponlar", icon: Ticket },
+        { id: "loyalty", label: "Sadakat Programı", icon: Heart },
       ]
     },
     {
@@ -47,8 +60,9 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
       items: [
          { id: "premium", label: "Avantajlar", icon: Crown },
          { id: "marketing", label: "Pazarlama Araçları", icon: Target },
-         { id: "loyalty", label: "Sadakat & Ödüller", icon: Gift },
+         { id: "portfolio", label: "Çalışmalarımız", icon: ImageIcon },
          { id: "reviews", label: "Müşteri Yorumları", icon: MessageSquare },
+         { id: "support", label: "Destek Merkezi", icon: LifeBuoy },
          { id: "settings", label: "İşletme Ayarı", icon: Settings },
       ]
     }

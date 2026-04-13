@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, MapPin, Star, CheckCircle, SlidersHorizontal, Zap } from "lucide-react";
+import { Search, MapPin, Star, CheckCircle, SlidersHorizontal, Zap, Navigation } from "lucide-react";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useBusinesses } from "@/hooks/useQueries";
 import { turkiyeIller } from "@/lib/turkey-locations";
@@ -42,6 +43,9 @@ const IsletmelerPage = () => {
   const [sortBy, setSortBy] = useState("rating");
   const [minRating, setMinRating] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [sortByDistance, setSortByDistance] = useState(false);
 
   const { data: businesses = [], isLoading: loading } = useBusinesses({
     city: selectedCity === "all" ? "" : selectedCity,
@@ -49,10 +53,53 @@ const IsletmelerPage = () => {
     search: searchQuery,
   });
 
+  // Haversine distance calculation
+  const getDistanceKm = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const handleNearMe = () => {
+    if (userLocation) {
+      setSortByDistance(!sortByDistance);
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setSortByDistance(true);
+        setLocating(false);
+        toast.success("Konumunuz alındı, en yakındaki işletmeler sıralanıyor.");
+      },
+      (err) => {
+        setLocating(false);
+        toast.error("Konum alınamadı. Lütfen tarayıcı izinlerini kontrol edin.");
+        console.error("Geolocation error:", err);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   // Client-side sort & filter
   const filteredBusinesses = businesses
     .filter((b) => !minRating || b.rating >= Number(minRating))
     .sort((a, b) => {
+      // Distance sort has highest priority when active
+      if (sortByDistance && userLocation) {
+        const distA = a.latitude && a.longitude ? getDistanceKm(userLocation.lat, userLocation.lng, a.latitude, a.longitude) : 9999;
+        const distB = b.latitude && b.longitude ? getDistanceKm(userLocation.lat, userLocation.lng, b.latitude, b.longitude) : 9999;
+        return distA - distB;
+      }
+
       // Always prioritize featured businesses
       if (a.is_featured !== b.is_featured) {
         return b.is_featured ? 1 : -1;
@@ -106,6 +153,15 @@ const IsletmelerPage = () => {
                     <SlidersHorizontal className="w-4 h-4" /> Karşılaştır
                   </Button>
                 </Link>
+                <Button
+                  variant={sortByDistance ? "default" : "outline"}
+                  className="h-11 gap-2"
+                  onClick={handleNearMe}
+                  disabled={locating}
+                >
+                  <Navigation className={`w-4 h-4 ${locating ? "animate-spin" : ""}`} />
+                  {locating ? "Konum alınıyor..." : sortByDistance ? "Yakınlık: Açık" : "Bana Yakın"}
+                </Button>
                 <Button
                   variant="outline"
                   className="h-11"

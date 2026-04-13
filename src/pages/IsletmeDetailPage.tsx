@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { StampCard } from "@/components/loyalty/StampCard";
 import { ReviewAISummary } from "@/components/ReviewAISummary";
+import { supabase } from "@/lib/supabase";
+import { MoveRight, ImageIcon, Sparkles } from "lucide-react";
 
 const IsletmeDetailPage = () => {
   const { slug } = useParams();
@@ -39,6 +41,38 @@ const IsletmeDetailPage = () => {
     queryKey: ["customer-loyalty", biz?.id, user?.id],
     queryFn: () => getCustomerLoyalty(biz!.id),
     enabled: !!biz?.id && !!user?.id,
+  });
+
+  const { data: canReview } = useQuery({
+    queryKey: ["can-review", biz?.id, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("id")
+        .eq("business_id", biz!.id)
+        .eq("customer_id", user!.id)
+        .eq("status", "completed")
+        .limit(1);
+      
+      if (error) return false;
+      return data && data.length > 0;
+    },
+    enabled: !!biz?.id && !!user?.id,
+  });
+
+  const { data: portfolio } = useQuery({
+    queryKey: ["portfolio", biz?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_portfolios")
+        .select("*")
+        .eq("business_id", biz!.id)
+        .order("created_at", { ascending: false });
+      
+      if (error) return [];
+      return data;
+    },
+    enabled: !!biz?.id,
   });
 
   const handleJoinLoyalty = async () => {
@@ -158,42 +192,42 @@ const IsletmeDetailPage = () => {
         </div>
 
         {/* Portfolio / Gallery */}
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-heading text-foreground">Çalışmalarımız</h2>
-              <p className="text-muted-foreground">
-                {biz.gallery_urls && biz.gallery_urls.length > 0 
-                  ? "İşletmemizde gerçekleştirilen bazı örnek hizmetler" 
-                  : "Yakında burada en iyi çalışmalarımızı göreceksiniz"}
-              </p>
+        {portfolio && portfolio.length > 0 && (
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-black text-foreground uppercase tracking-tight italic flex items-center gap-2">
+                   <Sparkles className="w-6 h-6 text-accent" /> Çalışmalarımız
+                </h2>
+                <p className="text-muted-foreground font-medium mt-1">
+                  En iyi sonuçlarımızı ve referanslarımızı inceleyin
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {portfolio.slice(0, 8).map((item: any, i: number) => (
+                <div 
+                  key={item.id} 
+                  className={cn(
+                    "group relative aspect-[4/5] rounded-[2rem] overflow-hidden border border-border bg-card shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500",
+                    i % 4 === 1 && "lg:mt-8",
+                    i % 4 === 3 && "lg:mt-4"
+                  )}
+                >
+                  <img 
+                    src={item.main_image} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0">
+                    <h4 className="text-white font-black uppercase tracking-tight text-sm mb-1">{item.title}</h4>
+                    <p className="text-white/70 text-[10px] leading-relaxed line-clamp-2">{item.description || "Referans çalışma"}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {(biz.gallery_urls && biz.gallery_urls.length > 0 
-              ? biz.gallery_urls 
-              : Array.from({ length: 4 }).map((_, i) => `/placeholder-portfolio-${(i % 2) + 1}.jpg`)).map((url: string, i: number) => (
-              <div 
-                key={i} 
-                className={cn(
-                  "group relative aspect-[4/5] rounded-2xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-xl transition-all duration-500",
-                  i % 3 === 0 && "md:col-span-1 md:row-span-1",
-                  i % 4 === 1 && "md:mt-8",
-                  (!biz.gallery_urls || biz.gallery_urls.length === 0) && "opacity-40 grayscale hover:grayscale-0 hover:opacity-100"
-                )}
-              >
-                <img 
-                  src={url.startsWith('/') ? `https://images.unsplash.com/photo-${i === 0 ? '1562322140-8baeececf3df' : i === 1 ? '1620331311520-246422ff83f9' : i === 2 ? '1521590832167-7bcbfaa6381f' : '1560066984-138dadb4c035'}?auto=format&fit=crop&q=80&w=800` : url} 
-                  alt={`${biz.name} galeri ${i+1}`} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
-                  <p className="text-white text-xs font-medium">Örnek Uygulama</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
 
         {/* Loyalty Program Section */}
         {loyaltyProgram && (
@@ -318,6 +352,7 @@ const IsletmeDetailPage = () => {
                 </div>
               )}
 
+
               {/* Reviews */}
               <div className="pt-8 border-t border-border">
                 <div className="flex items-center justify-between mb-8">
@@ -326,7 +361,20 @@ const IsletmeDetailPage = () => {
                     <p className="text-sm text-muted-foreground">Müşterilerimizin deneyimleri</p>
                   </div>
                   {user && (
-                    <Button variant="outline" size="sm" onClick={() => setReviewOpen(true)} className="rounded-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        if (!canReview) {
+                          toast.error("Yorum Yapılamaz", {
+                            description: "Sadece bu işletmeden hizmet alıp randevusu tamamlanan müşterilerimiz yorum yapabilir."
+                          });
+                          return;
+                        }
+                        setReviewOpen(true);
+                      }} 
+                      className={cn("rounded-full", !canReview && "opacity-50")}
+                    >
                       <MessageSquare className="w-4 h-4 mr-2" /> Yorum Yap
                     </Button>
                   )}
@@ -389,13 +437,24 @@ const IsletmeDetailPage = () => {
               <div className="bg-card border border-border rounded-xl p-6 shadow-card sticky top-20">
                 <h3 className="font-semibold text-foreground mb-4">{t("common.working_hours")}</h3>
                 <div className="space-y-2">
-                {Object.entries(workingHours).map(([day, hours]) => {
+                {Object.entries(workingHours)
+                  .sort(([dayA], [dayB]) => {
+                    const daysOrder = ["monday", "pazartesi", "tuesday", "salı", "wednesday", "çarşamba", "thursday", "perşembe", "friday", "cuma", "saturday", "cumartesi", "sunday", "pazar"];
+                    let idxA = daysOrder.indexOf(dayA.toLowerCase());
+                    let idxB = daysOrder.indexOf(dayB.toLowerCase());
+                    if (idxA === -1) idxA = 999;
+                    if (idxB === -1) idxB = 999;
+                    return idxA - idxB;
+                  })
+                  .map(([day, hours]) => {
                     const displayHours = typeof hours === 'object' && hours !== null
                       ? `${(hours as any).start || ''}-${(hours as any).end || ''}`
                       : String(hours);
+                    const translatedDay = t(`day.${day.toLowerCase()}`);
+                    const finalDayName = translatedDay.startsWith('day.') ? day : translatedDay;
                     return (
                       <div key={day} className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground capitalize">{t(`day.${day.toLowerCase()}`)}</span>
+                        <span className="text-muted-foreground capitalize">{finalDayName}</span>
                         <span className={`font-medium ${displayHours.toLowerCase().includes("kapal") ? "text-destructive" : "text-foreground"}`}>
                           {displayHours}
                         </span>
@@ -429,17 +488,15 @@ const IsletmeDetailPage = () => {
       </main>
       <Footer />
 
-      {biz.services && biz.services.length > 0 && (
-        <BookingModal
-          open={bookingOpen}
-          onOpenChange={setBookingOpen}
-          businessId={biz.id}
-          businessName={biz.name}
-          services={biz.services}
-          staff={biz.staff || []}
-          workingHours={workingHours}
-        />
-      )}
+      <BookingModal
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
+        businessId={biz.id}
+        businessName={biz.name}
+        services={biz.services || []}
+        staff={biz.staff || []}
+        workingHours={workingHours}
+      />
 
       <ReviewModal
         open={reviewOpen}

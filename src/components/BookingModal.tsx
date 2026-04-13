@@ -4,15 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
-import { Star, Zap, ThumbsUp, TrendingUp, Sparkles, ShieldCheck, Clock, User, Mail, Loader2, CreditCard, RefreshCw, CheckCircle } from "lucide-react";
+import { Star, Zap, ThumbsUp, TrendingUp, Sparkles, ShieldCheck, Clock, User, Mail, Loader2, CreditCard, RefreshCw, CheckCircle, MapPin, MessageSquare, ChevronRight, ChevronLeft, Check, Ticket, X } from "lucide-react";
 import { createAppointment, getOccupiedSlots, joinWaitlist } from "@/lib/api";
 import { toast } from "sonner";
+import { checkRateLimit, getRateLimitMessage, checkOtpAbuse } from "@/lib/rate-limiter";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { calculateSmartPrice, generateTimeSlots, getWorkingHoursForDay, isSlotOccupied } from "@/lib/booking-utils";
+import { supabase } from "@/lib/supabase";
 
 interface Service {
   id: string;
@@ -66,6 +68,11 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
   const [occupiedSlots, setOccupiedSlots] = useState<any[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [isKvkkAccepted, setIsKvkkAccepted] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -108,7 +115,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
 
   const chosenServices = services.filter((s) => selectedServices.includes(s.id));
   const totalPrice = chosenServices.reduce((sum, s) => sum + Number(s.price), 0);
-  const totalDuration = chosenServices.reduce((sum, s) => sum + s.duration, 0);
+  const totalDuration = chosenServices.reduce((sum, s) => sum + (Number(s.duration) || 0), 0);
 
   const handleJoinWaitlist = async () => {
     if (!user || !selectedDate) {
@@ -129,12 +136,18 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
         business_id: businessId,
         user_id: user.id,
         date: format(selectedDate, "yyyy-MM-dd"),
+        time: selectedTime || undefined,
         customer_name: customerName,
         customer_phone: customerPhone,
         customer_email: customerEmail
       });
       setInWaitlist(true);
       toast.success("Sıraya eklendiniz!", { description: "Yer açıldığında size bildirim ve e-posta göndereceğiz." });
+      
+      // 2 saniye sonra otomatik kapat
+      setTimeout(() => {
+        handleClose(false);
+      }, 2000);
     } catch (error: any) {
       console.error("Waitlist Error:", error);
       toast.error("İşlem başarısız", { description: error?.message || "Bilinmeyen bir hata oluştu." });
@@ -144,6 +157,20 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
 
   const handleSendCode = async () => {
     if (!customerEmail) return;
+
+    // Rate limit check (token bucket)
+    if (!checkRateLimit("otp_send")) {
+      toast.error("Çok fazla istek", { description: getRateLimitMessage() });
+      return;
+    }
+
+    // Persistent abuse check (survives refresh, 5 per 15 min)
+    const otpCheck = checkOtpAbuse();
+    if (!otpCheck.allowed) {
+      toast.error("Güvenlik Limiti", { description: "15 dakika içinde çok fazla doğrulama kodu istediniz. Lütfen daha sonra tekrar deneyin." });
+      return;
+    }
+
     setSendingCode(true);
 
     const code = generateOTP();
@@ -154,7 +181,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
       setSendingCode(false);
       setCountdown(120);
       toast.info("Doğrulama kodu gönderildi", {
-        description: `${customerEmail} adresine doğrulama kodu gönderildi. (Demo kod: ${code})`,
+        description: `${customerEmail} adresine doğrulama kodu gönderildi. (Demo kod: ${code}) | Kalan hak: ${otpCheck.remaining}`,
       });
     }, 1000);
   };
@@ -176,6 +203,39 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
     }
   };
 
+  const handleVerifyCoupon = async () => {
+    if (!couponCode) return;
+    setCouponLoading(true);
+    setCouponError(null);
+    try {
+      const { data, error } = await supabase
+        .from("coupons")
+        .select("*")
+        .eq("code", couponCode.toUpperCase())
+        .eq("is_active", true)
+        .eq("business_id", businessId)
+        .single();
+
+      if (error || !data) {
+        setCouponError("Geçersiz kupon kodu");
+        setAppliedCoupon(null);
+      } else {
+        // Check expiry
+        if (data.expires_at && new Date(data.expires_at) < new Date()) {
+          setCouponError("Kupon süresi dolmuş");
+          setAppliedCoupon(null);
+        } else {
+          setAppliedCoupon(data);
+          toast.success("Kupon Uygulandı! ✨");
+        }
+      }
+    } catch (err) {
+      setCouponError("Kupon kontrol edilirken hata oluştu");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime || !codeVerified) return;
     setSubmitting(true);
@@ -191,6 +251,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
         staff_id: selectedStaff || undefined,
         status: "pending",
         total_price: totalPrice,
+        total_duration: totalDuration,
         service_name: chosenServices.map(s => s.name).join(", "),
         notes: customerNotes || null,
       });
@@ -221,6 +282,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
     setSendingCode(false);
     setCountdown(0);
     setSuccess(false);
+    setIsKvkkAccepted(false);
   };
 
   const handleClose = (val: boolean) => {
@@ -273,16 +335,23 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
 
         {step === 1 && (
           <div className="space-y-3 mt-4">
-            {services.map((service) => (
-              <button
-                key={service.id}
-                onClick={() => toggleService(service.id)}
-                className={`w-full text-left p-4 rounded-xl border transition-colors ${
-                  selectedServices.includes(service.id)
-                    ? "border-accent bg-accent/5"
-                    : "border-border hover:border-accent/30"
-                }`}
-              >
+            {services.length === 0 ? (
+              <div className="text-center py-8">
+                <Sparkles className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-foreground font-medium mb-1">Henüz hizmet eklenmemiş</p>
+                <p className="text-sm text-muted-foreground">İşletme sahibi yakında hizmetlerini ekleyecektir. Lütfen daha sonra tekrar deneyin.</p>
+              </div>
+            ) : (
+              services.map((service) => (
+                <button
+                  key={service.id}
+                  onClick={() => toggleService(service.id)}
+                  className={`w-full text-left p-4 rounded-xl border transition-colors ${
+                    selectedServices.includes(service.id)
+                      ? "border-accent bg-accent/5"
+                      : "border-border hover:border-accent/30"
+                  }`}
+                >
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="font-medium text-foreground">{service.name}</p>
@@ -302,7 +371,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                   </div>
                 </div>
               </button>
-            ))}
+            )))}
             {selectedServices.length > 0 && (
               <div className="flex justify-between items-center pt-3 border-t border-border">
                 <span className="text-sm text-muted-foreground">
@@ -394,46 +463,42 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                     const isToday = selectedDate && format(selectedDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd"); 
                     const nowTime = format(new Date(), "HH:mm");
 
-                    const availableSlots = slots.filter(time => {
+                    const validSlots = slots.filter(time => {
                       // Eğer bugünse ve slot saati şu anki saatten küçükse gösterme
                       if (isToday && time <= nowTime) return false;
-                      return !isSlotOccupied(time, occupiedSlots || [], selectedStaff, sList.length);
+                      return true;
                     });
                     
-                    if (availableSlots.length > 0) {
+                    if (validSlots.length > 0) {
                       return (
                         <div className="space-y-4">
                           <div className="grid grid-cols-4 gap-2">
-                            {availableSlots.map((time) => (
-                              <button
-                                key={time}
-                                onClick={() => setSelectedTime(time)}
-                                className={`py-2 text-sm rounded-lg border transition-colors ${
-                                  selectedTime === time
-                                    ? "border-accent bg-accent text-accent-foreground"
-                                    : "border-border hover:border-accent/30 text-foreground"
-                                }`}
-                              >
-                                {time}
-                              </button>
-                            ))}
+                            {validSlots.map((time) => {
+                              const isOccupied = isSlotOccupied(time, occupiedSlots || [], selectedStaff, sList.length, totalDuration);
+                              
+                              return (
+                                <button
+                                  key={time}
+                                  onClick={() => setSelectedTime(time)}
+                                  className={`py-2 text-sm rounded-lg border transition-colors ${
+                                    isOccupied
+                                      ? selectedTime === time
+                                        ? "border-yellow-500 bg-yellow-500/20 text-yellow-400 ring-1 ring-yellow-500/50"
+                                        : "border-muted bg-muted/30 text-muted-foreground opacity-50 line-through decoration-accent/50"
+                                      : selectedTime === time
+                                        ? "border-accent bg-accent text-accent-foreground"
+                                        : "border-border hover:border-accent/30 text-foreground"
+                                  }`}
+                                >
+                                  {time}
+                                </button>
+                              );
+                            })}
                           </div>
                           
                           <div className="pt-4 border-t border-border/50 text-center">
                              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-2">İstediğiniz saat dolu mu?</p>
-                             {inWaitlist ? (
-                                <Badge variant="outline" className="text-emerald-500 bg-emerald-500/5 py-1 px-3 rounded-full border-emerald-500/20 text-[10px] font-bold">
-                                  BEKLEME LİSTESİNDESİNİZ ✅
-                                </Badge>
-                             ) : (
-                                <button 
-                                  onClick={handleJoinWaitlist}
-                                  disabled={waitlistLoading}
-                                  className="text-[11px] font-black text-primary hover:text-primary/70 underline underline-offset-4 uppercase tracking-tighter transition-all"
-                                >
-                                  {waitlistLoading ? "EKLENİYOR..." : "BENİ BEKLEME LİSTESİNE EKLE"}
-                                </button>
-                             )}
+                             <p className="text-xs text-muted-foreground">Üzeri çizili saatlere tıklayarak o saate özel bekleme listesine katılabilirsiniz.</p>
                           </div>
                         </div>
                       );
@@ -457,11 +522,30 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                 })()}
               </div>
             )}
-            <div className="flex gap-3">
+            <div className="flex gap-3 mt-6">
               <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>Geri</Button>
-              <Button className="flex-1" disabled={!selectedDate || !selectedTime || loadingSlots} onClick={() => setStep(4)}>
-                Devam Et
-              </Button>
+              {(() => {
+                const sList = staff || [];
+                const isSelectedOccupied = selectedTime ? isSlotOccupied(selectedTime, occupiedSlots || [], selectedStaff, sList.length, totalDuration) : false;
+
+                if (isSelectedOccupied) {
+                   return (
+                     <Button 
+                       className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white" 
+                       disabled={!selectedDate || !selectedTime || loadingSlots || waitlistLoading || inWaitlist} 
+                       onClick={handleJoinWaitlist}
+                     >
+                       {inWaitlist ? "Sıraya Girdiniz ✅" : waitlistLoading ? "Ekleniyor..." : "Bekleme Listesine Katıl"}
+                     </Button>
+                   );
+                }
+
+                return (
+                  <Button className="flex-1" disabled={!selectedDate || !selectedTime || loadingSlots} onClick={() => setStep(4)}>
+                    Devam Et
+                  </Button>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -512,24 +596,139 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                   className="w-full mt-1 min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
               </div>
+
+              {/* Coupon Code Section */}
+              <div className="pt-4 mt-4 border-t border-border">
+                <Label htmlFor="coupon-code" className="flex items-center gap-2 mb-2 text-xs uppercase tracking-widest font-black text-muted-foreground">
+                  <Ticket className="w-3 h-3" /> İndirim Kuponu
+                </Label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input 
+                      id="coupon-code" 
+                      value={couponCode} 
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())} 
+                      placeholder="KODUNUZ" 
+                      className={`uppercase tracking-widest font-mono text-sm ${
+                        appliedCoupon ? "bg-emerald-500/10 border-emerald-500 text-emerald-500 focus-visible:ring-emerald-500" : 
+                        couponError ? "bg-destructive/10 border-destructive text-destructive focus-visible:ring-destructive" : ""
+                      }`}
+                      disabled={appliedCoupon}
+                    />
+                    {appliedCoupon && (
+                      <Check className="w-4 h-4 text-emerald-500 absolute right-3 top-1/2 -translate-y-1/2" />
+                    )}
+                    {couponError && (
+                      <X className="w-4 h-4 text-destructive absolute right-3 top-1/2 -translate-y-1/2" />
+                    )}
+                  </div>
+                  {!appliedCoupon ? (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleVerifyCoupon} 
+                      disabled={couponLoading || !couponCode}
+                      className="shrink-0"
+                    >
+                      {couponLoading ? "..." : "Uygula"}
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => {
+                        setAppliedCoupon(null);
+                        setCouponCode("");
+                        setCouponError(null);
+                      }}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                {couponError && <p className="text-[10px] text-destructive mt-1 font-medium">{couponError}</p>}
+                {appliedCoupon && (
+                  <p className="text-[10px] text-emerald-500 mt-1 font-medium italic">
+                    {appliedCoupon.discount_type === "percent" ? `%${appliedCoupon.value}` : `${appliedCoupon.value} TL`} indirim uygulandı! 🎉
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 bg-accent/5 border border-accent/20 rounded-xl mt-4">
+              <input 
+                type="checkbox" 
+                id="kvkk-check" 
+                checked={isKvkkAccepted}
+                onChange={(e) => setIsKvkkAccepted(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent accent-accent cursor-pointer"
+              />
+              <label htmlFor="kvkk-check" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
+                <a href="/kvkk" target="_blank" rel="noopener noreferrer" className="text-accent font-bold hover:underline">KVKK Aydınlatma Metni</a>'ni okudum, kişisel verilerimin işlenmesini ve randevu süreçlerinde kullanılmasını onaylıyorum.
+              </label>
             </div>
 
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setStep(3)}>Geri</Button>
-              <Button
-                className="flex-1"
-                disabled={
-                  !customerName.trim().includes(" ") || 
-                  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail) || 
-                  !/^05\d{9}$/.test(customerPhone.replace(/[\s-]/g, ""))
+              {(() => {
+                const sList = staff || [];
+                const isSelectedOccupied = selectedTime ? isSlotOccupied(selectedTime, occupiedSlots || [], selectedStaff, sList.length, totalDuration) : false;
+                
+                // Eğer seçilen saat doluysa, bekleme listesine katılım butonu göster
+                if (isSelectedOccupied) {
+                  return (
+                    <Button
+                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white"
+                      disabled={
+                        !isKvkkAccepted ||
+                        waitlistLoading || 
+                        inWaitlist || 
+                        customerName.trim().length < 3 || 
+                        !/^05\d{9}$/.test(customerPhone.replace(/[\s-]/g, ""))
+                      }
+                      onClick={handleJoinWaitlist}
+                    >
+                      {inWaitlist ? "Sıraya Katıldınız ✅" : waitlistLoading ? "Ekleniyor..." : "Sıraya Kaydol"}
+                    </Button>
+                  );
                 }
-                onClick={() => {
-                  setStep(5);
-                  if (!codeSent) handleSendCode();
-                }}
-              >
-                Doğrula ve Devam Et
-              </Button>
+
+                // Normal randevu akışı
+                return (
+                  <Button
+                    className="flex-1"
+                    disabled={
+                      !isKvkkAccepted ||
+                      !customerName.trim().includes(" ") || 
+                      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail) || 
+                      !/^05\d{9}$/.test(customerPhone.replace(/[\s-]/g, ""))
+                    }
+                    onClick={async () => {
+                      // Admin kara liste kontrolü (erken kontrol)
+                      if (customerPhone) {
+                        const { data: banRecord } = await supabase
+                          .from("banned_users")
+                          .select("id")
+                          .eq("phone", customerPhone)
+                          .limit(1)
+                          .maybeSingle();
+
+                        if (banRecord) {
+                          toast.error("İşlem Reddedildi", { description: "Bu telefon numarası kuralları ihlal ettiği için randevu sisteminden süresiz uzaklaştırılmıştır." });
+                          return;
+                        }
+                      }
+
+                      setStep(5);
+                      if (!codeSent) handleSendCode();
+                    }}
+                  >
+                    Doğrula ve Devam Et
+                  </Button>
+                );
+              })()}
             </div>
           </div>
         )}

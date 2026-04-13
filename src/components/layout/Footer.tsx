@@ -44,6 +44,7 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm opacity-70">
               <li><Link to="/isletme-basvuru" className="hover:opacity-100 transition-opacity">{t("nav.business_apply")}</Link></li>
               <li><Link to="/giris" className="hover:opacity-100 transition-opacity">{t("footer.business_login")}</Link></li>
+              <li><Link to="/personel-paneli" className="hover:opacity-100 transition-opacity whitespace-nowrap">Personel Girişi</Link></li>
             </ul>
           </div>
 
@@ -51,10 +52,10 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm mb-4">{t("footer.legal")}</h4>
             <ul className="space-y-2.5 text-sm opacity-70">
-              <li><Link to="#" className="hover:opacity-100 transition-opacity">{t("footer.privacy")}</Link></li>
-              <li><Link to="#" className="hover:opacity-100 transition-opacity">{t("footer.terms")}</Link></li>
-              <li><Link to="#" className="hover:opacity-100 transition-opacity">{t("footer.kvkk")}</Link></li>
-              <li><Link to="#" className="hover:opacity-100 transition-opacity">{t("footer.cookies")}</Link></li>
+              <li><Link to="/gizlilik-politikasi" className="hover:opacity-100 transition-opacity">{t("footer.privacy")}</Link></li>
+              <li><Link to="/kullanim-kosullari" className="hover:opacity-100 transition-opacity">{t("footer.terms")}</Link></li>
+              <li><Link to="/kvkk" className="hover:opacity-100 transition-opacity">{t("footer.kvkk")}</Link></li>
+              <li><Link to="/cerez-politikasi" className="hover:opacity-100 transition-opacity">{t("footer.cookies")}</Link></li>
             </ul>
           </div>
         </div>

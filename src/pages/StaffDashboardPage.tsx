@@ -1,272 +1,256 @@
+
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { SEOHead } from "@/components/SEOHead";
-import {
-  Calendar as CalendarIcon, Clock, CheckCircle, XCircle,
-  User, Briefcase, ChevronRight,
-} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { getStaffProfile } from "@/lib/biz-api";
+import { 
+  Calendar, Clock, CheckCircle, 
+  User, LogOut, ChevronRight, 
+  Star, Briefcase, Phone, MessageSquare,
+  LayoutDashboard
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
-import { LogOut, LayoutDashboard } from "lucide-react";
+import { SEOHead } from "@/components/SEOHead";
 
-const statusMap: Record<string, { label: string; color: string }> = {
-  pending: { label: "Bekliyor", color: "bg-yellow-100 text-yellow-800" },
-  confirmed: { label: "Onaylandı", color: "bg-blue-100 text-blue-800" },
-  completed: { label: "Tamamlandı", color: "bg-green-100 text-green-800" },
-  cancelled: { label: "İptal", color: "bg-red-100 text-red-800" },
-};
-
-const StaffDashboardPage = () => {
-  const { user, loading: authLoading, signOut } = useAuth();
+export default function StaffDashboardPage() {
+  const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [staffMember, setStaffMember] = useState<any>(null);
+  const [staffInfo, setStaffInfo] = useState<any>(null);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/giris");
-  }, [user, authLoading, navigate]);
+    if (!authLoading && !user) {
+      navigate("/giris");
+      return;
+    }
 
-  useEffect(() => {
-    if (user) loadStaffData();
-  }, [user]);
+    if (user) {
+      loadStaffData();
+    }
+  }, [user, authLoading]);
 
-  const loadStaffData = async () => {
-    setLoading(true);
+  async function loadStaffData() {
     try {
-      // Find the staff entry associated with the logged in user
-      const { data: staff, error } = await supabase
-        .from("staff")
-        .select("*, business:businesses(*)")
-        .eq("user_id", user?.id)
-        .single();
-
-      if (error || !staff) {
+      const staff = await getStaffProfile(user!.id);
+      if (!staff) {
         setLoading(false);
         return;
       }
-      setStaffMember(staff);
+      setStaffInfo(staff);
 
-      // Load appointments for this staff member
+      // Load today's appointments for this staff
+      const today = new Date().toISOString().split("T")[0];
       const { data: apts } = await supabase
         .from("appointments")
         .select("*")
         .eq("staff_id", staff.id)
-        .order("appointment_date", { ascending: true })
+        .eq("appointment_date", today)
         .order("appointment_time", { ascending: true });
-
+      
       setAppointments(apts || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }
 
-  const handleStatusUpdate = async (id: string, status: string) => {
-    const { error } = await supabase
-      .from("appointments")
-      .update({ status })
-      .eq("id", id);
-
-    if (error) {
-      toast({ title: "Güncelleme başarısız", variant: "destructive" });
-    } else {
-      toast({ title: "Durum güncellendi" });
-      loadStaffData();
+  const handleComplete = async (aptId: string) => {
+    try {
+      const { error } = await supabase
+        .from("appointments")
+        .update({ status: 'completed' })
+        .eq("id", aptId);
+      
+      if (error) throw error;
+      
+      setAppointments(prev => prev.map(a => a.id === aptId ? { ...a, status: 'completed' } : a));
+      toast.success("Randevu tamamlandı!");
+    } catch (err) {
+      toast.error("İşlem başarısız");
     }
   };
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Yükleniyor...</p>
-        </main>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-white font-black text-xs uppercase tracking-widest opacity-50">Personel Verileri Yükleniyor...</p>
+        </div>
       </div>
     );
   }
 
-  if (!staffMember) {
+  if (!staffInfo) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 flex items-center justify-center bg-surface p-4">
-          <div className="text-center max-w-md">
-            <User className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-heading text-foreground mb-2">Personel kaydı bulunamadı</h2>
-            <p className="text-muted-foreground mb-4">
-              Bu hesap bir personel kaydıyla eşleşmemiş. Lütfen işletme yöneticinizle iletişime geçin.
-            </p>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
+        <div className="text-center max-w-md space-y-6">
+          <div className="w-20 h-20 bg-white/5 rounded-[2.5rem] flex items-center justify-center mx-auto border border-white/10">
+             <User className="w-10 h-10 text-slate-500" />
           </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  const today = format(new Date(), "yyyy-MM-dd");
-  const todayApts = appointments.filter(a => a.appointment_date === today);
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <SEOHead title={`Personel Paneli - ${staffMember.name}`} />
-      <Header />
-      <main className="flex-1 bg-surface">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-card border border-border rounded-2xl p-6 mb-8 shadow-sm">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-6">
-                <div className="w-20 h-20 bg-primary/10 rounded-3xl border border-primary/20 flex items-center justify-center shadow-lg shadow-primary/5">
-                  <span className="text-primary font-black text-2xl uppercase">
-                    {staffMember.name.split(" ").map((n: string) => n[0]).join("")}
-                  </span>
-                </div>
-                <div>
-                  <h1 className="text-3xl font-black text-foreground uppercase tracking-tight">{staffMember.name}</h1>
-                  <p className="text-sm text-muted-foreground font-bold flex items-center gap-2 mt-1 uppercase tracking-widest">
-                    <Briefcase className="w-4 h-4 text-primary" /> {staffMember.role} <span className="text-muted-foreground/30">|</span> {staffMember.business?.name}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline"
-                  onClick={() => navigate("/")}
-                  className="h-12 px-6 rounded-2xl border-border bg-background hover:bg-muted font-black text-[10px] tracking-widest uppercase flex items-center gap-2"
-                >
-                  <LayoutDashboard className="w-4 h-4" /> ANA SİTE
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={async () => { await signOut(); navigate("/"); }}
-                  className="h-12 px-6 rounded-2xl border-border bg-background hover:bg-rose-500/10 hover:border-rose-500/30 font-black text-[10px] tracking-widest uppercase flex items-center gap-2 group"
-                >
-                  <LogOut className="w-4 h-4 text-rose-500" /> ÇIKIŞ YAP
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Left Column: Stats & Today */}
-            <div className="space-y-6">
-              <div className="bg-card border border-border rounded-xl p-5">
-                <h3 className="text-sm font-medium text-muted-foreground mb-2 uppercase tracking-wider">Bugünün İşleri</h3>
-                <p className="text-3xl font-heading text-foreground">{todayApts.length}</p>
-                <p className="text-xs text-muted-foreground mt-1">Toplam {appointments.length} randevu</p>
-              </div>
-
-              <div className="bg-card border border-border rounded-xl p-5">
-                <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-accent" /> Yaklaşanlar
-                </h3>
-                <div className="space-y-4">
-                  {todayApts.slice(0, 3).map(apt => (
-                    <div key={apt.id} className="flex items-center gap-3 text-sm">
-                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                      <span className="font-medium">{apt.appointment_time}</span>
-                      <span className="text-muted-foreground truncate">{apt.customer_name}</span>
-                    </div>
-                  ))}
-                  {todayApts.length === 0 && (
-                    <p className="text-sm text-muted-foreground italic">Bugün başka işiniz görünmüyor.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Main Column: Appointment List */}
-            <div className="md:col-span-2 space-y-4">
-              <h2 className="text-lg font-heading text-foreground flex items-center gap-2 px-2">
-                <CalendarIcon className="w-5 h-5 text-primary" /> Programım
-              </h2>
-              
-              <div className="space-y-3">
-                {appointments.map((apt) => (
-                  <div key={apt.id} className="bg-card border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-foreground">{apt.customer_name}</span>
-                          <Badge className={statusMap[apt.status]?.color || ""}>
-                            {statusMap[apt.status]?.label || apt.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground font-medium flex items-center gap-1 mt-1">
-                          <Clock className="w-3.5 h-3.5" /> 
-                          {format(new Date(apt.appointment_date), "d MMMM", { locale: tr })}, {apt.appointment_time}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-heading text-foreground text-sm">₺{apt.total_price}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
-                      {apt.status === "confirmed" && (
-                        <Button size="sm" className="bg-green-600 hover:bg-green-700 h-8 text-xs" onClick={() => handleStatusUpdate(apt.id, "completed")}>
-                          Tamamla
-                        </Button>
-                      )}
-                      {apt.status === "pending" && (
-                        <Button size="sm" className="h-8 text-xs" onClick={() => handleStatusUpdate(apt.id, "confirmed")}>
-                          Onayla
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground ml-auto">
-                        Detaylar <ChevronRight className="w-3 h-3 ml-1" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                
-                {appointments.length === 0 && (
-                  <div className="bg-card border border-border rounded-xl p-12 text-center">
-                    <p className="text-muted-foreground italic">Henüz size atanan bir randevu yok.</p>
-                  </div>
-                )}
-              </div>
-            </div>
+          <h2 className="text-2xl font-black text-white uppercase tracking-tight">Personel Yetkisi Gerekli</h2>
+          <p className="text-slate-400 text-sm leading-relaxed">
+            Bu hesap bir personel kaydıyla eşleşmemiş. Eğer işletme personeliyseniz lütfen yöneticinizle iletişive geçin.
+          </p>
+          <div className="flex flex-col gap-3">
+             <Button onClick={() => navigate("/")} className="h-12 rounded-2xl font-black uppercase tracking-widest text-xs">ANA SAYFAYA DÖN</Button>
+             <Button variant="ghost" onClick={() => signOut()} className="text-slate-500 hover:text-white">Farklı Hesapla Giriş Yap</Button>
           </div>
         </div>
-      </main>
-      <Footer />
-    </div>
-  );
-};
+      </div>
+    );
+  }
 
-export default StaffDashboardPage;
-
-// Placeholder for missing Button component in this scope
-function Button({ children, className, variant, size, onClick, ...props }: any) {
-  const base = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
-  const variants = {
-    default: "bg-primary text-primary-foreground hover:bg-primary/90",
-    outline: "border border-input bg-background hover:bg-muted hover:text-accent-foreground",
-    ghost: "hover:bg-accent hover:text-accent-foreground",
-  };
-  const sizes = {
-    default: "h-10 px-4 py-2",
-    sm: "h-9 rounded-md px-3 text-sm",
-    xs: "h-7 rounded px-2 text-[10px]",
-  };
-  
   return (
-    <button 
-      className={`${base} ${(variants as any)[variant || "default"]} ${(sizes as any)[size || "default"]} ${className}`}
-      onClick={onClick}
-      {...props}
-    >
-      {children}
-    </button>
+    <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-primary/30">
+      <SEOHead title={`Personel Portalı - ${staffInfo.name}`} />
+      
+      <header className="p-6 border-b border-white/5 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
+        <div className="flex items-center justify-between max-w-2xl mx-auto">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-black uppercase tracking-tight">{staffInfo.name}</h1>
+              <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">{staffInfo.role}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+                onClick={() => navigate("/")}
+                className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all"
+                title="Ana Site"
+            >
+                <LayoutDashboard className="w-5 h-5 text-slate-400" />
+            </button>
+            <button 
+                onClick={() => signOut()}
+                className="p-3 bg-white/5 hover:bg-rose-500/10 hover:text-rose-500 rounded-xl transition-all"
+                title="Çıkış Yap"
+            >
+                <LogOut className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="p-6 max-w-2xl mx-auto space-y-8">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-6 bg-slate-900 border border-white/5 rounded-[2rem] shadow-sm">
+             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Bugünkü İş</p>
+             <p className="text-3xl font-black">{appointments.length}</p>
+          </div>
+          <div className="p-6 bg-slate-900 border border-white/5 rounded-[2rem] shadow-sm">
+             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Puanın</p>
+             <div className="flex items-center gap-2">
+                <p className="text-3xl font-black">4.9</p>
+                <Star className="w-5 h-5 text-warning fill-warning" />
+             </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+           <div className="flex items-center justify-between px-2">
+              <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Bugünkü Programım</h2>
+              <Badge variant="outline" className="text-[10px] border-white/10 text-slate-500">
+                {format(new Date(), 'd MMMM yyyy', { locale: tr })}
+              </Badge>
+           </div>
+
+           <div className="space-y-4">
+              {appointments.length > 0 ? (
+                appointments.map((apt) => (
+                  <div 
+                    key={apt.id} 
+                    className={cn(
+                      "p-6 bg-slate-900/50 border border-white/5 rounded-[2.5rem] hover:bg-slate-900 transition-all group",
+                      apt.status === 'completed' && "opacity-50 grayscale"
+                    )}
+                  >
+                    <div className="flex items-start justify-between mb-6">
+                       <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                             <Clock className="w-5 h-5" />
+                          </div>
+                          <div>
+                             <p className="text-xl font-black tracking-tighter">{apt.appointment_time}</p>
+                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Başlangıç Saati</p>
+                          </div>
+                       </div>
+                       <Badge className={cn(
+                         "bg-white/5 text-[9px] font-black uppercase px-3 py-1 border-none",
+                         apt.status === 'confirmed' ? "text-blue-400 bg-blue-400/10" : 
+                         apt.status === 'completed' ? "text-emerald-400 bg-emerald-400/10" : "text-slate-500"
+                       )}>
+                         {apt.status === 'confirmed' ? 'SIRADAKİ' : apt.status === 'completed' ? 'BİTTİ' : 'BEKLİYOR'}
+                       </Badge>
+                    </div>
+
+                    <div className="space-y-4">
+                       <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl">
+                          <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center font-black text-sm uppercase">
+                            {apt.customer_name[0]}
+                          </div>
+                          <div>
+                             <p className="text-sm font-black uppercase">{apt.customer_name}</p>
+                             <div className="flex items-center gap-3 mt-1">
+                                <a href={`tel:${apt.customer_phone}`} className="text-[10px] text-slate-500 hover:text-primary flex items-center gap-1 transition-colors">
+                                   <Phone className="w-3 h-3" /> {apt.customer_phone}
+                                </a>
+                             </div>
+                          </div>
+                       </div>
+
+                       <div className="flex items-center justify-between px-2">
+                          <div className="flex items-center gap-2">
+                             <Briefcase className="w-4 h-4 text-slate-500" />
+                             <span className="text-xs font-bold text-slate-300 uppercase">{apt.service_name || "Servis"}</span>
+                          </div>
+                          <span className="text-sm font-black text-primary">₺{apt.total_price}</span>
+                       </div>
+
+                       {apt.notes && (
+                         <div className="p-4 bg-amber-500/5 border-l-2 border-amber-500 rounded-r-xl">
+                            <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-1">Müşteri Notu</p>
+                            <p className="text-xs text-slate-400 italic">"{apt.notes}"</p>
+                         </div>
+                       )}
+
+                       {apt.status !== 'completed' && (
+                         <Button 
+                          onClick={() => handleComplete(apt.id)}
+                          className="w-full h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-900/20 group"
+                         >
+                            HİZMETİ TAMAMLA
+                            <CheckCircle className="w-4 h-4 ml-2 group-hover:scale-110 transition-transform" />
+                         </Button>
+                       )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-20 bg-white/5 border border-dashed border-white/10 rounded-[3rem]">
+                   <Calendar className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                   <p className="text-sm font-black text-slate-500 uppercase tracking-widest">Bugün için randevun yok.</p>
+                   <p className="text-xs text-slate-600 mt-2">Dinlenmek için iyi bir gün!</p>
+                </div>
+              )}
+           </div>
+        </div>
+      </main>
+
+      <footer className="p-10 text-center opacity-20">
+         <p className="text-[8px] font-black uppercase tracking-[0.4em]">{staffInfo?.businesses?.name} PERSONEL PORTALI</p>
+      </footer>
+    </div>
   );
 }

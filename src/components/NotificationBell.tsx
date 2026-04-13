@@ -29,9 +29,33 @@ export function NotificationBell() {
     if (!user) return;
     loadNotifications();
 
-    // Poll every 30 seconds
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
+    // Sound for new notifications
+    const playNotificationSound = () => {
+      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+      audio.play().catch(e => console.log("Audio play failed:", e));
+    };
+
+    // Realtime subscription
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          setNotifications(prev => [payload.new as Notification, ...prev]);
+          playNotificationSound();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const loadNotifications = async () => {

@@ -20,7 +20,30 @@ export async function getBusinesses(filters?: { city?: string; category?: string
 
   const { data, error } = await query;
   if (error) throw error;
-  return data;
+  
+  // Inject mock latitude and longitude based on city or name for location sorting to work
+  // This is a fallback until `latitude` and `longitude` are added to the DB schema
+  const mappedData = data?.map((biz: any) => {
+    // Generate deterministic pseudo-random offset based on ID
+    const hash = biz.id.charCodeAt(0) + (biz.id.charCodeAt(biz.id.length-1) || 0);
+    const offsetLat = (hash % 100) * 0.001;
+    const offsetLng = (hash % 100) * 0.001;
+    
+    let baseLat = 41.0082; // Istanbul default
+    let baseLng = 28.9784;
+    
+    if (biz.city === "Ankara") { baseLat = 39.9334; baseLng = 32.8597; }
+    else if (biz.city === "İzmir") { baseLat = 38.4192; baseLng = 27.1287; }
+    else if (biz.city === "Bursa") { baseLat = 40.1826; baseLng = 29.0669; }
+
+    return {
+      ...biz,
+      latitude: baseLat + offsetLat,
+      longitude: baseLng + offsetLng
+    };
+  });
+
+  return mappedData;
 }
 
 export async function getBusinessBySlug(slug: string) {
@@ -46,17 +69,25 @@ export async function getBusinessBySlug(slug: string) {
   };
 }
 
-export async function getMyBusiness() {
-  const { data: { session } } = await supabase.auth.getSession();
-  const user = session?.user;
-  if (!user) return null;
+export async function getMyBusiness(userId?: string) {
+  let uid = userId;
+  if (!uid) {
+    const { data: { session } } = await supabase.auth.getSession();
+    uid = session?.user?.id;
+  }
+  if (!uid) return null;
 
   const { data, error } = await supabase
     .from("businesses")
     .select("*")
-    .eq("owner_id", user.id);
+    .eq("owner_id", uid);
 
-  if (error || !data || data.length === 0) return null;
+  if (error) {
+    console.error("getMyBusiness error:", error);
+    throw error;
+  }
+  
+  if (!data || data.length === 0) return null;
   
   // If multiple businesses exist, we might want to let the user choose eventually,
   // but for now return the first active one or just the first one.
@@ -66,7 +97,7 @@ export async function getMyBusiness() {
 export async function getBusinessAppointments(businessId: string, status?: string) {
   let query = supabase
     .from("appointments")
-    .select("id, appointment_date, appointment_time, status, total_price, customer_name, customer_phone, staff(name)")
+    .select("id, appointment_date, appointment_time, status, total_price, customer_name, customer_phone, service_name, notes, total_duration, staff(name)")
     .eq("business_id", businessId)
     .order("appointment_date", { ascending: false })
     .order("appointment_time", { ascending: false });
@@ -144,7 +175,7 @@ export async function updateAppointmentStatus(id: string, status: string) {
         .from("waitlist")
         .select("*")
         .eq("business_id", apt.business_id)
-        .eq("date", apt.appointment_date);
+        .eq("desired_date", apt.appointment_date);
       
       if (waitlist && waitlist.length > 0) {
         waitlist.forEach((entry: any) => {
@@ -178,23 +209,35 @@ export async function joinWaitlist(data: {
   business_id: string; 
   user_id: string; 
   date: string; 
+  time?: string;
   customer_name?: string; 
   customer_phone?: string; 
   customer_email?: string 
 }) {
-  // Update profiles table as well to make sure we have the data
-  if (data.customer_name || data.customer_phone) {
-    await supabase.from("profiles").update({
-      full_name: data.customer_name,
-      phone: data.customer_phone,
-    }).eq("id", data.user_id);
+  // 1. Profil bilgilerini güncelle (Fallback olarak)
+  if (data.user_id && (data.customer_name || data.customer_phone)) {
+    try {
+      await supabase.from("profiles").update({
+        full_name: data.customer_name,
+        phone: data.customer_phone,
+      }).eq("id", data.user_id);
+    } catch (e) {
+      console.warn("Profile update failed during waitlist join:", e);
+    }
   }
 
+  // 2. Waitlist tablosuna ekle
+  // Tablo sütunları: id, user_id, business_id, desired_date, desired_time, customer_name, customer_phone, customer_email, created_at
   const { error } = await supabase.from("waitlist").insert({
     business_id: data.business_id,
     user_id: data.user_id,
     desired_date: data.date,
+    desired_time: data.time || null,
+    customer_name: data.customer_name || null,
+    customer_phone: data.customer_phone || null,
+    customer_email: data.customer_email || null
   });
+  
   if (error) throw error;
   return true;
 }
@@ -292,6 +335,42 @@ export async function getBusinessStats(businessId: string) {
 export async function createAppointment(data: any) {
   const { data: { user } } = await supabase.auth.getUser();
   
+  // Kara liste (banned users) kontrolü
+  if (data.customer_phone) {
+    const { data: banRecord } = await supabase
+      .from("banned_users")
+      .select("id")
+      .eq("phone", data.customer_phone)
+      .limit(1)
+      .single();
+      
+    if (banRecord) {
+      throw new Error("İşlem reddedildi: Bu telefon numarası platform kuralları ihlali nedeniyle kalıcı olarak askıya alınmıştır.");
+    }
+  }
+  // No-Show ceza kontrolü
+  const NO_SHOW_LIMIT = 3;
+  if (user?.id) {
+    const { count } = await supabase
+      .from("appointments")
+      .select("id", { count: "exact", head: true })
+      .eq("customer_id", user.id)
+      .eq("status", "no_show");
+
+    if ((count || 0) >= NO_SHOW_LIMIT) {
+      // Forced prepayment — müşteri 3+ kez gelmemiş, ön ödeme zorunlu
+      if (!data.is_paid && data.total_price > 0) {
+        throw new Error(
+          `Geçmişte ${count} kez randevunuza gelmediniz. Yeni randevu alabilmeniz için ön ödeme yapmanız gerekmektedir.`
+        );
+      }
+    }
+  }
+
+  // Embed duration metadata in notes field since DB may not have total_duration column
+  const durationTag = `[DURATION:${data.total_duration || 30}]`;
+  const notesWithDuration = data.notes ? `${durationTag} ${data.notes}` : durationTag;
+
   const insertData: Record<string, any> = {
     business_id: data.business_id,
     customer_name: data.customer_name,
@@ -300,7 +379,7 @@ export async function createAppointment(data: any) {
     appointment_date: data.appointment_date,
     appointment_time: data.appointment_time,
     total_price: data.total_price || 0,
-    notes: data.notes || null,
+    notes: notesWithDuration,
     status: data.total_price > 0 && data.is_paid ? "confirmed" : "pending",
     service_name: data.service_name || "",
   };
@@ -310,6 +389,26 @@ export async function createAppointment(data: any) {
 
   const { error } = await supabase.from("appointments").insert(insertData);
   if (error) throw error;
+
+  // 4. Notify business owner about the new appointment
+  try {
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("owner_id, name")
+      .eq("id", data.business_id)
+      .single();
+
+    if (biz?.owner_id) {
+      await supabase.from("notifications").insert({
+        user_id: biz.owner_id,
+        title: "Yeni Randevu! 📅",
+        message: `${data.customer_name} tarafından ${data.appointment_date} için yeni bir randevu oluşturuldu.`,
+        type: "general"
+      });
+    }
+  } catch (nError) {
+    console.warn("Notification trigger failed:", nError);
+  }
 }
 
 export async function getOccupiedSlots(businessId: string, date: string, staffId?: string) {
@@ -320,7 +419,7 @@ export async function getOccupiedSlots(businessId: string, date: string, staffId
 
     let query = supabase
       .from("appointments")
-      .select("appointment_time, staff_id")
+      .select("appointment_time, staff_id, notes")
       .eq("business_id", businessId)
       .eq("appointment_date", date)
       .in("status", ["pending", "confirmed", "completed"]);

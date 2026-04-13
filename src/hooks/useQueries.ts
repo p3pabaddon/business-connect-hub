@@ -31,7 +31,7 @@ export function useMyBusiness() {
   const { user } = useAuth();
   return useQuery({
     queryKey: ["myBusiness", user?.id],
-    queryFn: getMyBusiness,
+    queryFn: () => getMyBusiness(user?.id),
     enabled: !!user,
   });
 }

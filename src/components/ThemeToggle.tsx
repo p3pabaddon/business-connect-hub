@@ -1,34 +1,27 @@
-import { useState, useEffect } from "react";
-import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
-  const [dark, setDark] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("theme") === "dark" ||
-      (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  });
+  const { theme, setTheme } = useTheme();
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (dark) {
-      root.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [dark]);
+  const cycle = () => {
+    const next = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
+    setTheme(next);
+  };
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setDark(!dark)}
+      onClick={cycle}
       className="h-9 w-9"
       aria-label="Tema değiştir"
+      title={theme === "light" ? "Açık Tema" : theme === "dark" ? "Koyu Tema" : "Sistem Teması"}
     >
-      {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {theme === "light" && <Sun className="h-4 w-4 text-warning" />}
+      {theme === "dark" && <Moon className="h-4 w-4 text-accent" />}
+      {theme === "system" && <Monitor className="h-4 w-4 text-muted-foreground" />}
     </Button>
   );
 }

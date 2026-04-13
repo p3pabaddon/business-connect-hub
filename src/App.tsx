@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute, AdminRoute, BusinessRoute } from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Header } from "./components/layout/Header";
@@ -32,14 +33,19 @@ import HaritaPage from "./pages/HaritaPage";
 import { TrafficTracker } from "./components/TrafficTracker";
 import { QuickBookWidget } from "./components/QuickBookWidget";
 import { ChatbotWidget } from "./components/ChatbotWidget";
+import KvkkPage from "./pages/KvkkPage";
+import KullanimKosullari from "./pages/KullanimKosullari";
+import GizlilikPolitikasi from "./pages/GizlilikPolitikasi";
+import CerezPolitikasi from "./pages/CerezPolitikasi";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <TooltipProvider>
           <Sonner position="top-right" expand={true} richColors />
           <BrowserRouter>
             <TrafficTracker />
@@ -62,6 +68,10 @@ const App = () => (
               <Route path="/karsilastir" element={<KarsilastirmaPage />} />
               <Route path="/harita" element={<HaritaPage />} />
               <Route path="/oauth/google/callback" element={<GoogleOAuthCallback />} />
+              <Route path="/kvkk" element={<KvkkPage />} />
+              <Route path="/kullanim-kosullari" element={<KullanimKosullari />} />
+              <Route path="/gizlilik-politikasi" element={<GizlilikPolitikasi />} />
+              <Route path="/cerez-politikasi" element={<CerezPolitikasi />} />
 
               {/* Protected routes - requires login */}
               <Route path="/profil" element={
@@ -95,8 +105,10 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+          </TooltipProvider>
+          <Toaster />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

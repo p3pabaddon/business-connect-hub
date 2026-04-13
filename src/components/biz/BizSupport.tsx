@@ -1,0 +1,333 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { LifeBuoy, Send, MessageSquare, Loader2, Clock, CheckCircle2, ChevronRight, Lock, Plus } from "lucide-react";
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
+
+interface Ticket {
+  id: string;
+  subject: string;
+  status: string;
+  created_at: string;
+  business_id: string;
+  owner_id: string;
+}
+
+interface Message {
+  id: string;
+  sender_id: string;
+  message: string;
+  created_at: string;
+  profiles?: {
+    role: string;
+  };
+}
+
+export function BizSupport({ businessId }: { businessId: string }) {
+  const { user } = useAuth();
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newSubject, setNewSubject] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [senderRoles, setSenderRoles] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    loadTickets();
+  }, [user]);
+
+  useEffect(() => {
+    if (selectedTicket) {
+      loadMessages(selectedTicket.id);
+      
+      // Realtime listener for new messages
+      const channel = supabase
+        .channel(`ticket-${selectedTicket.id}`)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${selectedTicket.id}` },
+          (payload) => {
+            setMessages(prev => [...prev, payload.new as Message]);
+          }
+        )
+        .subscribe();
+      
+      return () => { supabase.removeChannel(channel); };
+    }
+  }, [selectedTicket]);
+
+  const loadTickets = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from("support_tickets")
+        .select("id, subject, status, created_at, business_id, owner_id")
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      setTickets(data || []);
+    } catch (err) {
+      toast.error("Talepler yüklenemedi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMessages = async (ticketId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("support_messages")
+        .select("*")
+        .eq("ticket_id", ticketId)
+        .order("created_at", { ascending: true });
+      
+      if (error) {
+        console.error("Mesaj yükleme hatası:", error);
+        toast.error("Mesajlar yüklenemedi: " + error.message);
+        return;
+      }
+      setMessages(data || []);
+    } catch (err) {
+      console.error("Mesaj yükleme catch:", err);
+    }
+  };
+
+  const handleCreateTicket = async () => {
+    console.log("DEBUG: handleCreateTicket tetiklendi.");
+    
+    if (!newSubject) {
+      toast.error("Lütfen bir konu başlığı yazın.");
+      return;
+    }
+
+    if (!user) {
+      toast.error("Oturum bulunamadı. Lütfen sayfayı yenileyip tekrar giriş yapın.");
+      console.error("User object is null in BizSupport");
+      return;
+    }
+
+    if (!businessId) {
+      toast.error("İşletme kimliği alınamadı. Lütfen dashboard'u yenileyin.");
+      console.error("businessId is null in BizSupport");
+      return;
+    }
+
+    setSending(true);
+    toast.info("Talep oluşturuluyor...");
+
+    try {
+      const ticketData = {
+        owner_id: user.id,
+        business_id: businessId,
+        subject: newSubject,
+        status: "open"
+      };
+
+      console.log("DEBUG: Gönderilen Veri:", ticketData);
+
+      const { data, error } = await supabase
+        .from("support_tickets")
+        .insert(ticketData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Supabase Hata Detayı:", error);
+        toast.error(`Veritabanı Hatası: ${error.message} (Kod: ${error.code})`);
+        return;
+      }
+      
+      if (!data) {
+        toast.error("Veritabanından yanıt alınamadı ama hata da dönmedi. Sinsi bir durum!");
+        return;
+      }
+
+      setTickets(prev => [data, ...prev]);
+      setSelectedTicket(data);
+      setNewSubject("");
+      toast.success("Destek talebi başarıyla açıldı!");
+    } catch (err: any) {
+      console.error("CATCH BLOĞU HATASI:", err);
+      toast.error("Bağlantı Hatası: " + (err.message || "Bilinmeyen hata"));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage || !selectedTicket || !user) return;
+    setSending(true);
+    try {
+      const { error } = await supabase
+        .from("support_messages")
+        .insert({
+          ticket_id: selectedTicket.id,
+          sender_id: user.id,
+          message: newMessage
+        });
+
+      if (error) throw error;
+      setNewMessage("");
+    } catch (err) {
+      toast.error("Mesaj gönderilemedi");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-180px)] animate-in fade-in duration-700">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-heading text-foreground uppercase tracking-tight flex items-center gap-3">
+            <LifeBuoy className="w-8 h-8 text-primary" /> Destek Merkezi
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">Platform uzmanlarımızla doğrudan iletişim kurun.</p>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+           <Lock className="w-3.5 h-3.5 text-emerald-500" />
+           <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Şifreli Uçtan Uca Destek</span>
+        </div>
+      </div>
+
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-hidden">
+        {/* Ticket List */}
+        <div className="lg:col-span-4 bg-card border border-border rounded-[2.5rem] flex flex-col overflow-hidden">
+           <div className="p-6 border-b border-border bg-muted/20">
+              <Label className="text-[10px] uppercase font-bold tracking-tighter text-muted-foreground mb-3 block">Yeni Destek Talebi</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="Konu başlığı..."
+                    value={newSubject}
+                    onChange={(e) => setNewSubject(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !sending && newSubject) {
+                        handleCreateTicket();
+                      }
+                    }}
+                    className="bg-white/5 border-white/10 rounded-xl h-12"
+                  />
+                  <Button 
+                    size="icon" 
+                    onClick={handleCreateTicket} 
+                    disabled={sending} 
+                    className="rounded-xl shrink-0 bg-primary hover:bg-primary/90 transition-all text-white"
+                  >
+                    {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  </Button>
+                </div>
+           </div>
+           <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+              {loading ? (
+                  <div className="flex justify-center p-10"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+              ) : tickets.length === 0 ? (
+                  <p className="text-center text-xs text-muted-foreground p-10">Henüz bir talebiniz yok.</p>
+              ) : (
+                tickets.map(ticket => (
+                  <button
+                    key={ticket.id}
+                    onClick={() => setSelectedTicket(ticket)}
+                    className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                      selectedTicket?.id === ticket.id 
+                      ? "bg-primary/10 border-primary/30 shadow-sm" 
+                      : "bg-muted/10 border-border hover:bg-muted/30"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                       <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-full ${
+                          ticket.status === 'open' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'
+                       }`}>
+                          {ticket.status === 'open' ? 'Aktif' : 'Kapalı'}
+                       </span>
+                       <span className="text-[9px] font-mono text-muted-foreground">
+                          {format(new Date(ticket.created_at), "d MMM", { locale: tr })}
+                       </span>
+                    </div>
+                    <p className="text-sm font-semibold text-foreground truncate">{ticket.subject}</p>
+                  </button>
+                ))
+              )}
+           </div>
+        </div>
+
+        {/* Chat Area */}
+        <div className="lg:col-span-8 bg-card border border-border rounded-[2.5rem] flex flex-col overflow-hidden relative shadow-2xl shadow-primary/5">
+           {selectedTicket ? (
+             <>
+               <div className="p-6 border-b border-border flex items-center justify-between bg-muted/10">
+                  <div className="flex items-center gap-4">
+                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <MessageSquare className="w-5 h-5 text-primary" />
+                     </div>
+                     <div>
+                        <h4 className="font-bold text-foreground">{selectedTicket.subject}</h4>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Talep ID: {selectedTicket.id.slice(0,8)}</p>
+                     </div>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">Talebi Kapat</Button>
+               </div>
+               
+               <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.02),transparent_40%)]">
+                    {messages.map((msg) => {
+                      const isAdmin = senderRoles[msg.sender_id] === 'admin';
+                      return (
+                        <div key={msg.id} className={`flex ${!isAdmin ? 'justify-end' : 'justify-start'}`}>
+                           <div className={`max-w-[70%] p-4 rounded-2xl text-sm ${
+                              !isAdmin 
+                              ? 'bg-primary text-primary-foreground rounded-tr-none shadow-lg shadow-primary/20' 
+                              : 'bg-muted text-foreground rounded-tl-none border border-border'
+                           }`}>
+                              {msg.message}
+                              <div className={`text-[9px] mt-2 opacity-50 flex items-center gap-2 ${!isAdmin ? 'justify-end' : 'justify-start'}`}>
+                                 {!isAdmin ? 'BEN (İŞLETME)' : 'PLATFORM DESTEK'}
+                                 <span>•</span>
+                                 {format(new Date(msg.created_at), "HH:mm")}
+                              </div>
+                           </div>
+                        </div>
+                      );
+                    })}
+               </div>
+
+               <div className="p-6 border-t border-border bg-background/50 backdrop-blur-sm">
+                  <div className="relative">
+                    <input 
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      placeholder="Mesajınızı yazın..."
+                      className="w-full bg-muted/30 border border-border rounded-2xl py-4 pl-6 pr-14 focus:ring-2 focus:ring-primary outline-none transition-all text-sm"
+                    />
+                    <Button 
+                      onClick={handleSendMessage}
+                      disabled={sending || !newMessage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl h-10 w-10 p-0"
+                    >
+                       <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+               </div>
+             </>
+           ) : (
+             <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-10 text-center">
+                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6 opacity-30">
+                   <LifeBuoy className="w-10 h-10" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground">Yardım Almaya Hazır mısınız?</h3>
+                <p className="text-sm max-w-xs mt-2">Sol taraftan bir talep seçin veya yeni bir konu açarak bizimle iletişime geçin.</p>
+             </div>
+           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+

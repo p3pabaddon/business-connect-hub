@@ -34,6 +34,25 @@ export function ReviewModal({ open, onOpenChange, businessId, businessName, appo
     }
 
     setSubmitting(true);
+
+    // Verified Review: Sadece hizmet almış müşteriler yorum yapabilir
+    const { count: completedCount } = await supabase
+      .from("appointments")
+      .select("id", { count: "exact", head: true })
+      .eq("customer_id", user.id)
+      .eq("business_id", businessId)
+      .eq("status", "completed");
+
+    if (!completedCount || completedCount === 0) {
+      toast({ 
+        title: "Yorum yapılamadı", 
+        description: "Sadece bu işletmeden hizmet almış ve randevusu tamamlanmış müşteriler yorum yapabilir.", 
+        variant: "destructive" 
+      });
+      setSubmitting(false);
+      return;
+    }
+
     const { error } = await supabase.from("reviews").insert({
       business_id: businessId,
       customer_id: user.id,
@@ -42,13 +61,14 @@ export function ReviewModal({ open, onOpenChange, businessId, businessName, appo
       rating,
       comment: comment || null,
       is_visible: true,
+      is_verified: true,
     });
     setSubmitting(false);
 
     if (error) {
       toast({ title: "Yorum gönderilemedi", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Yorumunuz eklendi!", description: "Teşekkür ederiz." });
+      toast({ title: "✅ Doğrulanmış yorum eklendi!", description: "Teşekkür ederiz." });
       setRating(0);
       setComment("");
       onReviewSubmitted?.();

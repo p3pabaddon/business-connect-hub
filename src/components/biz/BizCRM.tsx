@@ -145,33 +145,33 @@ export function BizCRM({ businessId, customers }: Props) {
                      </div>
                   </div>
                </div>
-               <div className="flex gap-4">
-                  <Button variant="outline" size="icon" className="h-14 w-14 rounded-3xl border-border bg-white shadow-xl shadow-primary/5 hover:text-primary transition-all active:scale-95"><MessageSquare className="w-6 h-6" /></Button>
-                  <Button variant="outline" size="icon" className="h-14 w-14 rounded-3xl border-border bg-white shadow-xl shadow-primary/5 hover:text-primary transition-all active:scale-95"><TrendingUp className="w-6 h-6" /></Button>
+                <div className="flex gap-4">
+                  <Button variant="outline" size="icon" className="h-14 w-14 rounded-3xl border-border bg-card shadow-xl shadow-primary/5 hover:text-primary transition-all active:scale-95"><MessageSquare className="w-6 h-6" /></Button>
+                  <Button variant="outline" size="icon" className="h-14 w-14 rounded-3xl border-border bg-card shadow-xl shadow-primary/5 hover:text-primary transition-all active:scale-95"><TrendingUp className="w-6 h-6" /></Button>
                </div>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8 relative z-10">
-               <div className="bg-muted/30 border border-border rounded-[2.5rem] p-8 relative overflow-hidden group shadow-sm transition-all hover:bg-white hover:shadow-xl hover:shadow-primary/5 border-transparent hover:border-border">
+               <div className="bg-muted/30 border border-border rounded-[2.5rem] p-8 relative overflow-hidden group shadow-sm transition-all hover:bg-card hover:shadow-xl hover:shadow-primary/5 border-transparent hover:border-border">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-border mb-6 group-hover:rotate-12 transition-transform">
+                  <div className="w-12 h-12 bg-card rounded-2xl flex items-center justify-center shadow-sm border border-border mb-6 group-hover:rotate-12 transition-transform">
                     <CreditCard className="w-6 h-6 text-emerald-600" />
                   </div>
                   <p className="text-2xl lg:text-3xl font-black text-foreground tracking-tighter">₺{selectedUser.totalSpent.toLocaleString()}</p>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2 opacity-50">Toplam Ciro</p>
                </div>
-               <div className="bg-muted/30 border border-border rounded-[2.5rem] p-8 relative overflow-hidden group shadow-sm transition-all hover:bg-white hover:shadow-xl hover:shadow-primary/5 border-transparent hover:border-border">
+               <div className="bg-muted/30 border border-border rounded-[2.5rem] p-8 relative overflow-hidden group shadow-sm transition-all hover:bg-card hover:shadow-xl hover:shadow-primary/5 border-transparent hover:border-border">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-violet-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-border mb-6 group-hover:rotate-12 transition-transform">
+                  <div className="w-12 h-12 bg-card rounded-2xl flex items-center justify-center shadow-sm border border-border mb-6 group-hover:rotate-12 transition-transform">
                     <Calendar className="w-6 h-6 text-violet-600" />
                   </div>
                   <p className="text-2xl lg:text-3xl font-black text-foreground tracking-tighter">{selectedUser.totalAppointments}</p>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2 opacity-50">Ziyaret Sayısı</p>
                </div>
-               <div className="bg-muted/30 border border-border rounded-[2.5rem] p-8 relative overflow-hidden group shadow-sm transition-all hover:bg-white hover:shadow-xl hover:shadow-primary/5 border-transparent hover:border-border">
+               <div className="bg-muted/30 border border-border rounded-[2.5rem] p-8 relative overflow-hidden group shadow-sm transition-all hover:bg-card hover:shadow-xl hover:shadow-primary/5 border-transparent hover:border-border">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-border mb-6 group-hover:rotate-12 transition-transform">
+                  <div className="w-12 h-12 bg-card rounded-2xl flex items-center justify-center shadow-sm border border-border mb-6 group-hover:rotate-12 transition-transform">
                     <History className="w-6 h-6 text-amber-600" />
                   </div>
                   <p className="text-base font-black text-foreground uppercase tracking-tight mt-1">{selectedUser.lastVisit}</p>
@@ -194,7 +194,7 @@ export function BizCRM({ businessId, customers }: Props) {
                   <textarea 
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    className="w-full h-48 lg:h-60 bg-muted/20 border-2 border-transparent focus:border-primary/20 bg-white rounded-[2.5rem] p-8 text-sm text-foreground focus:outline-none transition-all custom-scrollbar resize-none font-bold placeholder:text-muted-foreground/30 shadow-inner"
+                    className="w-full h-48 lg:h-60 bg-muted/20 border-2 border-transparent focus:border-primary/20 bg-card rounded-[2.5rem] p-8 text-sm text-foreground focus:outline-none transition-all custom-scrollbar resize-none font-bold placeholder:text-muted-foreground/30 shadow-inner"
                     placeholder="Müşterinin tercihleri, özel talepleri veya dikkat edilmesi gereken detaylar..."
                   />
                   <div className="absolute bottom-6 right-6 flex items-center gap-4">
@@ -212,7 +212,7 @@ export function BizCRM({ businessId, customers }: Props) {
             </div>
           </div>
         ) : (
-          <div className="h-[600px] flex flex-col items-center justify-center space-y-8 text-center bg-white border border-dashed border-border rounded-[4rem] transition-all hover:bg-primary/5 hover:border-primary/20 group">
+          <div className="h-[600px] flex flex-col items-center justify-center space-y-8 text-center bg-card border border-dashed border-border rounded-[4rem] transition-all hover:bg-primary/5 hover:border-primary/20 group">
              <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-[3rem] bg-card shadow-2xl shadow-primary/5 border border-border flex items-center justify-center relative group-hover:scale-105 transition-transform duration-700">
                 <div className="absolute inset-0 bg-primary/5 rounded-[3rem] animate-pulse" />
                 <User className="w-12 h-12 lg:w-16 lg:h-16 text-muted-foreground/30 relative z-10" />

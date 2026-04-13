@@ -96,7 +96,7 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto pb-20">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full pb-20">
       {/* Header */}
       <div className="flex items-center justify-between bg-card p-6 rounded-3xl border border-border shadow-sm sticky top-0 z-10">
         <div className="flex items-center gap-4">
@@ -120,7 +120,7 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Left Column - General Info */}
-        <div className="md:col-span-12 lg:col-span-7 space-y-8">
+        <div className="md:col-span-12 lg:col-span-6 space-y-8">
           {/* Main Info */}
           <SectionCard 
             icon={Building2} 
@@ -267,24 +267,24 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
         </div>
 
         {/* Right Column - Working Hours & Branding */}
-        <div className="md:col-span-12 lg:col-span-5 space-y-8">
+        <div className="md:col-span-12 lg:col-span-6 space-y-8">
           {/* Working Hours */}
           <SectionCard 
             icon={Clock} 
             title="Çalışma Saatleri" 
             desc="Mesai düzenini yönetin."
           >
-            <div className="space-y-3">
+            <div className="space-y-4">
               {DAYS.map((day) => {
                 const hour = business.working_hours?.[day.key] || { start: "09:00", end: "18:00", closed: false, break_start: "12:00", break_end: "13:00" };
                 return (
                   <div 
                     key={day.key} 
                     className={cn(
-                      "group flex items-center justify-between gap-4 p-5 rounded-[2rem] border transition-all duration-300",
+                      "group flex items-center justify-between gap-6 p-6 rounded-[2.5rem] border transition-all duration-300",
                       hour.closed 
                         ? "bg-muted/30 border-border/50 opacity-60" 
-                        : "bg-card border-border hover:border-primary/40 hover:bg-muted/5 shadow-sm"
+                        : "bg-card border-border hover:border-primary/40 hover:bg-muted/5 shadow-md shadow-black/5"
                     )}
                   >
                     {/* Left: Day Info */}
@@ -321,19 +321,19 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                                 type="time" 
                                 value={hour.start} 
                                 onChange={(e) => updateWorkingHour(day.key, "start", e.target.value)}
-                                className="bg-muted/50 border-border h-10 text-sm w-24 text-center rounded-xl font-bold focus:ring-1 focus:ring-primary/20"
+                                className="bg-background border-border h-12 text-base w-36 text-center rounded-2xl font-black focus:ring-1 focus:ring-primary/20 shadow-inner"
                               />
                            </div>
                            
-                           <div className="mt-6 text-muted-foreground/20 font-light text-xl prose-2xl">–</div>
-
+                           <div className="mt-6 text-muted-foreground/30 font-light text-2xl prose-2xl px-2">–</div>
+ 
                            <div className="flex flex-col gap-1.5">
-                              <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest ml-1 opacity-60">KAPANIŞ</span>
+                              <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2 opacity-60">KAPANIŞ</span>
                               <Input 
                                 type="time" 
                                 value={hour.end} 
                                 onChange={(e) => updateWorkingHour(day.key, "end", e.target.value)}
-                                className="bg-muted/50 border-border h-10 text-sm w-24 text-center rounded-xl font-bold focus:ring-1 focus:ring-primary/20"
+                                className="bg-background border-border h-12 text-base w-36 text-center rounded-2xl font-black focus:ring-1 focus:ring-primary/20 shadow-inner"
                               />
                            </div>
                         </div>
@@ -379,7 +379,7 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                          <ImageUpload
                            onUpload={(url) => setBusiness({...business, logo: url})}
                            defaultValue={business.logo || ""}
-                           bucket="business-images"
+                           label="Logo Yükle"
                          />
                       </div>
                    </div>
@@ -390,7 +390,7 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                    <ImageUpload
                      onUpload={(url) => setBusiness({...business, cover_image: url})}
                      defaultValue={business.cover_image || ""}
-                     bucket="business-images"
+                     label="Kapak Fotoğrafı Yükle"
                    />
                 </div>
               </div>

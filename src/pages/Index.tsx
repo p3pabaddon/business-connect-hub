@@ -11,6 +11,7 @@ import { CustomerBenefitsSection } from "@/components/marketing/CustomerBenefits
 import { FeaturedSalonsSection } from "@/components/marketing/FeaturedSalonsSection";
 import { CustomerAppCTA } from "@/components/marketing/CustomerAppCTA";
 import { t } from "@/lib/translations";
+import { PublicAiAdvisor } from "@/components/layout/PublicAiAdvisor";
 
 const Index = () => {
   return (
@@ -41,6 +42,7 @@ const Index = () => {
         <CustomerAppCTA />
         <FeaturedCitiesSection />
       </main>
+      <PublicAiAdvisor />
       <Footer />
     </div>
   );

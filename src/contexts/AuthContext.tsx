@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profiles";
 import { getMyBusiness } from "@/lib/api";
+import { Loader2 } from "lucide-react";
 import type { User, Session } from "@supabase/supabase-js";
 import type { Profile } from "@/types";
 
@@ -39,18 +40,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [hasBusiness, setHasBusiness] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const refreshProfile = async () => {
-    if (!user) {
+  const refreshProfile = async (currentUser?: User | null) => {
+    const activeUser = currentUser !== undefined ? currentUser : user;
+    
+    if (!activeUser) {
       setProfile(null);
       setHasBusiness(false);
       return;
     }
 
     try {
-      const p = await ensureProfile(user);
+      const p = await ensureProfile(activeUser);
       setProfile(p as Profile);
       
-      const biz = await getMyBusiness();
+      // Pass the ID directly to avoid session fetch inside getMyBusiness
+      const biz = await getMyBusiness(activeUser.id);
       setHasBusiness(!!biz);
     } catch (error) {
       console.error("Profile refresh error:", error);
@@ -58,45 +62,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("Auth State Changed:", _event, session?.user?.email);
-      setSession(session);
+    let mounted = true;
+    let authInitialized = false;
+
+    async function handleAuthChange(session: Session | null) {
+      if (!mounted) return;
+      
       const currentUser = session?.user ?? null;
+      
+      // If we already initialized with this exact user ID, skip
+      if (authInitialized && user?.id === currentUser?.id) {
+        setLoading(false);
+        return;
+      }
+      
+      authInitialized = true;
+      setSession(session);
       setUser(currentUser);
       
-      try {
-        if (currentUser) {
-          await refreshProfile();
-        } else {
-          setProfile(null);
-          setHasBusiness(false);
+      if (currentUser) {
+        try {
+          // Add a small timeout to refreshProfile to catch any hanging queries
+          const refreshTask = refreshProfile(currentUser);
+          const timeoutTask = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 10000));
+          
+          await Promise.race([refreshTask, timeoutTask]);
+        } catch (err) {
+          console.error("Auth initialization timed out or failed:", err);
         }
-      } catch (err) {
-        console.error("Auth listener error:", err);
-      } finally {
-        setLoading(false);
+      } else {
+        setProfile(null);
+        setHasBusiness(false);
       }
-    });
-
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log("Initial Session Fetch:", session?.user?.email);
-      setSession(session);
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
       
-      try {
-        if (currentUser) {
-          await refreshProfile();
-        }
-      } catch (err) {
-        console.error("Get session error:", err);
-      } finally {
-        setLoading(false);
-      }
+      if (mounted) setLoading(false);
+    }
+
+    // Single source of truth for initialization
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleAuthChange(session);
+    }).catch(err => {
+      console.error("Initial session fetch failed:", err);
+      if (mounted) setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleAuthChange(session);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [user?.id]); // Add user?.id to dependencies to ensure handleAuthChange sees latest user state
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -124,6 +142,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
     setProfile(null);
     setHasBusiness(false);
   };
@@ -131,6 +151,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = !!user && (ADMIN_EMAILS.includes(user.email || "") || profile?.role === "admin" || profile?.role === "hq_staff");
   const isBusinessOwner = !!user && (hasBusiness || profile?.role === "business_owner" || isAdmin);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground animate-pulse">
+            Oturum Kontrol Ediliyor...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ 
@@ -145,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp, 
       signInWithGoogle, 
       signOut,
-      refreshProfile
+      refreshProfile: () => refreshProfile()
     }}>
       {children}
     </AuthContext.Provider>

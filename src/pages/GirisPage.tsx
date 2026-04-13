@@ -104,7 +104,7 @@ const GirisPage = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("auth.password")}</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="h-12 bg-white/5 border-white/10 rounded-2xl focus:ring-accent focus:border-accent transition-all" required />
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="h-12 bg-white/5 border-white/10 rounded-2xl focus:ring-accent focus:border-accent transition-all" autoComplete="new-password" required />
             </div>
             <Button type="submit" className="w-full h-14 rounded-2xl text-lg font-bold shadow-xl hover:shadow-accent/20 transition-all duration-300" disabled={loading}>
               {loading ? (

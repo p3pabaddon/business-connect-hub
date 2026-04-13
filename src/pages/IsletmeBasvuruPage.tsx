@@ -101,8 +101,12 @@ const IsletmeBasvuruPage = () => {
     if (error) {
       toast({ title: "Başvuru hatası", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Başvurunuz alındı!", description: "İşletmeniz onay sürecine alındı. Onaylandığında size bildirilecektir." });
-      navigate("/");
+      toast({ 
+        title: "Başvurunuz alındı!", 
+        description: "En yakın zamanda dönüş yapılacak başvurunuzun durumunu profilinizden takip edebilirsiniz",
+        duration: 8000
+      });
+      navigate("/profil");
     }
   };
 

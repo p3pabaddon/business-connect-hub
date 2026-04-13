@@ -2,17 +2,15 @@ import { useMemo } from "react";
 import { 
   format, 
   startOfWeek, 
-  addDays, 
-  addHours, 
-  startOfDay, 
-  isSameDay, 
-  parseISO,
   eachDayOfInterval,
   endOfWeek,
   setHours,
-  setMinutes
+  setMinutes,
+  isSameDay,
+  parseISO
 } from "date-fns";
 import { tr } from "date-fns/locale";
+import { isSlotOccupied, calculateOverlaps } from "@/lib/booking-utils";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -32,13 +30,6 @@ export function WeekView({ appointments, onAppointmentClick }: WeekViewProps) {
     eachDayOfInterval({ start: weekStart, end: weekEnd }),
     [weekStart, weekEnd]
   );
-
-  const statusMap: Record<string, string> = {
-    pending: "bg-yellow-500/20 text-yellow-500 border-yellow-500/50",
-    confirmed: "bg-blue-500/20 text-blue-500 border-blue-500/50",
-    completed: "bg-green-500/20 text-green-500 border-green-500/50",
-    cancelled: "bg-red-500/20 text-red-500 border-red-500/50",
-  };
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col h-[800px]">
@@ -87,34 +78,75 @@ export function WeekView({ appointments, onAppointmentClick }: WeekViewProps) {
               ))}
 
               {/* Appointments Overflow layer */}
-              <div className="absolute inset-0 pointer-events-none">
-                {appointments
-                  .filter((apt) => isSameDay(parseISO(apt.appointment_date), day))
-                  .map((apt) => {
-                    const [h, m] = apt.appointment_time.split(":").map(Number);
-                    if (h < 8 || h > 22) return null;
-                    
-                    const top = (h - 8) * 80 + (m / 60) * 80;
-                    const durationInMinutes = apt.duration || 30; // default 30 min if not specified
-                    const height = (durationInMinutes / 60) * 80;
+              <div className="flex-1 relative min-h-[1280px]">
+                {/* Visual grid lines */}
+                {Array.from({ length: 16 }).map((_, i) => (
+                  <div key={i} className="absolute w-full h-px bg-border/40" style={{ top: `${i * 80}px` }} />
+                ))}
 
-                    return (
-                      <div
-                        key={apt.id}
-                        onClick={() => onAppointmentClick?.(apt)}
-                        className={cn(
-                          "absolute left-1 right-1 rounded-md border p-1.5 cursor-pointer pointer-events-auto transition-all hover:scale-[1.02] hover:z-20 shadow-sm",
-                          statusMap[apt.status] || "bg-slate-500/20 text-slate-500 border-slate-500/50"
-                        )}
-                        style={{ top: `${top}px`, height: `${height}px` }}
-                      >
-                        <div className="text-[10px] font-bold truncate">{apt.customer_name}</div>
-                        <div className="text-[9px] opacity-80 leading-tight">
-                          {apt.appointment_time} · {apt.services?.[0]?.name || "Servis"}
+                {(() => {
+                  const dayApts = appointments.filter((apt) => isSameDay(parseISO(apt.appointment_date), day));
+                  const overlapGroups = calculateOverlaps(dayApts);
+
+                  return overlapGroups.map((column, colIndex, allCols) => {
+                    const width = 100 / allCols.length;
+                    const left = colIndex * width;
+
+                    return column.map((apt) => {
+                      const [h, m] = apt.appointment_time.split(":").map(Number);
+                      const top = (h - 8) * 80 + (m / 60) * 80;
+                      
+                      const notesStr = apt.notes || "";
+                      const durMatch = notesStr.match(/\[DURATION:(\d+)\]/);
+                      const durationInMinutes = durMatch ? parseInt(durMatch[1], 10) : (apt.total_duration || apt.duration || 30);
+                      const height = Math.max((durationInMinutes / 60) * 80, 25);
+
+                      return (
+                        <div
+                          key={apt.id}
+                          onClick={() => onAppointmentClick?.(apt)}
+                          className={`absolute p-2 rounded-lg border shadow-sm transition-all hover:scale-[1.02] hover:z-20 overflow-hidden cursor-pointer ${
+                            apt.status === "completed" 
+                              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400" 
+                              : apt.status === "cancelled"
+                              ? "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400"
+                              : "bg-primary/10 border-primary/30 text-primary"
+                          }`}
+                          style={{ 
+                            top: `${top}px`, 
+                            height: `${height}px`,
+                            left: `${left}%`,
+                            width: `${width}%`
+                          }}
+                        >
+                          <div className="flex flex-col h-full">
+                            <div className="flex items-center justify-between gap-1 overflow-hidden">
+                              <p className="text-[10px] font-bold truncate leading-tight">{apt.customer_name}</p>
+                              <p className="text-[9px] font-mono opacity-70 flex-shrink-0">{apt.appointment_time}</p>
+                            </div>
+                            {height > 40 && (
+                              <p className="text-[9px] mt-1 opacity-80 line-clamp-2 leading-tight">
+                                {apt.service_name || "Hizmet belirtilmedi"}
+                              </p>
+                            )}
+                            {height > 60 && apt.staff?.name && (
+                              <div className="mt-auto pt-1 border-t border-current/10 flex items-center justify-between">
+                                <p className="text-[8px] font-bold uppercase tracking-wider truncate">
+                                  {apt.staff.name}
+                                </p>
+                                <span className={`text-[8px] px-1 rounded-sm border border-current/20 ${
+                                  apt.status === 'confirmed' ? 'bg-emerald-500/20' : 'bg-amber-500/20'
+                                }`}>
+                                  {apt.status === 'confirmed' ? 'ONAYLI' : 'BEKLİYOR'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    });
+                  });
+                })()}
               </div>
             </div>
           ))}

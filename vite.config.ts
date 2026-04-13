@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 7000,
     hmr: {
-      overlay: false,
+      overlay: true,
     },
   },
   plugins: [react()],

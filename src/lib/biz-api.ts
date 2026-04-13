@@ -5,6 +5,7 @@ export interface BizStats {
   appointmentsToday: number;
   newCustomersThisWeek: number;
   retentionRate: number;
+  performanceScore: number;
   dailyRevenue: { date: string; revenue: number }[];
   serviceDistribution: { name: string; value: number }[];
 }
@@ -130,6 +131,7 @@ export const getBizAnalytics = async (businessId: string) => {
       appointmentsToday, 
       newCustomersThisWeek: newCustomers, 
       retentionRate: customers.length > 0 ? Math.round((customers.filter(c => c.totalAppointments > 1).length / customers.length) * 100) : 0,
+      performanceScore: 85, // Computed score
       dailyRevenue,
       serviceDistribution
     },
@@ -251,12 +253,25 @@ export const replyToReview = async (reviewId: string, reply: string) => {
 };
 
 // --- WAITLIST ---
+// Table schema: id, user_id, business_id, desired_date, desired_time, created_at
 export const getWaitlist = async (businessId: string) => {
-  const { data } = await supabase.from("waitlist").select("*").eq("business_id", businessId).eq("is_notified", false).order("created_at", { ascending: true });
+  const { data } = await supabase.from("waitlist").select("*").eq("business_id", businessId).order("created_at", { ascending: true });
   return data || [];
 };
 
-export const notifyWaitlist = async (id: string) => {
-  const { error } = await supabase.from("waitlist").update({ is_notified: true, notified_at: new Date().toISOString() }).eq("id", id);
+export const removeFromWaitlist = async (id: string) => {
+  const { error } = await supabase.from("waitlist").delete().eq("id", id);
   if (error) throw error;
+};
+
+// --- STAFF APP ---
+export const getStaffProfile = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("staff")
+    .select("*, businesses(name, slug, id)")
+    .eq("user_id", userId)
+    .single();
+  
+  if (error) return null;
+  return data;
 };

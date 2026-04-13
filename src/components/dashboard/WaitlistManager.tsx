@@ -1,21 +1,19 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Users, 
-  Trash2, 
-  Send, 
-  CheckCircle, 
-  Phone, 
+import {
+  Users,
+  Trash2,
+  Phone,
   Mail,
   Calendar,
+  Clock,
   UserPlus,
   RefreshCw,
   MoreHorizontal
 } from "lucide-react";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -24,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -32,11 +31,15 @@ interface WaitlistManagerProps {
 }
 
 export function WaitlistManager({ businessId }: WaitlistManagerProps) {
+  const { user } = useAuth();
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadWaitlist = async () => {
-    if (!businessId) return;
+    if (!businessId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const { data: waitlistData, error: waitlistError } = await supabase
@@ -47,10 +50,11 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
 
       if (waitlistError) throw waitlistError;
 
-      // Manuel Profil Eşleştirme
+      // Enrich with profile data for cases where customer_name might be missing
       if (waitlistData && waitlistData.length > 0) {
-        const userIds = [...new Set(waitlistData.map(e => e.user_id))];
-        const { data: profiles, error: profileError } = await supabase
+        const userIds = [...new Set(waitlistData.filter(i => i.user_id).map(item => item.user_id))];
+
+        const { data: profiles } = await supabase
           .from("profiles")
           .select("id, full_name, phone, email")
           .in("id", userIds);
@@ -59,14 +63,14 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
           ...entry,
           user: profiles?.find(p => p.id === entry.user_id) || null
         }));
-        
+
         setEntries(enriched);
       } else {
         setEntries([]);
       }
     } catch (err: any) {
-      console.error("Critical Waitlist Error:", err);
-      toast.error("İşlem Başarısız: " + (err.message || "Bağlantı hatası"));
+      console.error("Waitlist Error:", err);
+      toast.error("Liste yüklenemedi");
     } finally {
       setLoading(false);
     }
@@ -79,33 +83,21 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
   const deleteEntry = async (id: string) => {
     const { error } = await supabase.from("waitlist").delete().eq("id", id);
     if (error) {
-       toast.error("Silinemedi");
+      toast.error("Silinemedi");
     } else {
-       toast.success("Kayıt silindi");
-       loadWaitlist();
-    }
-  };
-
-  const notifyEntry = async (id: string) => {
-    const { error } = await supabase
-      .from("waitlist")
-      .update({ is_notified: true, notified_at: new Date().toISOString() })
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Bildirim gönderilemedi");
-    } else {
-      toast.success("Müşteriye bildirim gönderildi!");
+      toast.success("Kayıt silindi");
       loadWaitlist();
     }
   };
 
   const handleMoveToAppointment = async (entry: any) => {
     try {
-      // 1. Randevu oluştur
       const { error: aptError } = await supabase.from("appointments").insert({
         business_id: businessId,
         customer_id: entry.user_id,
+        customer_name: entry.customer_name || entry.user?.full_name || "Müşteri",
+        customer_phone: entry.customer_phone || entry.user?.phone || "",
+        customer_email: entry.customer_email || entry.user?.email || "",
         appointment_date: entry.desired_date || format(new Date(), "yyyy-MM-dd"),
         appointment_time: entry.desired_time || "09:00",
         status: "confirmed"
@@ -113,14 +105,13 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
 
       if (aptError) throw aptError;
 
-      // 2. Bekleme listesinden sil
       await supabase.from("waitlist").delete().eq("id", entry.id);
 
       toast.success("Müşteri randevuya başarıyla taşındı!");
       loadWaitlist();
     } catch (err: any) {
       console.error(err);
-      toast.error("İşlem başarısız: " + (err.message || "Bilinmeyen hata"));
+      toast.error("İşlem başarısız");
     }
   };
 
@@ -128,7 +119,7 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <RefreshCw className="w-10 h-10 text-primary animate-spin mb-4" />
-        <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Veriler Getiriliyor...</p>
+        <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Bekleme Listesi Yükleniyor...</p>
       </div>
     );
   }
@@ -148,9 +139,9 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
             </p>
           </div>
         </div>
-        <Button 
-          onClick={loadWaitlist} 
-          variant="outline" 
+        <Button
+          onClick={loadWaitlist}
+          variant="outline"
           className="rounded-xl border-border hover:bg-muted font-bold text-[10px] tracking-widest uppercase gap-2 py-6 px-8"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Listeyi Yenile
@@ -160,15 +151,13 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
       {/* Grid of Entries */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {entries.map((entry, index) => (
-          <div 
+          <div
             key={entry.id}
             className="bg-card border border-border rounded-[2rem] p-6 hover:shadow-xl transition-all duration-300 relative group overflow-hidden"
           >
             {/* Status Indicator */}
-            <div className={`absolute top-0 right-0 px-6 py-1.5 rounded-bl-[1.5rem] text-[9px] font-black uppercase tracking-widest ${
-              entry.is_notified ? "bg-emerald-500 text-white" : "bg-amber-500 text-white"
-            }`}>
-              {entry.is_notified ? "BİLDİRİLDİ" : "BEKLİYOR"}
+            <div className="absolute top-0 right-0 px-6 py-1.5 rounded-bl-[1.5rem] text-[9px] font-black uppercase tracking-widest bg-amber-500 text-white">
+              BEKLİYOR
             </div>
 
             <div className="flex items-start justify-between mb-6">
@@ -178,14 +167,14 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
                 </div>
                 <div>
                   <h4 className="font-black text-foreground uppercase tracking-tight leading-none truncate max-w-[150px]">
-                    {entry.user?.full_name || entry.customer_name || "Müşteri"}
+                    {entry.customer_name || entry.user?.full_name || "Müşteri"}
                   </h4>
                   <p className="text-[10px] text-muted-foreground font-bold mt-2 uppercase tracking-tight opacity-60">
-                    ID: #{entry.id.substring(0, 8)}
+                    {entry.desired_time || "Belirsiz Saat"}
                   </p>
                 </div>
               </div>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted opacity-100 transition-opacity">
@@ -195,10 +184,6 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
                 <DropdownMenuContent align="end" className="w-56 rounded-2xl border-border p-2">
                   <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest opacity-50 px-3">İşlemler</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => notifyEntry(entry.id)} className="rounded-xl gap-3 p-3">
-                    <Send className="w-4 h-4 text-primary" />
-                    <span className="font-bold text-xs">Müsaitlik Bildir</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleMoveToAppointment(entry)} className="rounded-xl gap-3 p-3">
                     <UserPlus className="w-4 h-4 text-emerald-500" />
                     <span className="font-bold text-xs">Randevuya Taşı</span>
@@ -225,26 +210,32 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
                 </Badge>
               </div>
 
+              {entry.desired_time && (
+                <div className="bg-muted/30 border border-border rounded-2xl p-4 flex items-center gap-3">
+                  <Clock className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-black uppercase tracking-tight">
+                    Saat: {entry.desired_time}
+                  </p>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 gap-2">
                 <div className="flex items-center gap-3 p-3 rounded-xl border border-transparent">
                   <Phone className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs font-bold text-foreground">{entry.user?.phone || entry.customer_phone || "Telefon Yok"}</span>
+                  <span className="text-xs font-bold text-foreground">{entry.customer_phone || entry.user?.phone || "Telefon Yok"}</span>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-xl border border-transparent">
                   <Mail className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs font-bold text-foreground truncate">{entry.user?.email || entry.customer_email || "E-posta Yok"}</span>
+                  <span className="text-xs font-bold text-foreground truncate">{entry.customer_email || entry.user?.email || "E-posta Yok"}</span>
                 </div>
               </div>
             </div>
 
-            {entry.notified_at && (
-              <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-2">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-                <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-widest">
-                  Bildiri: {format(new Date(entry.notified_at), "d MMM, HH:mm", { locale: tr })}
-                </p>
-              </div>
-            )}
+            <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-2">
+              <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-widest">
+                Kayıt: {format(new Date(entry.created_at), "d MMM, HH:mm", { locale: tr })}
+              </p>
+            </div>
           </div>
         ))}
 
@@ -253,7 +244,6 @@ export function WaitlistManager({ businessId }: WaitlistManagerProps) {
             <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mb-6">
               <Users className="w-10 h-10 text-muted-foreground/30" />
             </div>
-            <h3 className="text-xl font-black text-foreground uppercase tracking-tight">Kayıt Bulunamadı</h3>
             <p className="text-sm text-muted-foreground max-w-[300px] text-center mt-2 leading-relaxed">
               Müşterileriniz tam dolu günlerde "Beni Ara" butonuna basarak bu listeye katılırlar.
             </p>

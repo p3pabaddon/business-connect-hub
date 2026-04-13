@@ -138,21 +138,95 @@ export function calculateSmartPrice(basePrice: number, date: Date | undefined): 
   };
 }
 
+/**
+ * Extract duration (in minutes) from the notes field.
+ * Format: [DURATION:180] stored as a prefix in notes.
+ */
+function parseDurationFromNotes(notes: string | null | undefined): number {
+  if (!notes) return 30;
+  const match = notes.match(/\[DURATION:(\d+)\]/);
+  return match ? parseInt(match[1], 10) : 30;
+}
+
+/**
+ * Checks if a slot (or a range of slots for a duration) is occupied.
+ */
 export function isSlotOccupied(
   slot: string,
   occupiedSlots: any[],
   staffId: string | null,
-  totalStaffCount: number
+  totalStaffCount: number,
+  serviceDuration: number = 30
 ): boolean {
-  const appointmentsInSlot = occupiedSlots.filter(s => s.appointment_time.slice(0, 5) === slot);
+  const [slotH, slotM] = slot.split(":").map(Number);
+  const slotStartMins = slotH * 60 + slotM;
+  const slotEndMins = slotStartMins + serviceDuration;
 
-  if (staffId) {
-    // Specific staff member: check if they have an appointment at this time
-    return appointmentsInSlot.some(a => a.staff_id === staffId);
-  } else {
-    // "Anyone": check if ALL staff members are busy at this time
-    // If totalStaffCount is 0 (no staff defined), we assume 1 implicit staff
-    const limit = totalStaffCount > 0 ? totalStaffCount : 1;
-    return appointmentsInSlot.length >= limit;
+  const staffCount = totalStaffCount > 0 ? totalStaffCount : 1;
+
+  // We need to check EVERY minute (or 15-min interval) within the service duration
+  // to see if at any point there aren't enough staff free.
+  // For simplicity since our intervals are usually 30 min, we can check in 15 min steps.
+  for (let time = slotStartMins; time < slotEndMins; time += 15) {
+    const overlappingAtTime = occupiedSlots.filter(s => {
+      if (!s.appointment_time) return false;
+      const [aptH, aptM] = s.appointment_time.split(":").map(Number);
+      const aptStartMins = aptH * 60 + aptM;
+      const duration = parseDurationFromNotes(s.notes) || s.total_duration || s.duration || 30;
+      const aptEndMins = aptStartMins + duration;
+
+      return time >= aptStartMins && time < aptEndMins;
+    });
+
+    if (staffId) {
+      // If a specific staff is selected, check if they are busy at THIS exact time 'time'
+      if (overlappingAtTime.some(a => a.staff_id === staffId)) return true;
+    } else {
+      // If no staff selected, check if ALL staff are busy at THIS exact time 'time'
+      if (overlappingAtTime.length >= staffCount) return true;
+    }
   }
+
+  return false;
+}
+
+/**
+ * Helper to calculate overlapping groups for UI positioning.
+ */
+export function calculateOverlaps(appointments: any[]) {
+  const sorted = [...appointments].sort((a, b) => {
+    const aTime = a.appointment_time.split(":").map(Number);
+    const bTime = b.appointment_time.split(":").map(Number);
+    return (aTime[0] * 60 + aTime[1]) - (bTime[0] * 60 + bTime[1]);
+  });
+
+  const columns: any[][] = [];
+  
+  sorted.forEach(apt => {
+    const [aptH, aptM] = apt.appointment_time.split(":").map(Number);
+    const start = aptH * 60 + aptM;
+    const duration = parseDurationFromNotes(apt.notes) || apt.total_duration || apt.duration || 30;
+    const end = start + duration;
+
+    let placed = false;
+    for (let i = 0; i < columns.length; i++) {
+      const lastInCol = columns[i][columns[i].length - 1];
+      const [lastH, lastM] = lastInCol.appointment_time.split(":").map(Number);
+      const lastStart = lastH * 60 + lastM;
+      const lastEnd = lastStart + (parseDurationFromNotes(lastInCol.notes) || lastInCol.total_duration || lastInCol.duration || 30);
+
+      // If it doesn't overlap with the last one in this column, place it here
+      if (start >= lastEnd) {
+        columns[i].push(apt);
+        placed = true;
+        break;
+      }
+    }
+
+    if (!placed) {
+      columns.push([apt]);
+    }
+  });
+
+  return columns;
 }
