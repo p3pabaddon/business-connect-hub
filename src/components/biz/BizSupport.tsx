@@ -25,6 +25,7 @@ interface Message {
   created_at: string;
   profiles?: {
     role: string;
+    full_name: string;
   };
 }
 
@@ -85,7 +86,13 @@ export function BizSupport({ businessId }: { businessId: string }) {
     try {
       const { data, error } = await supabase
         .from("support_messages")
-        .select("*")
+        .select(`
+          *,
+          profiles:sender_id (
+            full_name,
+            role
+          )
+        `)
         .eq("ticket_id", ticketId)
         .order("created_at", { ascending: true });
       
@@ -276,26 +283,32 @@ export function BizSupport({ businessId }: { businessId: string }) {
                </div>
                
                <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.02),transparent_40%)]">
-                    {messages.map((msg) => {
-                      const isAdmin = senderRoles[msg.sender_id] === 'admin';
-                      return (
-                        <div key={msg.id} className={`flex ${!isAdmin ? 'justify-end' : 'justify-start'}`}>
-                           <div className={`max-w-[70%] p-4 rounded-2xl text-sm ${
-                              !isAdmin 
-                              ? 'bg-primary text-primary-foreground rounded-tr-none shadow-lg shadow-primary/20' 
-                              : 'bg-muted text-foreground rounded-tl-none border border-border'
-                           }`}>
-                              {msg.message}
-                              <div className={`text-[9px] mt-2 opacity-50 flex items-center gap-2 ${!isAdmin ? 'justify-end' : 'justify-start'}`}>
-                                 {!isAdmin ? 'BEN (İŞLETME)' : 'PLATFORM DESTEK'}
-                                 <span>•</span>
-                                 {format(new Date(msg.created_at), "HH:mm")}
-                              </div>
-                           </div>
-                        </div>
-                      );
-                    })}
-               </div>
+                     {messages.map((msg) => {
+                       const isMe = msg.sender_id === user?.id;
+                       const senderRole = msg.profiles?.role;
+                       const isAdmin = senderRole === 'admin';
+                       const senderName = msg.profiles?.full_name || 'Kullanıcı';
+
+                       return (
+                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[70%] p-4 rounded-2xl text-sm ${
+                               isMe 
+                               ? 'bg-primary text-primary-foreground rounded-tr-none shadow-lg shadow-primary/20' 
+                               : 'bg-muted text-foreground rounded-tl-none border border-border'
+                            }`}>
+                               {msg.message}
+                               <div className={`text-[9px] mt-2 opacity-50 flex items-center gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                  <span className="font-bold uppercase tracking-tighter">
+                                    {isMe ? 'SİZ' : (isAdmin ? 'PLATFORM DESTEK' : senderName.toUpperCase())}
+                                  </span>
+                                  <span>•</span>
+                                  {format(new Date(msg.created_at), "HH:mm")}
+                               </div>
+                            </div>
+                         </div>
+                       );
+                     })}
+                </div>
 
                <div className="p-6 border-t border-border bg-background/50 backdrop-blur-sm">
                   <div className="relative">
