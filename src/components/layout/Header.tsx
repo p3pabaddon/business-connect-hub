@@ -34,15 +34,17 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
-            <img 
-              src="/logo.png" 
-              alt="Randevu Dünyası" 
-              className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
-            />
+            <div className="relative p-1.5 bg-white rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-300 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] group-hover:scale-105">
+              <img 
+                src="/logo.png" 
+                alt="Randevu Dünyası" 
+                className="h-10 sm:h-12 w-auto object-contain" 
+              />
+            </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
