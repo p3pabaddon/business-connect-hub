@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   Package, Plus, Search, Trash2, 
   AlertTriangle, Check, ArrowRight,
-  Filter, MoreHorizontal, History,
+  Filter, MoreHorizontal, History, Crown,
   Database, ShoppingCart, RefreshCw
 } from "lucide-react";
 import { getInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/api";
@@ -297,17 +297,20 @@ export function BizInventory({ businessId }: { businessId: string }) {
       </div>
 
       {/* Info Banner */}
-      <div className="bg-primary/5 border border-primary/10 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center gap-6 shadow-sm">
-         <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shrink-0 shadow-inner">
-            <History className="w-8 h-8 text-primary" />
+      <div className="bg-purple-500/5 border border-purple-500/10 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center gap-6 shadow-sm">
+         <div className="w-16 h-16 bg-purple-500/10 rounded-[1.25rem] flex items-center justify-center border border-purple-500/20 shrink-0 shadow-inner">
+            <Crown className="w-8 h-8 text-purple-600" />
          </div>
          <div className="text-center md:text-left">
-            <h4 className="text-xl font-black text-foreground leading-none tracking-tight">Akıllı Stok Takibi</h4>
+            <div className="flex items-center justify-center md:justify-start gap-3">
+               <h4 className="text-xl font-black text-foreground leading-none tracking-tight">Akıllı Stok Takibi</h4>
+               <Badge className="bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700 text-white border-none text-[10px] py-0.5 px-3 uppercase font-black shadow-md shadow-purple-500/30">Premium</Badge>
+            </div>
             <p className="text-sm text-muted-foreground mt-3 max-w-2xl font-medium leading-relaxed">
                Envanter sistemimiz bir sonraki aşamada **Otomatik Düşüm** özelliğine sahip olacak. Bir randevu tamamlandığında, kullanılan malzemeler otomatik olarak stoktan düşülecek.
             </p>
          </div>
-         <Button variant="outline" className="md:ml-auto border-primary/20 text-primary hover:bg-primary/5 rounded-2xl flex items-center gap-2 h-12 px-6 font-bold tracking-tight">
+         <Button variant="outline" className="md:ml-auto border-purple-500/20 text-purple-600 hover:text-purple-700 hover:bg-purple-500/10 rounded-2xl flex items-center gap-2 h-12 px-6 font-bold tracking-tight">
             Nasıl Çalışır?
             <ArrowRight className="w-4 h-4" />
          </Button>
