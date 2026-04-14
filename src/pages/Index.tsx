@@ -17,17 +17,18 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEOHead
-        title={t("seo.index_title") || "Türkiye'nin Randevu Platformu"}
-        description={t("seo.index_desc") || "Berber, güzellik salonu, spa ve diş kliniği randevularınızı kolayca alın. Türkiye genelinde binlerce işletme ile güvenli randevu deneyimi."}
+        title="Randevu Dünyası | Berber, Kuaför ve Güzellik Salonu Online Randevu Al"
+        description="Türkiye'nin en büyük online randevu sistemi. Berber, güzellik merkezi, kuaför, spa ve kliniklerden anında online randevu al, sıra beklemeden işlemlerini hallet."
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          "name": "RandevuDunyasi",
+          "name": "Randevu Dünyası - Online Randevu Platformu",
           "url": "https://randevudunyasi.com",
-          "description": "Türkiye'nin online randevu platformu",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "Web",
+          "description": "Berber, kuaför, güzellik salonu ve spa merkezleri için 7/24 ücretsiz online randevu alma uygulaması.",
+          "applicationCategory": "LifestyleApplication",
+          "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
+          "keywords": "randevu al, online randevu, berber randevusu, güzellik salonu randevu, kuaför randevu al, randevu dünyası, ücretsiz randevu"
         }}
       />
       <Header />

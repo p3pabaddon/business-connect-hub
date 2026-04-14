@@ -15,7 +15,8 @@ export function QuickBookWidget() {
   const isHiddenPage = location.pathname.startsWith("/dashboard") || 
                        location.pathname.startsWith("/hq") ||
                        location.pathname === "/giris" || 
-                       location.pathname === "/kayit";
+                       location.pathname === "/kayit" ||
+                       location.pathname === "/isletme-basvuru";
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 2000); // Show after 2s

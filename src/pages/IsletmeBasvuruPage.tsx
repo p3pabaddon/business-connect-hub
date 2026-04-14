@@ -49,6 +49,7 @@ const IsletmeBasvuruPage = () => {
     description: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const generateSlug = (name: string) =>
     name
@@ -101,18 +102,60 @@ const IsletmeBasvuruPage = () => {
     if (error) {
       toast({ title: "Başvuru hatası", description: error.message, variant: "destructive" });
     } else {
+      setIsSubmitted(true);
       toast({ 
         title: "Başvurunuz alındı!", 
         description: "En yakın zamanda dönüş yapılacak başvurunuzun durumunu profilinizden takip edebilirsiniz",
-        duration: 8000
       });
-      navigate("/profil");
+      
+      // Auto redirect to home after 4 seconds
+      setTimeout(() => {
+        navigate("/");
+      }, 4000);
     }
   };
 
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 bg-surface flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-card border border-border rounded-3xl p-8 text-center shadow-2xl animate-in zoom-in duration-500">
+            <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-10 h-10 text-emerald-500" />
+            </div>
+            <h1 className="text-2xl font-black text-foreground mb-4 uppercase tracking-tight italic">Başvurunuz Alındı!</h1>
+            <p className="text-muted-foreground mb-8 text-sm leading-relaxed">
+              İşletme başvurunuz başarıyla sisteme kaydedildi. Ekibimiz en kısa sürede inceleyerek size dönüş yapacaktır. Başvurunuzun durumunu profil sayfanızdaki "Başvurularım" sekmesinden takip edebilirsiniz.
+            </p>
+            <div className="space-y-3">
+              <Button onClick={() => navigate("/")} className="w-full h-12 rounded-xl font-bold">
+                Ana Sayfaya Dön
+              </Button>
+              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest opacity-60">
+                4 saniye içinde otomatik yönlendirileceksiniz...
+              </p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
-      <SEOHead title="İşletme Başvurusu" description="RandevuDunyasi'na işletmenizi ekleyin. Ücretsiz başvuru yapın." />
+      <SEOHead 
+        title="İşletmeni Ekle | Ücretsiz Randevu Sistemi ve Takip Programı" 
+        description="Berber, kuaför veya güzellik salonunuz için ücretsiz randevu sistemi kurun. Randevularınızı kolayca yönetin, müşteri sadakatini artırın ve gelirinizi katlayın." 
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "İşletme Başvurusu - Randevu Dünyası",
+          "description": "Berber, güzellik merkezi ve kuaförler için ücretsiz online randevu sistemi kayıt sayfası.",
+          "keywords": "randevu programı, berber randevu sistemi, güzellik salonu randevu programı, kuaför randevu sistemi, ücretsiz randevu sistemi kur, işletme ekle"
+        }}
+      />
       <Header />
       <main className="flex-1 bg-surface">
         <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-16">

@@ -47,13 +47,26 @@ export function SEOHead({ title, description, url, image, type = "website", json
     const existingScript = document.querySelector('script[data-seo-jsonld]');
     if (existingScript) existingScript.remove();
     
-    if (jsonLd) {
-      const script = document.createElement("script");
-      script.type = "application/ld+json";
-      script.setAttribute("data-seo-jsonld", "true");
-      script.textContent = JSON.stringify(jsonLd);
-      document.head.appendChild(script);
-    }
+    // Default Schema for the platform
+    const defaultJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Randevu Dünyası",
+      "url": "https://randevudunyasi.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://randevudunyasi.com/isletmeler?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    };
+    
+    const finalJsonLd = jsonLd ? (Array.isArray(jsonLd) ? [defaultJsonLd, ...jsonLd] : [defaultJsonLd, jsonLd]) : defaultJsonLd;
+
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.setAttribute("data-seo-jsonld", "true");
+    script.textContent = JSON.stringify(finalJsonLd);
+    document.head.appendChild(script);
 
     return () => {
       const script = document.querySelector('script[data-seo-jsonld]');

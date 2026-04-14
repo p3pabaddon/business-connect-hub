@@ -12,7 +12,7 @@ export async function getBusinesses(filters?: { city?: string; category?: string
     query = query.eq("city", filters.city);
   }
   if (filters?.category) {
-    query = query.eq("category", filters.category);
+    query = query.ilike("category", filters.category);
   }
   if (filters?.search) {
     query = query.or(`name.ilike.%${filters.search}%,category.ilike.%${filters.search}%`);

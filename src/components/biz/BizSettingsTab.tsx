@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { 
   Building2, MapPin, Globe, Phone, Mail, 
   Settings2, Save, Clock, Trash2, Plus,
-  Camera, Briefcase, ExternalLink, ShieldCheck
+  Camera, Briefcase, ExternalLink, ShieldCheck,
+  Zap, TrendingUp, Sparkles
 } from "lucide-react";
 import { ImageUpload } from "@/components/ImageUpload";
 import { supabase } from "@/lib/supabase";
@@ -242,9 +243,6 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                     className="bg-muted/30 border-border h-12 rounded-xl font-black text-primary"
                   />
                 </div>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-2 opacity-60">
-                  Dükkan adresini değiştirmek SEO ve linklerinizi etkileyebilir.
-                </p>
               </div>
               
               <div className="flex items-center justify-between p-5 bg-muted/20 border border-border rounded-2xl">
@@ -261,6 +259,125 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                   checked={business.is_active} 
                   onCheckedChange={(v) => setBusiness({...business, is_active: v})}
                  />
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* Dynamic Pricing */}
+          <SectionCard 
+            icon={Zap} 
+            title="Dinamik Fiyatlandırma" 
+            desc="Yoğun ve sakin günlere özel otomatik fiyat kuralları."
+          >
+            <div className="space-y-6">
+              {/* Peak Pricing */}
+              <div className="p-5 bg-rose-500/5 border border-rose-500/20 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-rose-500/10 rounded-lg flex items-center justify-center border border-rose-500/20">
+                      <TrendingUp className="w-4 h-4 text-rose-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-foreground uppercase tracking-tight">Yoğun Gün Artışı</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-muted-foreground">Artış:</span>
+                    <Input 
+                      type="number" 
+                      step="0.05"
+                      value={business.dynamic_pricing?.peak_multiplier || 1.1}
+                      onChange={(e) => setBusiness({
+                        ...business, 
+                        dynamic_pricing: { 
+                          ...(business.dynamic_pricing || {}), 
+                          peak_multiplier: parseFloat(e.target.value) 
+                        }
+                      })}
+                      className="w-20 h-8 text-center font-bold rounded-lg"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {DAYS.map(day => (
+                    <button
+                      key={day.key}
+                      onClick={() => {
+                        const current = business.dynamic_pricing?.peak_days || [];
+                        const next = current.includes(day.key) 
+                          ? current.filter((d: string) => d !== day.key)
+                          : [...current, day.key];
+                        setBusiness({
+                          ...business,
+                          dynamic_pricing: { ...(business.dynamic_pricing || {}), peak_days: next }
+                        });
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border",
+                        (business.dynamic_pricing?.peak_days || []).includes(day.key)
+                          ? "bg-rose-500 text-white border-rose-600 shadow-md shadow-rose-200"
+                          : "bg-white text-muted-foreground border-border hover:border-rose-300"
+                      )}
+                    >
+                      {day.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Slow Day Pricing */}
+              <div className="p-5 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
+                      <Sparkles className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-foreground uppercase tracking-tight">Sakin Gün İndirimi</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-muted-foreground">Çarpan:</span>
+                    <Input 
+                      type="number" 
+                      step="0.05"
+                      value={business.dynamic_pricing?.slow_multiplier || 0.9}
+                      onChange={(e) => setBusiness({
+                        ...business, 
+                        dynamic_pricing: { 
+                          ...(business.dynamic_pricing || {}), 
+                          slow_multiplier: parseFloat(e.target.value) 
+                        }
+                      })}
+                      className="w-20 h-8 text-center font-bold rounded-lg"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {DAYS.map(day => (
+                    <button
+                      key={day.key}
+                      onClick={() => {
+                        const current = business.dynamic_pricing?.slow_days || [];
+                        const next = current.includes(day.key) 
+                          ? current.filter((d: string) => d !== day.key)
+                          : [...current, day.key];
+                        setBusiness({
+                          ...business,
+                          dynamic_pricing: { ...(business.dynamic_pricing || {}), slow_days: next }
+                        });
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border",
+                        (business.dynamic_pricing?.slow_days || []).includes(day.key)
+                          ? "bg-emerald-500 text-white border-emerald-600 shadow-md shadow-emerald-200"
+                          : "bg-white text-muted-foreground border-border hover:border-emerald-300"
+                      )}
+                    >
+                      {day.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </SectionCard>

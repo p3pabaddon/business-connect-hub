@@ -105,7 +105,18 @@ export function getWorkingHoursForDay(workingHours: any, date: Date | undefined)
  * - Weekends (Sat, Sun): +10% Peak Surcharge
  * - Slow Days (Tue, Wed): -10% Off-Peak Discount
  */
-export function calculateSmartPrice(basePrice: number, date: Date | undefined): { 
+export interface DynamicPricingSettings {
+  peak_multiplier: number;
+  slow_multiplier: number;
+  peak_days: string[];
+  slow_days: string[];
+}
+
+export function calculateSmartPrice(
+  basePrice: number, 
+  date: Date | undefined,
+  settings?: DynamicPricingSettings
+): { 
   price: number, 
   originalPrice: number, 
   multiplier: number,
@@ -114,18 +125,27 @@ export function calculateSmartPrice(basePrice: number, date: Date | undefined): 
   if (!date) return { price: basePrice, originalPrice: basePrice, multiplier: 1, label: null };
   
   const day = format(date, "EEEE").toLowerCase();
+  
+  // Use provided settings or fall back to defaults
+  const config = settings || {
+    peak_multiplier: 1.1,
+    slow_multiplier: 0.9,
+    peak_days: ["saturday", "sunday"],
+    slow_days: ["tuesday", "wednesday"]
+  };
+
   let multiplier = 1;
   let label = null;
 
-  // Peak Hours: Saturday and Sunday
-  if (day === "saturday" || day === "sunday") {
-    multiplier = 1.1; // +10%
-    label = "Yoğun Saat Artışı (+10%)";
+  if (config.peak_days.includes(day)) {
+    multiplier = config.peak_multiplier;
+    const diff = Math.round((multiplier - 1) * 100);
+    label = `Yoğun Saat Artışı (+${diff}%)`;
   } 
-  // Off-Peak: Tuesday and Wednesday
-  else if (day === "tuesday" || day === "wednesday") {
-    multiplier = 0.9; // -10%
-    label = "Sakin Gün İndirimi (-10%)";
+  else if (config.slow_days.includes(day)) {
+    multiplier = config.slow_multiplier;
+    const diff = Math.round((1 - multiplier) * 100);
+    label = `Sakin Gün İndirimi (-${diff}%)`;
   }
 
   const finalPrice = Math.round(basePrice * multiplier);

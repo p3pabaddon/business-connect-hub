@@ -37,8 +37,11 @@ function findAnswer(input: string): string {
   return "Bu konuda size yardımcı olabilmem için daha fazla detay verir misiniz? Randevu, kayıt, fiyatlandırma veya işletme başvurusu gibi konularda sorularınızı sorabilirsiniz. Detaylı destek için destek@randevudunyasi.com adresine yazabilirsiniz.";
 }
 
+import { useLocation } from "react-router-dom";
+
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Merhaba! 👋 RandevuDunyasi asistanıyım. Size nasıl yardımcı olabilirim?" }
   ]);
@@ -46,9 +49,17 @@ export function ChatbotWidget() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const isHiddenPage = location.pathname.startsWith("/dashboard") || 
+                       location.pathname.startsWith("/hq") ||
+                       location.pathname === "/giris" || 
+                       location.pathname === "/kayit" ||
+                       location.pathname === "/isletme-basvuru";
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  if (isHiddenPage) return null;
 
   const handleSend = async () => {
     if (!input.trim()) return;

@@ -15,7 +15,7 @@ import { useBusinessBySlug } from "@/hooks/useQueries";
 import { getLoyaltyProgram, getCustomerLoyalty, joinLoyaltyProgram } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { SEOHead } from "@/components/SEOHead";
-import { cn } from "@/lib/utils";
+import { cn, getCategoryPlaceholder, toTitleCase } from "@/lib/utils";
 import { toast } from "sonner";
 import { StampCard } from "@/components/loyalty/StampCard";
 import { ReviewAISummary } from "@/components/ReviewAISummary";
@@ -133,8 +133,34 @@ const IsletmeDetailPage = () => {
     ? JSON.parse(biz.working_hours) 
     : (biz.working_hours || {});
 
-  const seoTitle = `${biz.name} - ${biz.category} | ${biz.city}`;
-  const seoDesc = `${biz.city} konumundaki ${biz.name} için randevunuzu hemen alın. ${biz.category} alanında uzman kadrosuyla hizmetinizde.`;
+  const seoTitle = `${biz.name} | ${toTitleCase(biz.category)} - ${biz.district}, ${biz.city} | Online Randevu Al`;
+  const seoDesc = `${biz.city} ${biz.district} konumundaki ${biz.name} işletmesinden online randevu alın. ${biz.rating ? biz.rating + ' yıldızlı hizmet. ' : ''}${biz.category} alanında uzman kadrosuyla anında onaylı randevu oluşturun.`;
+
+  const businessJsonLd = {
+    "@context": "https://schema.org",
+    "@type": ["LocalBusiness", "BeautySalon"],
+    "name": biz.name,
+    "image": biz.image_url || biz.logo || "https://randevudunyasi.com/icon-512.png",
+    "@id": `https://randevudunyasi.com/isletme/${biz.slug}`,
+    "url": `https://randevudunyasi.com/isletme/${biz.slug}`,
+    "telephone": biz.phone || "",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": biz.address || "",
+      "addressLocality": biz.district || "",
+      "addressRegion": biz.city || "",
+      "addressCountry": "TR"
+    },
+    ...(biz.rating && {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": biz.rating,
+        "reviewCount": biz.review_count || 1
+      }
+    }),
+    "priceRange": "₺₺",
+    "description": biz.description || seoDesc
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -142,7 +168,8 @@ const IsletmeDetailPage = () => {
         title={seoTitle}
         description={seoDesc}
         url={window.location.href}
-        image={biz.image_url || "/placeholder.jpg"}
+        image={biz.image_url || biz.logo || getCategoryPlaceholder(biz.category)}
+        jsonLd={businessJsonLd}
       />
       <Header />
       <main className="flex-1 bg-surface">
@@ -152,7 +179,7 @@ const IsletmeDetailPage = () => {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="secondary">{biz.category}</Badge>
+                  <Badge variant="secondary">{toTitleCase(biz.category)}</Badge>
                   {biz.is_verified && (
                     <Badge className="bg-accent/10 text-accent border-accent/20">
                       <CheckCircle className="w-3 h-3 mr-1" /> Onaylı
@@ -496,6 +523,7 @@ const IsletmeDetailPage = () => {
         services={biz.services || []}
         staff={biz.staff || []}
         workingHours={workingHours}
+        dynamicPricing={biz.dynamic_pricing}
       />
 
       <ReviewModal

@@ -1,7 +1,15 @@
 User-agent: Googlebot
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /hq
+Disallow: /profil
 Allow: /
 
 User-agent: Bingbot
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /hq
+Disallow: /profil
 Allow: /
 
 User-agent: Twitterbot
@@ -11,4 +19,10 @@ User-agent: facebookexternalhit
 Allow: /
 
 User-agent: *
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /hq
+Disallow: /profil
 Allow: /
+
+Sitemap: https://randevudunyasi.com/sitemap.xml

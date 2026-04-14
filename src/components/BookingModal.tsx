@@ -37,13 +37,19 @@ interface BookingModalProps {
   services: Service[];
   staff: StaffMember[];
   workingHours: any;
+  dynamicPricing?: {
+    peak_multiplier: number;
+    slow_multiplier: number;
+    peak_days: string[];
+    slow_days: string[];
+  };
 }
 
 function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-export function BookingModal({ open, onOpenChange, businessId, businessName, services, staff, workingHours }: BookingModalProps) {
+export function BookingModal({ open, onOpenChange, businessId, businessName, services, staff, workingHours, dynamicPricing }: BookingModalProps) {
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -114,7 +120,18 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
   };
 
   const chosenServices = services.filter((s) => selectedServices.includes(s.id));
-  const totalPrice = chosenServices.reduce((sum, s) => sum + Number(s.price), 0);
+  const smartBasePrice = chosenServices.reduce((sum, s) => {
+    return sum + calculateSmartPrice(Number(s.price), selectedDate, dynamicPricing).price;
+  }, 0);
+  
+  const totalPrice = (() => {
+    if (!appliedCoupon) return smartBasePrice;
+    if (appliedCoupon.discount_type === "percentage") {
+      return Math.round(smartBasePrice * (1 - appliedCoupon.discount_value / 100));
+    }
+    return Math.max(0, smartBasePrice - appliedCoupon.discount_value);
+  })();
+
   const totalDuration = chosenServices.reduce((sum, s) => sum + (Number(s.duration) || 0), 0);
 
   const handleJoinWaitlist = async () => {
@@ -361,11 +378,11 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-accent">
-                      {calculateSmartPrice(service.price, selectedDate || new Date()).price} TL
+                      {calculateSmartPrice(service.price, selectedDate, dynamicPricing).price} TL
                     </div>
-                    {calculateSmartPrice(service.price, selectedDate || new Date()).multiplier !== 1 && (
+                    {calculateSmartPrice(service.price, selectedDate, dynamicPricing).multiplier !== 1 && (
                       <div className="text-xs text-accent/80 font-medium">
-                        {calculateSmartPrice(service.price, selectedDate || new Date()).label}
+                        {calculateSmartPrice(service.price, selectedDate, dynamicPricing).label}
                       </div>
                     )}
                   </div>
@@ -649,11 +666,11 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                   )}
                 </div>
                 {couponError && <p className="text-[10px] text-destructive mt-1 font-medium">{couponError}</p>}
-                {appliedCoupon && (
-                  <p className="text-[10px] text-emerald-500 mt-1 font-medium italic">
-                    {appliedCoupon.discount_type === "percent" ? `%${appliedCoupon.value}` : `${appliedCoupon.value} TL`} indirim uygulandı! 🎉
-                  </p>
-                )}
+                 {appliedCoupon && (
+                   <p className="text-[10px] text-emerald-500 mt-1 font-medium italic">
+                     {appliedCoupon.discount_type === "percentage" ? `%${appliedCoupon.discount_value}` : `${appliedCoupon.discount_value} TL`} indirim uygulandı! 🎉
+                   </p>
+                 )}
               </div>
             </div>
 

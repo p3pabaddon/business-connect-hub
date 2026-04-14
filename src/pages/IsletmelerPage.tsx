@@ -19,6 +19,7 @@ import { turkiyeIller } from "@/lib/turkey-locations";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { t } from "@/lib/translations";
 import { SEOHead } from "@/components/SEOHead";
+import { getCategoryPlaceholder, toTitleCase } from "@/lib/utils";
 
 const categories = [
   { value: "all", label: t("isletmeler.all_categories") },
@@ -113,7 +114,17 @@ const IsletmelerPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEOHead title="İşletmeler" description="Türkiye genelinde berber, güzellik salonu, spa ve klinik işletmelerini keşfedin." />
+      <SEOHead 
+        title={`${selectedCategory && selectedCategory !== "all" ? selectedCategory : "Berber, Kuaför ve Güzellik Salonu"} Seç & Online Randevu Al`}
+        description={`Türkiye'nin en iyi ${selectedCategory !== "all" ? selectedCategory.toLowerCase() : "işletmelerini"} keşfedin. Konumunuza en yakın işletmeyi bulun, yorumları okuyun ve saniyeler içinde ücretsiz online randevu alın.`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Randevu Dünyası İşletmeler",
+          "description": "Yakınınızdaki en iyi berberler, güzellik merkezleri, spa ve kuaförler. Online randevu al.",
+          "keywords": "yakınımdaki berber, en iyi kuaför, yakınımdaki güzellik merkezi, online randevu al, berber randevu"
+        }}
+      />
       <Header />
       <main className="flex-1 bg-surface">
         {/* Search Header */}
@@ -241,9 +252,12 @@ const IsletmelerPage = () => {
                       <FavoriteButton businessId={biz.id} />
                     </div>
                     <div className="flex-shrink-0 w-24 sm:w-32 h-24 sm:h-32 bg-muted relative">
-                    {biz.logo && (
-                      <img src={biz.logo} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    )}
+                      <img 
+                        src={biz.logo || getCategoryPlaceholder(biz.category)} 
+                        alt="" 
+                        className="w-full h-full object-cover" 
+                        loading="lazy" 
+                      />
                     </div>
                     <div className="p-5">
                       <div className="flex items-start justify-between mb-2">
@@ -256,7 +270,7 @@ const IsletmelerPage = () => {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-3">{biz.category}</p>
+                      <p className="text-sm text-muted-foreground mb-3">{toTitleCase(biz.category)}</p>
                       <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 text-warning fill-warning" />
