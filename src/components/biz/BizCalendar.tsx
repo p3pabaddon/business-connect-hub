@@ -1,3 +1,4 @@
+// BUSINESS CONNECT HUB - CALENDAR ENGINE V2.1 (FIXED COLLISION)
 import { useState, useMemo } from "react";
 import {
    ChevronLeft, ChevronRight, Calendar as CalendarIcon,
