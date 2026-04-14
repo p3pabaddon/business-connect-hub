@@ -389,26 +389,6 @@ export async function createAppointment(data: any) {
 
   const { error } = await supabase.from("appointments").insert(insertData);
   if (error) throw error;
-
-  // 4. Notify business owner about the new appointment
-  try {
-    const { data: biz } = await supabase
-      .from("businesses")
-      .select("owner_id, name")
-      .eq("id", data.business_id)
-      .single();
-
-    if (biz?.owner_id) {
-      await supabase.from("notifications").insert({
-        user_id: biz.owner_id,
-        title: "Yeni Randevu! 📅",
-        message: `${data.customer_name} tarafından ${data.appointment_date} için yeni bir randevu oluşturuldu.`,
-        type: "general"
-      });
-    }
-  } catch (nError) {
-    console.warn("Notification trigger failed:", nError);
-  }
 }
 
 export async function getOccupiedSlots(businessId: string, date: string, staffId?: string) {

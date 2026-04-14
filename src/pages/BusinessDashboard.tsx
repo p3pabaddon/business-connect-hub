@@ -271,7 +271,10 @@ export default function BusinessDashboard() {
 
            <div className="flex items-center gap-2 lg:gap-4">
               <ThemeToggle />
-              <button className="relative p-2 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group">
+              <button 
+                onClick={() => setActiveTab("notifications")}
+                className="relative p-2 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group"
+              >
                  <Bell className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full border-2 border-background"></span>
               </button>
