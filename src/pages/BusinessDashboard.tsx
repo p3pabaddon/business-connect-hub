@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyBusiness, useBizAnalytics, useInventory, useBizServices, useBizStaff, useBizReviews } from "@/hooks/useQueries";
@@ -82,11 +82,19 @@ export default function BusinessDashboard() {
     reloadReviews();
   };
 
+  const globalNotifChannelRef = useRef<any>(null);
+  const bizAptChannelRef = useRef<any>(null);
+
   // Unified Notification & Realtime Listener
   useEffect(() => {
     if (user?.id) {
-      const channel = supabase
-        .channel(`global-notifications-${user.id}-${Date.now()}`)
+      if (globalNotifChannelRef.current) {
+        supabase.removeChannel(globalNotifChannelRef.current);
+      }
+
+      const chanId = `gl-notif-${user.id}-${Math.random().toString(36).slice(2, 10)}`;
+      globalNotifChannelRef.current = supabase
+        .channel(chanId)
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
@@ -103,16 +111,24 @@ export default function BusinessDashboard() {
         .subscribe();
 
       return () => {
-        supabase.removeChannel(channel);
+        if (globalNotifChannelRef.current) {
+          supabase.removeChannel(globalNotifChannelRef.current);
+          globalNotifChannelRef.current = null;
+        }
       };
     }
-  }, [user]);
+  }, [user?.id]);
 
-  // Specific Appointment Listener for immediate refresh (optional if covered by notifications)
+  // Specific Appointment Listener for immediate refresh
   useEffect(() => {
     if (business?.id) {
-      const channel = supabase
-        .channel(`biz-updates-appointments-${business.id}-${Date.now()}`)
+      if (bizAptChannelRef.current) {
+        supabase.removeChannel(bizAptChannelRef.current);
+      }
+
+      const chanId = `biz-apt-${business.id}-${Math.random().toString(36).slice(2, 10)}`;
+      bizAptChannelRef.current = supabase
+        .channel(chanId)
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'appointments', filter: `business_id=eq.${business.id}` },
@@ -123,7 +139,10 @@ export default function BusinessDashboard() {
         .subscribe();
 
       return () => {
-        supabase.removeChannel(channel);
+        if (bizAptChannelRef.current) {
+          supabase.removeChannel(bizAptChannelRef.current);
+          bizAptChannelRef.current = null;
+        }
       };
     }
   }, [business?.id]);
