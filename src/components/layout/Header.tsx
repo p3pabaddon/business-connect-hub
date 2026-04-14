@@ -34,7 +34,7 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
+    <header className="sticky top-0 z-50 border-b border-white/5 bg-white/70 dark:bg-black/70 backdrop-blur-xl transition-all duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
@@ -52,7 +52,7 @@ export function Header() {
               <Link
                 key={link.href}
                 to={link.href}
-                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-muted"
+                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 dark:text-zinc-400 dark:hover:text-white transition-all rounded-lg"
               >
                 {link.label}
               </Link>
@@ -67,12 +67,12 @@ export function Header() {
             </div>
             
             <div className="flex items-center gap-4">
-              <Link to="/isletmeler-icin" className="text-sm font-semibold text-muted-foreground hover:text-accent transition-colors">
+              <Link to="/isletmeler-icin" className="text-sm font-semibold text-muted-foreground hover:text-accent dark:hover:text-white transition-colors">
                 {t("nav.for_business")}
               </Link>
               
               <Link to="/isletme-basvuru">
-                <Button variant="ghost" size="sm" className="text-accent hover:text-accent font-bold tracking-tight px-0">
+                <Button variant="ghost" size="sm" className="text-accent hover:text-accent-foreground hover:bg-accent font-bold tracking-tight px-3 transition-all rounded-lg">
                   {t("nav.business_apply")}
                 </Button>
               </Link>
