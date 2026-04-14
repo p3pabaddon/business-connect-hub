@@ -9,7 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
    startOfWeek, addDays, format, isSameDay,
-   addWeeks, subWeeks, startOfToday
+   addWeeks, subWeeks, startOfToday, parseISO,
+   isWithinInterval, endOfDay, startOfDay,
+   addMinutes
 } from "date-fns";
 import { tr } from "date-fns/locale";
 import { updateAppointmentStatus } from "@/lib/api";
@@ -18,7 +20,6 @@ import {
    Dialog, DialogContent, DialogHeader,
    DialogTitle, DialogTrigger, DialogFooter
 } from "@/components/ui/dialog";
-import { format as formatFns } from "date-fns";
 import { toast } from "sonner";
 
 interface Props {
@@ -26,7 +27,7 @@ interface Props {
    onRefresh?: () => void;
 }
 
-const HOURS = Array.from({ length: 13 }, (_, i) => `${i + 9}:00`);
+const HOURS = Array.from({ length: 14 }, (_, i) => `${i + 8}:00`); // 8am to 9pm
 
 export function BizCalendar({ appointments, onRefresh }: Props) {
    const [currentViewDate, setCurrentViewDate] = useState(new Date());
@@ -52,64 +53,131 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
    const handleNextWeek = () => setCurrentViewDate(addWeeks(currentViewDate, 1));
    const handleToday = () => setCurrentViewDate(new Date());
 
-   // Group appointments by date
+   const isCurrentWeek = useMemo(() => {
+      const today = startOfToday();
+      const start = startOfWeek(currentViewDate, { weekStartsOn: 1 });
+      const end = addDays(start, 6);
+      return today >= start && today <= end;
+   }, [currentViewDate]);
+
+   // Helper to extract duration from notes or metadata
+   const getDuration = (apt: any) => {
+      if (apt.notes) {
+         const match = apt.notes.match(/\[DURATION:(\d+)\]/);
+         if (match) return parseInt(match[1]);
+      }
+      return 30; // Default 30 mins
+   };
+
+   // Group appointments by date and calculate overlap logic
    const appointmentsByDay = useMemo(() => {
       const map: Record<string, any[]> = {};
+      
       appointments.forEach(apt => {
          const dateStr = apt.appointment_date;
          if (!map[dateStr]) map[dateStr] = [];
-         map[dateStr].push(apt);
+         
+         const duration = getDuration(apt);
+         const [h, m] = apt.appointment_time.split(":").map(Number);
+         const startTime = h * 60 + m;
+         const endTime = startTime + duration;
+         
+         map[dateStr].push({
+            ...apt,
+            duration,
+            startTime,
+            endTime
+         });
       });
+
+      // Calculate overlap grouping for each day
+      Object.keys(map).forEach(date => {
+         const dayApts = map[date].sort((a, b) => a.startTime - b.startTime);
+         
+         // Simple collision detection algorithm
+         const columns: any[][] = [];
+         dayApts.forEach(apt => {
+            let placed = false;
+            for (let i = 0; i < columns.length; i++) {
+               const lastAptInCol = columns[i][columns[i].length - 1];
+               if (apt.startTime >= lastAptInCol.endTime) {
+                  columns[i].push(apt);
+                  apt.col = i;
+                  placed = true;
+                  break;
+               }
+            }
+            if (!placed) {
+               apt.col = columns.length;
+               columns.push([apt]);
+            }
+         });
+
+         dayApts.forEach(apt => {
+            apt.totalCols = columns.length;
+         });
+      });
+
       return map;
    }, [appointments]);
 
-   // Helper to calculate top position
-   const getAppointmentPosition = (timeStr: string) => {
+   const getPosition = (timeStr: string) => {
       const [hours, minutes] = timeStr.split(":").map(Number);
-      const totalMinutes = (hours - 9) * 60 + minutes;
-      return (totalMinutes / (12 * 60)) * 100; // Relative to 12 hour span (9am - 9pm)
+      const totalMinutes = (hours - 8) * 60 + minutes;
+      return totalMinutes * (100 / 60); // 100px per hour
    };
 
    return (
-      <div className="bg-card border border-border rounded-3xl overflow-hidden flex flex-col h-[calc(100vh-200px)] animate-in fade-in duration-500 shadow-sm">
+      <div className="bg-card border border-border rounded-[2.5rem] overflow-hidden flex flex-col h-[calc(100vh-140px)] animate-in fade-in duration-700 shadow-2xl relative">
          {/* Calendar Header */}
-         <div className="p-6 border-b border-border flex flex-col sm:flex-row items-center justify-between bg-muted/20 gap-4">
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 bg-primary/10 rounded-2xl border border-primary/20 flex items-center justify-center shrink-0 shadow-inner">
-                  <CalendarDays className="w-6 h-6 text-primary" />
+         <div className="p-8 border-b border-border flex flex-col sm:flex-row items-center justify-between bg-muted/10 backdrop-blur-md z-30 gap-6">
+            <div className="flex items-center gap-6">
+               <div className="w-14 h-14 bg-primary/10 rounded-[1.25rem] border border-primary/20 flex items-center justify-center shrink-0 shadow-lg ring-4 ring-primary/5">
+                  <CalendarDays className="w-7 h-7 text-primary" />
                </div>
                <div>
-                  <h3 className="text-xl font-black text-foreground tracking-tight uppercase">Randevu Çizelgesi</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black opacity-60">
-                     {format(weekDays[0], 'd MMMM', { locale: tr })} - {format(weekDays[6], 'd MMMM yyyy', { locale: tr })}
-                  </p>
+                  <h3 className="text-2xl font-black text-foreground tracking-tight uppercase italic underline decoration-primary/30 underline-offset-8">Randevu Ajandası</h3>
+                  <div className="flex items-center gap-2 mt-2">
+                     <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary px-3 py-1 rounded-lg">
+                        {format(weekDays[0], 'd MMMM', { locale: tr })} - {format(weekDays[6], 'd MMMM yyyy', { locale: tr })}
+                     </Badge>
+                  </div>
                </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-2xl border border-border">
-               <Button onClick={handlePrevWeek} variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:bg-card hover:text-primary transition-all"><ChevronLeft className="w-5 h-5" /></Button>
-               <Button onClick={handleToday} variant="ghost" className="px-5 h-9 text-[10px] font-black text-foreground uppercase tracking-widest hover:bg-card hover:text-primary transition-all">BU HAFTA</Button>
-               <Button onClick={handleNextWeek} variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:bg-card hover:text-primary transition-all"><ChevronRight className="w-5 h-5" /></Button>
+            <div className="flex items-center gap-2 bg-background/50 p-1.5 rounded-[1.5rem] border border-border shadow-inner ring-1 ring-border/50">
+               <Button onClick={handlePrevWeek} variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-xl"><ChevronLeft className="w-5 h-5" /></Button>
+               <Button 
+                  onClick={handleToday} 
+                  variant={isCurrentWeek ? "secondary" : "ghost"} 
+                  className={cn(
+                     "px-6 h-10 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all",
+                     isCurrentWeek ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground"
+                  )}
+               >
+                  {isCurrentWeek ? "BU HAFTA" : "BUGÜNE DÖN"}
+               </Button>
+               <Button onClick={handleNextWeek} variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-xl"><ChevronRight className="w-5 h-5" /></Button>
             </div>
          </div>
 
          {/* Grid Area */}
          <div className="flex-1 flex flex-col overflow-hidden">
             {/* Days Header */}
-            <div className="flex bg-muted/30 border-b border-border">
-               <div className="w-20 border-r border-border shrink-0" />
-               <div className="flex-1 grid grid-cols-7 min-w-[700px]">
+            <div className="flex bg-muted/20 border-b border-border">
+               <div className="w-24 border-r border-border shrink-0 bg-muted/30" />
+               <div className="flex-1 grid grid-cols-7 min-w-[1000px]">
                   {weekDays.map((day, i) => (
                      <div key={i} className={cn(
-                        "p-5 text-center border-r border-border/50 last:border-0 transition-colors",
-                        isSameDay(day, new Date()) && "bg-primary/5 shadow-[inset_0_-3px_0_0_#3b82f6]"
+                        "p-6 text-center border-r border-border/50 last:border-0 transition-all duration-300",
+                        isSameDay(day, new Date()) && "bg-primary/5 shadow-[inset_0_-4px_0_0_#3b82f6]"
                      )}>
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2 opacity-60">
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em] mb-2 opacity-50">
                            {format(day, 'eeee', { locale: tr })}
                         </p>
                         <p className={cn(
-                           "text-2xl font-black tracking-tighter",
-                           isSameDay(day, new Date()) ? "text-primary" : "text-foreground"
+                           "text-3xl font-black tracking-tighter transition-transform",
+                           isSameDay(day, new Date()) ? "text-primary scale-110" : "text-foreground opacity-90"
                         )}>
                            {format(day, 'd')}
                         </p>
@@ -119,13 +187,13 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
             </div>
 
             {/* Scrollable Body */}
-            <div className="flex-1 overflow-auto custom-scrollbar relative">
-               <div className="flex min-w-[700px] h-[1200px]">
+            <div className="flex-1 overflow-auto custom-scrollbar relative bg-grid-slate-900/[0.05] dark:bg-grid-white/[0.02]">
+               <div className="flex min-w-[1000px] h-[1400px]">
                   {/* Time Strip */}
-                  <div className="w-20 shrink-0 bg-muted/20 border-r border-border shadow-inner">
-                     {HOURS.map((hour, i) => (
-                        <div key={hour} className="h-[100px] relative">
-                           <span className="absolute -top-3 left-0 right-0 text-center text-[11px] font-black text-muted-foreground/40 uppercase tracking-tighter">
+                  <div className="w-24 shrink-0 bg-muted/10 border-r border-border backdrop-blur-sm sticky left-0 z-20">
+                     {HOURS.map((hour) => (
+                        <div key={hour} className="h-[100px] relative border-b border-border/20 last:border-0">
+                           <span className="absolute top-4 left-0 right-0 text-center text-[11px] font-black text-muted-foreground/30 uppercase tracking-tighter">
                               {hour}
                            </span>
                         </div>
@@ -137,103 +205,97 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                      {/* Horizontal Grid Lines */}
                      <div className="absolute inset-0 pointer-events-none">
                         {HOURS.map((hour) => (
-                           <div key={hour} className="h-[100px] border-b border-border/50 last:border-0" />
+                           <div key={hour} className="h-[100px] border-b border-border/30 last:border-0" />
                         ))}
                      </div>
 
-                     {/* Vertical Grid Lines & Appointments */}
+                     {/* Today Highlight Column */}
+                     <div className="absolute inset-0 grid grid-cols-7 pointer-events-none">
+                        {weekDays.map((day, i) => (
+                           <div key={i} className={cn(
+                              "border-r border-border/20 last:border-0",
+                              isSameDay(day, new Date()) && "bg-primary/[0.02]"
+                           )} />
+                        ))}
+                     </div>
+
+                     {/* Appointments */}
                      {weekDays.map((day, dayIndex) => {
                         const dateStr = format(day, 'yyyy-MM-dd');
                         const dayApts = appointmentsByDay[dateStr] || [];
 
                         return (
-                           <div key={dayIndex} className="relative border-r border-border/30 last:border-0 group">
+                           <div key={dayIndex} className="relative group">
                               {dayApts.map((apt, aptIndex) => {
-                                 const top = getAppointmentPosition(apt.appointment_time);
-                                 const statusMap: any = {
-                                    pending: "Bekliyor",
-                                    confirmed: "Onaylandı",
-                                    completed: "Tamamlandı",
-                                    cancelled: "İptal"
+                                 const top = getPosition(apt.appointment_time);
+                                 const height = (apt.duration / 60) * 100;
+                                 const width = 100 / apt.totalCols;
+                                 const left = apt.col * width;
+
+                                 const statusColors: any = {
+                                    pending: "border-amber-500/30 bg-amber-500/5",
+                                    confirmed: "border-blue-500/30 bg-blue-500/5 shadow-blue-500/10",
+                                    completed: "border-emerald-500/30 bg-emerald-500/5 shadow-emerald-500/10",
+                                    cancelled: "border-rose-500/30 bg-rose-500/5"
                                  };
 
                                  return (
                                     <div
-                                       key={aptIndex}
-                                       style={{ top: `${top}%`, height: '90px' }}
+                                       key={apt.id || aptIndex}
+                                       style={{ 
+                                          top: `${top}px`, 
+                                          height: `${height}px`,
+                                          left: `${left}%`,
+                                          width: `${width}%`
+                                       }}
                                        onClick={() => {
                                           setSelectedApt(apt);
                                           setIsDetailsOpen(true);
                                        }}
-                                       className="absolute left-1 right-1 z-10 p-4 rounded-2xl bg-card border border-border shadow-lg group/apt overflow-hidden hover:z-20 hover:scale-[1.02] transition-all cursor-pointer ring-1 ring-border/50"
+                                       className={cn(
+                                          "absolute z-10 px-3 py-2 rounded-2xl border backdrop-blur-md transition-all duration-300",
+                                          "cursor-pointer hover:z-30 hover:scale-[1.02] hover:shadow-2xl ring-1 ring-white/5",
+                                          statusColors[apt.status] || "border-border bg-card",
+                                          apt.status === 'confirmed' && "animate-in fade-in zoom-in duration-500"
+                                       )}
                                     >
+                                       {/* Status Indicator Bar */}
                                        <div className={cn(
-                                          "absolute left-0 top-0 bottom-0 w-2",
-                                          apt.status === 'confirmed' ? "bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]" :
-                                             apt.status === 'completed' ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]" : "bg-muted-foreground/30"
+                                          "absolute top-0 bottom-0 left-0 w-1.5 rounded-l-2xl",
+                                          apt.status === 'confirmed' ? "bg-blue-500" :
+                                          apt.status === 'completed' ? "bg-emerald-500" :
+                                          apt.status === 'cancelled' ? "bg-rose-500" : "bg-amber-500"
                                        )} />
 
-                                       <div className="flex flex-col h-full justify-between">
-                                          <div>
-                                             <h4 className="text-xs font-black text-foreground uppercase tracking-tight leading-none mb-1">
+                                       <div className="flex flex-col h-full overflow-hidden">
+                                          <div className="flex items-center justify-between gap-1 mb-1">
+                                             <span className="text-[9px] font-black text-foreground uppercase truncate tracking-tight">
                                                 {apt.customer_name}
-                                             </h4>
-                                             <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight opacity-60">
-                                                {apt.service_name || "Servis"}
-                                             </p>
-                                          </div>
-                                          <div className="flex items-center justify-between">
-                                             <span className="text-[10px] font-black text-primary">
+                                             </span>
+                                             <span className="text-[9px] font-mono font-bold text-primary shrink-0">
                                                 {apt.appointment_time}
                                              </span>
-                                             <Badge variant="outline" className="h-5 px-1.5 text-[8px] border-border text-muted-foreground ml-auto uppercase font-black tracking-tighter shadow-sm">
-                                                {statusMap[apt.status] || apt.status}
-                                             </Badge>
                                           </div>
+                                          
+                                          {height >= 50 && (
+                                             <div className="space-y-1">
+                                                <p className="text-[8px] text-muted-foreground font-black uppercase truncate tracking-widest opacity-70">
+                                                   {apt.service_name || "Servis"}
+                                                </p>
+                                                {height >= 80 && apt.staff?.name && (
+                                                   <div className="flex items-center gap-1 opacity-60">
+                                                      <User className="w-2.5 h-2.5" />
+                                                      <span className="text-[8px] font-bold truncate">{apt.staff.name}</span>
+                                                   </div>
+                                                )}
+                                             </div>
+                                          )}
                                        </div>
 
-                                       {/* Tooltip on Hover */}
-                                       <div className="hidden group-hover/apt:flex absolute inset-0 bg-background/95 p-4 flex-col gap-3 z-30 animate-in fade-in zoom-in-95 backdrop-blur-sm">
-                                          <div className="flex items-center gap-3">
-                                             <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                                                <User className="w-4 h-4 text-primary" />
-                                             </div>
-                                             <span className="text-xs font-black text-foreground uppercase tracking-tight">{apt.customer_name}</span>
-                                          </div>
-                                          <div className="flex flex-col gap-2 px-1">
-                                             <div className="flex items-center gap-3">
-                                                <Clock className="w-4 h-4 text-muted-foreground" />
-                                                <span className="text-[11px] font-black">{apt.appointment_time}</span>
-                                             </div>
-                                             <div className="flex items-center gap-3">
-                                                <Scissors className="w-4 h-4 text-muted-foreground" />
-                                                <span className="text-[11px] text-foreground font-medium">{apt.service_name || "Hizmet Belirtilmedi"}</span>
-                                             </div>
-                                          </div>
-                                          <div className="mt-auto pt-3 border-t border-border flex gap-2">
-                                             {apt.status === 'pending' && (
-                                                <Button
-                                                   onClick={() => handleStatusUpdate(apt.id, 'confirmed')}
-                                                   size="sm"
-                                                   className="h-7 w-full bg-blue-600 hover:bg-blue-700 text-[9px] font-bold tracking-tighter"
-                                                >
-                                                   ONAYLA
-                                                </Button>
-                                             )}
-                                             {apt.status === 'confirmed' && (
-                                                <Button
-                                                   onClick={() => handleStatusUpdate(apt.id, 'completed')}
-                                                   size="sm"
-                                                   className="h-7 w-full bg-emerald-600 hover:bg-emerald-700 text-[9px] font-bold tracking-tighter"
-                                                >
-                                                   BİTTİ
-                                                </Button>
-                                             )}
-                                             <Button variant="outline" size="icon" className="h-7 w-7 border-slate-800 shrink-0">
-                                                <MoreVertical className="w-3 h-3" />
-                                             </Button>
-                                          </div>
-                                       </div>
+                                       {/* Overlap Badge */}
+                                       {apt.totalCols > 1 && (
+                                          <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-white/20 animate-pulse" title="Çakışma var" />
+                                       )}
                                     </div>
                                  );
                               })}
@@ -243,11 +305,28 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                   </div>
                </div>
             </div>
+            
+            {/* Legend / Status Footer */}
+            <div className="p-4 border-t border-border bg-muted/10 flex items-center gap-6 justify-center">
+               <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-amber-500" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Bekliyor</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Onaylandı</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Tamamlandı</span>
+               </div>
+            </div>
+
             {/* Appointment Details Modal */}
             <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
                <DialogContent className="bg-card border-border text-foreground max-w-lg rounded-[2.5rem] shadow-2xl p-0 overflow-hidden">
                   <DialogHeader className="p-8 pb-4">
-                     <DialogTitle className="text-2xl font-black uppercase tracking-tight">Randevu Bilgileri</DialogTitle>
+                     <DialogTitle className="text-2xl font-black uppercase tracking-tight italic">Randevu Detayları</DialogTitle>
                   </DialogHeader>
                   {selectedApt && (
                      <div className="p-8 pt-0 space-y-8">
@@ -258,7 +337,11 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                               </div>
                               <div>
                                  <h2 className="text-2xl font-black tracking-tight uppercase leading-none">{selectedApt.customer_name}</h2>
-                                 <p className="text-muted-foreground font-black text-[11px] mt-2 uppercase tracking-widest opacity-60">{selectedApt.customer_phone}</p>
+                                 <p className="text-muted-foreground font-black text-[11px] mt-2 uppercase tracking-widest opacity-60">
+                                    {selectedApt.customer_phone} 
+                                    <span className="mx-2 opacity-30">|</span> 
+                                    {selectedApt.duration} DK
+                                 </p>
                               </div>
                            </div>
                            <Badge className={cn(
@@ -272,20 +355,22 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">
-                           <div className="bg-muted/30 border border-border p-6 rounded-[2rem] space-y-2">
-                              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Tarih & Saat</p>
+                           <div className="bg-muted/30 border border-border p-6 rounded-[2rem] space-y-2 relative overflow-hidden group">
+                              <div className="absolute -right-4 -top-4 w-12 h-12 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors" />
+                              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Zamanlama</p>
                               <div className="flex items-center gap-2">
                                  <CalendarIcon className="w-4 h-4 text-primary" />
                                  <p className="font-black text-sm uppercase">{selectedApt.appointment_date}</p>
                               </div>
                               <div className="flex items-center gap-2 mt-1">
                                  <Clock className="w-4 h-4 text-primary" />
-                                 <p className="font-black text-lg">{selectedApt.appointment_time}</p>
+                                 <p className="font-black text-xl">{selectedApt.appointment_time}</p>
                               </div>
                            </div>
 
-                           <div className="bg-muted/30 border border-border p-6 rounded-[2rem] space-y-2">
-                              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Hizmet Detayı</p>
+                           <div className="bg-muted/30 border border-border p-6 rounded-[2rem] space-y-2 relative overflow-hidden group">
+                              <div className="absolute -right-4 -top-4 w-12 h-12 bg-violet-500/5 rounded-full blur-xl group-hover:bg-violet-500/10 transition-colors" />
+                              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Hizmet & Personel</p>
                               <div className="flex items-center gap-2">
                                  <Scissors className="w-4 h-4 text-violet-400" />
                                  <p className="font-black text-sm uppercase">{selectedApt.service_name || 'Servis'}</p>
@@ -297,9 +382,9 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                         </div>
 
                         {selectedApt.notes && (
-                           <div className="bg-amber-500/5 border border-amber-500/10 p-6 rounded-[2rem]">
-                              <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-3 italic">Müşteri Notu</p>
-                              <p className="text-sm text-foreground/80 font-medium italic leading-relaxed">"{selectedApt.notes}"</p>
+                           <div className="bg-amber-500/5 border border-amber-500/10 p-6 rounded-[2.5rem]">
+                              <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-3 italic underline underline-offset-4">Müşteri Notu</p>
+                              <p className="text-sm text-foreground/80 font-medium italic leading-relaxed">"{selectedApt.notes.replace(/\[DURATION:\d+\]/, '').trim() || 'Not bırakılmadı'}"</p>
                            </div>
                         )}
 
@@ -310,7 +395,7 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                                     handleStatusUpdate(selectedApt.id, 'confirmed');
                                     setIsDetailsOpen(false);
                                  }}
-                                 className="flex-1 bg-blue-600 hover:bg-blue-700 h-12 rounded-2xl font-black text-xs uppercase"
+                                 className="flex-1 bg-blue-600 hover:bg-blue-700 h-14 rounded-2xl font-black text-xs uppercase shadow-lg shadow-blue-500/20"
                               >
                                  RANDEVUYU ONAYLA
                               </Button>
@@ -321,7 +406,7 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                                     handleStatusUpdate(selectedApt.id, 'completed');
                                     setIsDetailsOpen(false);
                                  }}
-                                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 h-12 rounded-2xl font-black text-xs uppercase"
+                                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 h-14 rounded-2xl font-black text-xs uppercase shadow-lg shadow-emerald-500/20"
                               >
                                  HİZMET TAMAMLANDI
                               </Button>
@@ -329,26 +414,26 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                            <Button
                               variant="outline"
                               onClick={() => setIsDetailsOpen(false)}
-                              className="flex-1 border-border hover:bg-muted h-12 rounded-2xl font-black text-xs uppercase"
+                              className="flex-1 border-border hover:bg-muted h-14 rounded-2xl font-black text-xs uppercase"
                            >
                               KAPAT
                            </Button>
                            <Button 
                               variant="ghost" 
                               onClick={async () => {
-                                 if (confirm("Bu randevuyu tamamen iptal etmek ve silmek istediğinize emin misiniz?")) {
+                                 if (confirm("Bu randevuyu iptal edip silmek üzeresiniz. Emin misiniz?")) {
                                     const { error } = await supabase.from('appointments').delete().eq('id', selectedApt.id);
                                     if (error) toast.error("Hata oluştu");
                                     else {
-                                       toast.success("Randevu iptal edildi ve silindi");
+                                       toast.success("Randevu iptal edildi");
                                        setIsDetailsOpen(false);
                                        onRefresh?.();
                                     }
                                  }
                               }}
-                              className="flex-1 text-rose-500 hover:bg-rose-500/10 h-12 rounded-2xl font-black text-xs uppercase"
+                              className="flex-1 text-rose-500 hover:bg-rose-500/10 h-14 rounded-2xl font-black text-xs uppercase"
                            >
-                              İPTAL ET & SİL
+                              İPTAL ET
                            </Button>
                         </DialogFooter>
                      </div>
