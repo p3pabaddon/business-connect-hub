@@ -29,6 +29,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/layout/Logo";
+import { supabase } from "@/lib/supabase";
+
+const NOTIFICATION_SOUND = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
+
+const playNotificationSound = () => {
+    const audio = new Audio(NOTIFICATION_SOUND);
+    audio.play().catch(() => {});
+};
 
 type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" | "staff-performance" | "analytics" | "portfolio" | "support" | "coupons";
 
@@ -73,6 +81,31 @@ export default function BusinessDashboard() {
     reloadReviews();
   };
 
+  // Realtime appointment listener
+  useEffect(() => {
+    if (business?.id) {
+      const channel = supabase
+        .channel(`biz-updates-${business.id}`)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'appointments', filter: `business_id=eq.${business.id}` },
+          () => {
+            playNotificationSound();
+            toast.success("YENİ RANDEVU GELDİ!", {
+              description: "Takviminize yeni bir randevu eklendi.",
+              duration: 10000,
+            });
+            loadData();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [business?.id]);
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -108,7 +141,6 @@ export default function BusinessDashboard() {
     );
   }
 
-  // Show pending approval state
   if (business && (business.status === "pending" || !business.is_active)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -209,51 +241,6 @@ export default function BusinessDashboard() {
                             </div>
                           </div>
                         ))}
-                        
-                        {/* Navigation Section */}
-                        {[
-                          { id: "overview", label: "Genel Bakış", synonyms: ["özet", "dashboard", "ana sayfa"] },
-                          { id: "waitlist", label: "Bekleme Listesi", synonyms: ["sıra", "bekleyenler"] },
-                          { id: "crm", label: "Müşterilerim", synonyms: ["müşteri", "rehber", "crm", "kişiler"] },
-                          { id: "marketing", label: "Müşteri Radarı (AI)", synonyms: ["radar", "ai", "tahmin", "churn"] },
-                          { id: "calendar", label: "Randevu Takvimi", synonyms: ["takvim", "ajanda", "randevular"] },
-                          { id: "catalog", label: "Hizmet & Personel", synonyms: ["katalog", "hizmetler", "çalışanlar", "ekip"] },
-                          { id: "staff-performance", label: "Personel Performansı", synonyms: ["performans", "verim", "personel"] },
-                          { id: "analytics", label: "Gelişmiş Analytics", synonyms: ["analiz", "rapor", "istatistik"] },
-                          { id: "inventory", label: "Stok & Envanter", synonyms: ["ürünler", "stok", "depo"] },
-                          { id: "coupons", label: "Kuponlar", synonyms: ["indirim", "kampanya", "kod"] },
-                          { id: "loyalty", label: "Sadakat Programı", synonyms: ["puan", "sadakat", "ödül"] },
-                          { id: "premium", label: "Avantajlar", synonyms: ["premium", "ayrıcalık"] },
-                          { id: "portfolio", label: "Çalışmalarımız", synonyms: ["portfolyo", "galeri", "resimler"] },
-                          { id: "reviews", label: "Müşteri Yorumları", synonyms: ["yorum", "puan", "değerlendirme"] },
-                          { id: "support", label: "Destek Merkezi", synonyms: ["yardım", "iletişim", "destek"] },
-                          { id: "settings", label: "İşletme Ayarı", synonyms: ["ayarlar", "profil", "bilgiler"] },
-                        ].filter(item => 
-                          item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.synonyms.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
-                        ).map(item => (
-                          <div 
-                            key={item.id}
-                            onClick={() => { setActiveTab(item.id as any); setSearchQuery(""); }}
-                            className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left group border-t border-border/50 cursor-pointer"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-[10px] font-black text-muted-foreground">
-                              <LayoutDashboard className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <p className="text-xs font-bold text-foreground capitalize">{item.label}</p>
-                              <p className="text-[9px] text-muted-foreground font-mono">Modüle Git</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="p-2 border-t border-border bg-muted/30 text-center">
-                        <button 
-                          onClick={() => setSearchQuery("")}
-                          className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline"
-                        >
-                          Sonuçları Kapat
-                        </button>
                       </div>
                     </div>
                   )}
@@ -262,12 +249,6 @@ export default function BusinessDashboard() {
 
            <div className="flex items-center gap-2 lg:gap-4">
               <ThemeToggle />
-              
-              <div className="hidden sm:flex items-center gap-2 bg-muted/50 border border-border px-3 py-1 rounded-full">
-                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight">Sistem Aktif</span>
-              </div>
-              
               <button className="relative p-2 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group">
                  <Bell className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full border-2 border-background"></span>
@@ -283,18 +264,8 @@ export default function BusinessDashboard() {
                   <span className="text-[10px] font-bold text-muted-foreground uppercase hidden sm:block">Ana Sayfa</span>
                </button>
 
-               {business?.slug && (
-                 <button 
-                   onClick={() => window.open(`/isletme/${business.slug}`, "_blank")}
-                   className="flex items-center gap-2 p-1 lg:p-1.5 lg:px-4 bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/20 transition-colors group"
-                 >
-                    <ExternalLink className="w-4 h-4 text-primary" />
-                    <span className="text-[10px] font-bold text-primary uppercase hidden sm:block">Sayfamı Görüntüle</span>
-                 </button>
-               )}
-
                <button 
-                 onClick={async () => { toast.info("Çıkış yapılıyor..."); await signOut(); navigate("/"); }}
+                 onClick={async () => { await signOut(); navigate("/"); }}
                  className="flex items-center gap-2 p-1 lg:p-1.5 lg:pr-4 bg-muted/50 border border-border rounded-xl lg:rounded-2xl hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors group"
                >
                   <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-lg lg:rounded-xl bg-primary/20 flex items-center justify-center border border-primary/20 group-hover:bg-rose-500/20 group-hover:border-rose-500/20">
@@ -302,7 +273,6 @@ export default function BusinessDashboard() {
                   </div>
                    <div className="text-left hidden lg:block">
                      <p className="text-[10px] font-bold text-foreground uppercase tracking-tighter leading-none group-hover:text-rose-500">Çıkış Yap</p>
-                     <p className="text-[9px] text-muted-foreground font-mono mt-1">Oturumu Kapat</p>
                    </div>
                </button>
             </div>

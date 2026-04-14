@@ -26,6 +26,13 @@ interface Message {
   created_at: string;
 }
 
+const NOTIFICATION_SOUND = "https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3";
+
+const playNotificationSound = () => {
+  const audio = new Audio(NOTIFICATION_SOUND);
+  audio.play().catch(() => {});
+};
+
 export function AdminSupport() {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -83,12 +90,17 @@ export function AdminSupport() {
             table: 'support_messages',
             filter: `ticket_id=eq.${selectedTicket.id}`
           },
-          () => {
-            // Realtime payload'da profiles join olmaz, bu yüzden listeyi yenile
+          (payload: any) => {
+            // Sadece başkasından gelen mesajlar için ses çal
+            if (payload.new && payload.new.sender_id !== user?.id) {
+              playNotificationSound();
+            }
             loadMessages(selectedTicket.id);
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log("Admin Realtime status:", status);
+        });
 
       return () => { supabase.removeChannel(channel); };
     }
@@ -138,15 +150,21 @@ export function AdminSupport() {
   };
 
   const handleCloseTicket = async (ticketId: string) => {
+    await updateTicketStatus(ticketId, 'closed');
+  };
+
+  const updateTicketStatus = async (ticketId: string, status: string) => {
     const { error } = await supabase
       .from("support_tickets")
-      .update({ status: 'closed' })
+      .update({ status })
       .eq("id", ticketId);
 
     if (!error) {
-      setTickets(tickets.map(t => t.id === ticketId ? { ...t, status: 'closed' } : t));
-      if (selectedTicket?.id === ticketId) setSelectedTicket({ ...selectedTicket, status: 'closed' });
-      toast.success("Talep kapatıldı");
+      setTickets(tickets.map(t => t.id === ticketId ? { ...t, status } : t));
+      if (selectedTicket?.id === ticketId) setSelectedTicket({ ...selectedTicket, status });
+      toast.success("Talep durumu güncellendi: " + status);
+    } else {
+      toast.error("Hata: " + error.message);
     }
   };
 
@@ -224,17 +242,40 @@ export function AdminSupport() {
                         </div>
                      </div>
                   </div>
-                  {selectedTicket.status === 'open' && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCloseTicket(selectedTicket.id)}
-                      className="rounded-xl font-bold text-rose-500 border-rose-500/20 hover:bg-rose-500/5"
-                    >
-                       TALEBİ KAPAT
-                    </Button>
-                  )}
-               </div>
+                   <div className="flex items-center gap-2">
+                      {selectedTicket.status !== 'closed' && (
+                        <>
+                          <div className="flex items-center gap-1 bg-muted/20 p-1 rounded-xl mr-2">
+                             {[
+                               { id: 'open', label: 'Açık', color: 'text-emerald-500' },
+                               { id: 'in_review', label: 'İnceleniyor', color: 'text-amber-500' },
+                               { id: 'queued', label: 'Sıraya Alındı', color: 'text-blue-500' },
+                               { id: 'waiting_reply', label: 'Cevap Bekleniyor', color: 'text-violet-500' }
+                             ].map((st) => (
+                               <Button
+                                 key={st.id}
+                                 variant={selectedTicket.status === st.id ? "secondary" : "ghost"}
+                                 size="sm"
+                                 onClick={() => updateTicketStatus(selectedTicket.id, st.id)}
+                                 className={`text-[9px] h-7 px-2 font-bold uppercase ${selectedTicket.status === st.id ? st.color : 'text-muted-foreground'}`}
+                               >
+                                 {st.label}
+                               </Button>
+                             ))}
+                          </div>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCloseTicket(selectedTicket.id)}
+                            className="rounded-xl font-bold text-rose-500 border-rose-500/20 hover:bg-rose-500/5 h-8 text-[10px]"
+                          >
+                             KAPAT
+                          </Button>
+                        </>
+                      )}
+                   </div>
+                </div>
 
                <div
                   className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.01),transparent_40%)]"

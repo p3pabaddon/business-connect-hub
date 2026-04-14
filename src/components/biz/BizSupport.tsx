@@ -25,6 +25,13 @@ interface Message {
   created_at: string;
 }
 
+const NOTIFICATION_SOUND = "https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3";
+
+const playNotificationSound = () => {
+  const audio = new Audio(NOTIFICATION_SOUND);
+  audio.play().catch(() => {});
+};
+
 export function BizSupport({ businessId }: { businessId: string }) {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -74,13 +81,17 @@ export function BizSupport({ businessId }: { businessId: string }) {
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${selectedTicket.id}` },
-          () => {
-            // Realtime mesaj geldiğinde listeyi komple yenile
-            // (realtime payload'da profiles join olmaz, bu yüzden refetch yapıyoruz)
+          (payload: any) => {
+            // Sadece başkasından gelen mesajlar için ses çal
+            if (payload.new && payload.new.sender_id !== user?.id) {
+              playNotificationSound();
+            }
             loadMessages(selectedTicket.id);
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log("Realtime status:", status);
+        });
       
       return () => { supabase.removeChannel(channel); };
     }

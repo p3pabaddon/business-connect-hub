@@ -18,6 +18,13 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { SEOHead } from "@/components/SEOHead";
 
+const NOTIFICATION_SOUND = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
+
+const playNotificationSound = () => {
+    const audio = new Audio(NOTIFICATION_SOUND);
+    audio.play().catch(() => {});
+};
+
 export default function StaffDashboardPage() {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -77,6 +84,30 @@ export default function StaffDashboardPage() {
       toast.error("İşlem başarısız");
     }
   };
+
+  useEffect(() => {
+    if (staffInfo?.id) {
+       const channel = supabase
+         .channel(`staff-updates-${staffInfo.id}`)
+         .on(
+           'postgres_changes',
+           { event: 'INSERT', schema: 'public', table: 'appointments', filter: `staff_id=eq.${staffInfo.id}` },
+           () => {
+             playNotificationSound();
+             toast.success("YENİ RANDEVU SİZE ATANDI!", {
+               description: "Bugünkü programınıza yeni bir iş eklendi.",
+               duration: 10000,
+             });
+             loadStaffData();
+           }
+         )
+         .subscribe();
+ 
+       return () => {
+         supabase.removeChannel(channel);
+       };
+    }
+  }, [staffInfo?.id]);
 
   if (authLoading || loading) {
     return (
