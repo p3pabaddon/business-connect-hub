@@ -221,16 +221,23 @@ export function BizSupport({ businessId }: { businessId: string }) {
                       : "bg-muted/10 border-border hover:bg-muted/30"
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-1">
-                       <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-full ${
-                          ticket.status === 'open' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'
-                       }`}>
-                          {ticket.status === 'open' ? 'Aktif' : 'Kapalı'}
-                       </span>
-                       <span className="text-[9px] font-mono text-muted-foreground">
-                          {format(new Date(ticket.created_at), "d MMM", { locale: tr })}
-                       </span>
-                    </div>
+                     <div className="flex justify-between items-start mb-2">
+                        <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-full ${
+                           ticket.status === 'open' ? 'bg-emerald-500/20 text-emerald-400' : 
+                           ticket.status === 'in_review' ? 'bg-amber-500/20 text-amber-400' :
+                           ticket.status === 'queued' ? 'bg-blue-500/20 text-blue-400' :
+                           ticket.status === 'waiting_reply' ? 'bg-violet-500/20 text-violet-400' :
+                           'bg-white/5 text-slate-500'
+                        }`}>
+                           {ticket.status === 'open' ? 'Aktif' : 
+                            ticket.status === 'in_review' ? 'İnceleniyor' :
+                            ticket.status === 'queued' ? 'Sırada' :
+                            ticket.status === 'waiting_reply' ? 'Cevap' : 'Kapalı'}
+                        </span>
+                        <span className="text-[9px] font-mono text-slate-500">
+                           {format(new Date(ticket.created_at), "d MMM HH:mm", { locale: tr })}
+                        </span>
+                     </div>
                     <p className="text-sm font-semibold text-foreground truncate">{ticket.subject}</p>
                   </button>
                 ))

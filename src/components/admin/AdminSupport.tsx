@@ -205,16 +205,23 @@ export function AdminSupport() {
                       : "bg-muted/10 border-border hover:bg-muted/30"
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                       <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-full ${
-                          ticket.status === 'open' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'
-                       }`}>
-                          {ticket.status === 'open' ? 'Aktif' : 'Kapalı'}
-                       </span>
-                       <span className="text-[9px] font-mono text-muted-foreground">
-                          {format(new Date(ticket.created_at), "d MMM HH:mm", { locale: tr })}
-                       </span>
-                    </div>
+                     <div className="flex justify-between items-start mb-2">
+                        <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-full ${
+                           ticket.status === 'open' ? 'bg-emerald-500/10 text-emerald-500' : 
+                           ticket.status === 'in_review' ? 'bg-amber-500/10 text-amber-500' :
+                           ticket.status === 'queued' ? 'bg-blue-500/10 text-blue-500' :
+                           ticket.status === 'waiting_reply' ? 'bg-violet-500/10 text-violet-500' :
+                           'bg-muted text-muted-foreground'
+                        }`}>
+                           {ticket.status === 'open' ? 'Aktif' : 
+                            ticket.status === 'in_review' ? 'İnceleniyor' :
+                            ticket.status === 'queued' ? 'Sırada' :
+                            ticket.status === 'waiting_reply' ? 'Cevap' : 'Kapalı'}
+                        </span>
+                        <span className="text-[9px] font-mono text-muted-foreground">
+                           {format(new Date(ticket.created_at), "d MMM HH:mm", { locale: tr })}
+                        </span>
+                     </div>
                     <p className="text-sm font-bold text-foreground mb-1">{ticket.subject}</p>
                     <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium uppercase tracking-tight">
                        <Building2 className="w-3 h-3" /> {ticket.business?.name || "Bilinmeyen İşletme"}
