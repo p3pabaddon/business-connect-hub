@@ -86,7 +86,7 @@ export default function BusinessDashboard() {
   useEffect(() => {
     if (user?.id) {
       const channel = supabase
-        .channel(`global-notifications-${user.id}`)
+        .channel(`global-notifications-${user.id}-${Date.now()}`)
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
@@ -112,7 +112,7 @@ export default function BusinessDashboard() {
   useEffect(() => {
     if (business?.id) {
       const channel = supabase
-        .channel(`biz-updates-appointments-${business.id}`)
+        .channel(`biz-updates-appointments-${business.id}-${Date.now()}`)
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'appointments', filter: `business_id=eq.${business.id}` },

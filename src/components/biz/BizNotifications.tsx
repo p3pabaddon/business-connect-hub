@@ -45,7 +45,7 @@ export function BizNotifications() {
 
     // Real-time subscription for notifications
     const channel = supabase
-      .channel(`user-notifications-${user?.id}`)
+      .channel(`user-notifications-${user?.id}-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user?.id}` },

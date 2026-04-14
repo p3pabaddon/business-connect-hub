@@ -88,7 +88,7 @@ export default function StaffDashboardPage() {
   useEffect(() => {
     if (staffInfo?.id) {
        const channel = supabase
-         .channel(`staff-updates-${staffInfo.id}`)
+         .channel(`staff-updates-${staffInfo.id}-${Date.now()}`)
          .on(
            'postgres_changes',
            { event: 'INSERT', schema: 'public', table: 'appointments', filter: `staff_id=eq.${staffInfo.id}` },
