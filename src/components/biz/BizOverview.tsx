@@ -31,23 +31,23 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
   const topService = stats.serviceDistribution[0];
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700">
+    <div className="space-y-6 lg:space-y-10 animate-in fade-in duration-700">
       {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
         {kpis.map((kpi, i) => (
-          <div key={i} className="bg-card border border-border p-8 rounded-[2.5rem] hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 group relative overflow-hidden">
+          <div key={i} className="bg-card border border-border p-4 lg:p-8 rounded-3xl lg:rounded-[2.5rem] hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-muted/50 rounded-bl-full -mr-12 -mt-12 group-hover:scale-110 transition-transform duration-500" />
-            <div className="flex justify-between items-start mb-6">
-              <div className="p-4 bg-muted/50 rounded-2xl border border-border group-hover:border-primary/20 transition-colors shadow-inner">
-                <kpi.icon className={cn("w-6 h-6", kpi.color)} />
+            <div className="flex justify-between items-start mb-4 lg:mb-6">
+              <div className="p-2 lg:p-4 bg-muted/50 rounded-xl lg:rounded-2xl border border-border group-hover:border-primary/20 transition-colors shadow-inner">
+                <kpi.icon className={cn("w-4 h-4 lg:w-6 lg:h-6", kpi.color)} />
               </div>
-              <Badge variant="outline" className="text-[10px] font-black text-muted-foreground border-border uppercase tracking-widest px-3 py-1 bg-background/50 backdrop-blur-sm">
+              <Badge variant="outline" className="text-[8px] lg:text-[10px] font-black text-muted-foreground border-border uppercase tracking-widest px-2 lg:px-3 py-0.5 lg:py-1 bg-background/50 backdrop-blur-sm">
                 {kpi.trend}
               </Badge>
             </div>
-            <div className="space-y-2">
-              <p className="text-4xl font-black text-foreground tracking-tighter group-hover:translate-x-1 transition-transform">{kpi.value}</p>
-              <p className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.2em] opacity-60">{kpi.label}</p>
+            <div className="space-y-1 lg:space-y-2">
+              <p className="text-xl lg:text-4xl font-black text-foreground tracking-tighter group-hover:translate-x-1 transition-transform">{kpi.value}</p>
+              <p className="text-[8px] lg:text-[10px] uppercase font-black text-muted-foreground tracking-[0.1em] lg:tracking-[0.2em] opacity-60">{kpi.label}</p>
             </div>
           </div>
         ))}
@@ -55,9 +55,9 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Chart */}
-        <div className="lg:col-span-2 bg-card border border-border p-10 rounded-[3rem] h-[450px] flex flex-col shadow-sm relative overflow-hidden">
+        <div className="lg:col-span-2 bg-card border border-border p-6 lg:p-10 rounded-3xl lg:rounded-[3rem] h-[300px] lg:h-[450px] flex flex-col shadow-sm relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 to-transparent" />
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-6 lg:mb-10">
             <div>
               <h3 className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-3">
                 <Activity className="w-5 h-5 text-primary" /> Haftalık Ciro Grafiği
@@ -92,9 +92,9 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
         </div>
 
         {/* Action Center or Pie Chart */}
-        <div className="bg-card border border-border p-10 rounded-[3rem] flex flex-col shadow-sm">
-          <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-8 flex items-center gap-3">
-            <Zap className="w-5 h-5 text-amber-500" /> Servis Dağılımı
+        <div className="bg-card border border-border p-6 lg:p-10 rounded-3xl lg:rounded-[3rem] flex flex-col shadow-sm">
+          <h3 className="text-xs lg:text-sm font-black text-foreground uppercase tracking-widest mb-6 lg:mb-8 flex items-center gap-2 lg:gap-3">
+            <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-amber-500" /> Servis Dağılımı
           </h3>
           <div className="flex-1 min-h-[250px] relative">
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -141,11 +141,11 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6 lg:space-y-8">
           {/* Recent Alerts / Inventory (Restructured) */}
-          <div className="bg-card border border-border p-10 rounded-[3rem] shadow-sm">
-            <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-8 flex items-center gap-3">
-              <Package className="w-5 h-5 text-violet-500" /> Operasyonel Durum
+          <div className="bg-card border border-border p-6 lg:p-10 rounded-3xl lg:rounded-[3rem] shadow-sm">
+            <h3 className="text-xs lg:text-sm font-black text-foreground uppercase tracking-widest mb-6 lg:mb-8 flex items-center gap-2 lg:gap-3">
+              <Package className="w-4 h-4 lg:w-5 lg:h-5 text-violet-500" /> Operasyonel Durum
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {recentApts.filter(a => a.status === 'pending').slice(0, 2).map((apt, i) => (
@@ -178,7 +178,7 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="p-8 bg-slate-900 border border-white/5 rounded-[3rem] shadow-sm relative overflow-hidden group">
+          <div className="p-6 lg:p-8 bg-slate-900 border border-white/5 rounded-3xl lg:rounded-[3rem] shadow-sm relative overflow-hidden group">
              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                 <Zap className="w-24 h-24 text-primary" />
              </div>
@@ -197,7 +197,7 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
              </div>
           </div>
 
-          <div className="p-8 bg-indigo-600 border border-indigo-500 rounded-[3rem] shadow-xl shadow-indigo-500/10 relative overflow-hidden group">
+          <div className="p-6 lg:p-8 bg-indigo-600 border border-indigo-500 rounded-3xl lg:rounded-[3rem] shadow-xl shadow-indigo-500/10 relative overflow-hidden group">
              <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:rotate-12 transition-transform duration-700">
                 <Target className="w-24 h-24 text-white" />
              </div>
@@ -212,7 +212,7 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
              </div>
           </div>
 
-          <div className="p-8 bg-emerald-600 border border-emerald-500 rounded-[3rem] flex flex-col justify-center shadow-xl shadow-emerald-500/10 relative overflow-hidden group">
+          <div className="p-6 lg:p-8 bg-emerald-600 border border-emerald-500 rounded-3xl lg:rounded-[3rem] flex flex-col justify-center shadow-xl shadow-emerald-500/10 relative overflow-hidden group">
              <div className="relative z-10 text-white">
                 <div className="flex items-center gap-3 mb-4">
                    <div className="p-2 bg-white/20 rounded-xl">

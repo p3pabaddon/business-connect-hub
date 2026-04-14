@@ -23,16 +23,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ADMIN_EMAILS = [
-  "asrinaltan04@gmail.com", 
-  "asrinaltan1990@gmail.com", 
-  "admin@randevual.com",
-  "admin@admin.com", 
-  "testadmin@rendezvous.com", 
-  "info@randevudunyasi.com"
-];
-
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -148,8 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setHasBusiness(false);
   };
 
-  const isAdmin = !!user && (ADMIN_EMAILS.includes(user.email || "") || profile?.role === "admin" || profile?.role === "hq_staff");
-  const isBusinessOwner = !!user && (hasBusiness || profile?.role === "business_owner" || isAdmin);
+  const isAdmin = !!profile && (profile.role === "admin" || profile.role === "hq_staff" || profile.role === "super_admin");
+  const isBusinessOwner = !!profile && (profile.role === "business_owner" || profile.role === "admin" || hasBusiness);
 
   if (loading) {
     return (

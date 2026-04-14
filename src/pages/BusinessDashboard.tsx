@@ -222,19 +222,18 @@ export default function BusinessDashboard() {
                     onClick={() => setActiveTab("overview")}
                     className="text-muted-foreground uppercase tracking-widest font-black opacity-40 hover:opacity-100 transition-opacity"
                   >
-                    İşletme Kontrol Merkezi
+                    Kontrol Merkezi
                   </button>
                   <span className="text-muted-foreground/30 mx-2 text-lg">/</span>
                   <span className="text-primary capitalize font-bold bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">{activeTab}</span>
                </div>
-               <div className="relative flex-1 max-w-xs hidden sm:block group">
+               <div className="relative flex-1 max-w-[200px] lg:max-w-xs group">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-20" />
                   <Input 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => {}} 
-                    className="bg-muted/50 border-border pl-9 h-9 text-xs focus:ring-primary/20 transition-all relative z-10" 
-                    placeholder="Hızlı ara..." 
+                    className="bg-muted/50 border-border pl-9 h-9 text-[10px] lg:text-xs focus:ring-primary/20 transition-all relative z-10" 
+                    placeholder="Ara..." 
                   />
                   
                   {/* Global Search Results Dropdown */}
@@ -288,28 +287,25 @@ export default function BusinessDashboard() {
 
                <button 
                  onClick={() => navigate("/")}
-                 className="flex items-center gap-2 p-1 lg:p-1.5 lg:px-4 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group"
+                 className="flex items-center gap-2 p-1.5 px-3 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group"
                >
                   <LayoutDashboard className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase hidden sm:block">Ana Sayfa</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase hidden lg:block">Panel</span>
                </button>
 
                <button 
                  onClick={async () => { await signOut(); navigate("/"); }}
-                 className="flex items-center gap-2 p-1 lg:p-1.5 lg:pr-4 bg-muted/50 border border-border rounded-xl lg:rounded-2xl hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors group"
+                 className="flex items-center gap-2 p-1 bg-muted/50 border border-border rounded-xl hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors group"
                >
-                  <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-lg lg:rounded-xl bg-primary/20 flex items-center justify-center border border-primary/20 group-hover:bg-rose-500/20 group-hover:border-rose-500/20">
-                     <LogOut className="w-4 h-4 lg:w-5 lg:h-5 text-primary group-hover:text-rose-500" />
+                  <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/20 group-hover:bg-rose-500/20 group-hover:border-rose-500/20 shadow-sm">
+                     <LogOut className="w-4 h-4 text-primary group-hover:text-rose-500" />
                   </div>
-                   <div className="text-left hidden lg:block">
-                     <p className="text-[10px] font-bold text-foreground uppercase tracking-tighter leading-none group-hover:text-rose-500">Çıkış Yap</p>
-                   </div>
                </button>
             </div>
         </header>
 
         {/* Dynamic Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 lg:p-10 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.03),transparent_40%)]">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 lg:p-10 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.03),transparent_40%)]">
            <div className="max-w-[1600px] mx-auto">
               <VerificationGuard>
               {activeTab === "overview" && stats && (

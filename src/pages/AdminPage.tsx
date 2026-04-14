@@ -382,51 +382,50 @@ const AdminPage = () => {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <header className="h-16 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-8 shrink-0">
-            <div className="flex items-center gap-4">
+          <header className="h-16 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 lg:px-8 shrink-0 relative z-[60]">
+            <div className="flex items-center gap-2 lg:gap-4">
               <button 
                 onClick={() => setSidebarOpen(true)} 
                 className="lg:hidden p-2 text-muted-foreground hover:bg-accent rounded-lg transition-colors"
               >
                 <Menu className="w-5 h-5" />
               </button>
-              <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground/60">
+              <div className="flex items-center gap-2 text-[8px] lg:text-[10px] font-mono uppercase tracking-widest text-muted-foreground/60">
                 <span>Admin</span>
                 <span className="opacity-30">/</span>
                 <span className="text-primary font-bold">{activeTab}</span>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 lg:gap-4">
               <ThemeToggle />
               <div className="h-6 w-px bg-border/60 mx-1 hidden sm:block" />
-              <Link to="/" className="hidden sm:block">
+              <Link to="/" className="hidden lg:block">
                 <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-accent font-bold text-[10px] tracking-widest">
-                  PORTAL PROJE <ArrowRight className="w-3 h-3 ml-2" />
+                  PORTAL <ArrowRight className="w-3 h-3 ml-2" />
                 </Button>
               </Link>
-              <div className="flex items-center gap-3 px-3 py-1.5 bg-muted/50 rounded-full border border-border/50">
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">AD</div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase hidden md:block">Root Admin</span>
+              <div className="flex items-center gap-2 px-2 py-1 bg-muted/50 rounded-full border border-border/50">
+                <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[8px] lg:text-[10px] font-bold">AD</div>
+                <span className="text-[8px] font-bold text-muted-foreground uppercase hidden md:block">Root Admin</span>
               </div>
             </div>
           </header>
-
-          <main className="flex-1 overflow-y-auto p-6 lg:p-10 custom-scrollbar">
+             <main className="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar pb-24">
             <div className="max-w-7xl mx-auto">
-              <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 animate-in fade-in slide-in-from-left-4 duration-700">
-                <div className="space-y-1">
-                   <h1 className="text-3xl font-heading font-black text-foreground tracking-tighter uppercase italic">
+              <div className="mb-6 lg:mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 lg:gap-6 animate-in fade-in slide-in-from-left-4 duration-700">
+                <div className="space-y-1 text-center sm:text-left">
+                   <h1 className="text-xl lg:text-3xl font-heading font-black text-foreground tracking-tighter uppercase italic">
                      {navigation.find(n => n.id === activeTab)?.name} Control
                    </h1>
-                   <p className="text-sm text-muted-foreground font-medium opacity-60">Platform orkestrasyon ve denetim katmanı v4.0</p>
+                   <p className="text-[10px] lg:text-sm text-muted-foreground font-medium opacity-60 uppercase lg:normal-case">Platform Orkestrasyon v4.0</p>
                 </div>
                 {['businesses', 'customers', 'appointments'].includes(activeTab) && (
                   <div className="relative w-full sm:w-72 group">
                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                      <Input 
                        placeholder="Sistemde ara..." 
-                       className="bg-card border-border pl-10 h-11 text-sm rounded-xl focus:ring-2 focus:ring-primary/20 transition-all shadow-sm" 
+                       className="bg-card border-border pl-10 h-10 lg:h-11 text-xs lg:text-sm rounded-xl focus:ring-2 focus:ring-primary/20 transition-all shadow-sm" 
                        value={searchTerm}
                        onChange={(e) => setSearchTerm(e.target.value)}
                      />
@@ -436,12 +435,12 @@ const AdminPage = () => {
 
               <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
                 {activeTab === "overview" && (
-                  <div className="space-y-10">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                      <StatCard title="Toplam İşletme" value={systemStats.totalBusinesses} icon={Building2} color="text-primary" />
-                      <StatCard title="Aktif Kullanıcı" value={systemStats.totalUsers} icon={Users} color="text-blue-500" />
-                      <StatCard title="Toplam Randevu" value={systemStats.totalAppointments} icon={Calendar} color="text-emerald-500" />
-                      <StatCard title="Brüt Hacim" value={`₺${(systemStats.totalRevenue/1000).toFixed(1)}K`} icon={Wallet} color="text-amber-500" />
+                  <div className="space-y-6 lg:space-y-10">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                      <StatCard title="İşletme" value={systemStats.totalBusinesses} icon={Building2} color="text-primary" />
+                      <StatCard title="Kullanıcı" value={systemStats.totalUsers} icon={Users} color="text-blue-500" />
+                      <StatCard title="Randevu" value={systemStats.totalAppointments} icon={Calendar} color="text-emerald-500" />
+                      <StatCard title="Hacim" value={`₺${(systemStats.totalRevenue/1000).toFixed(1)}K`} icon={Wallet} color="text-amber-500" />
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                       <Card className="lg:col-span-2 bg-card border-border overflow-hidden shadow-sm">
@@ -550,27 +549,27 @@ const AdminPage = () => {
                 })()}
 
                 {activeTab === "businesses" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 gap-4 lg:gap-6">
                      {filteredBusinesses.map(biz => (
-                       <Card key={biz.id} className="bg-card border-border p-5 flex items-center justify-between hover:border-primary/30 transition-all duration-300">
+                       <Card key={biz.id} className="bg-card border-border p-4 lg:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-primary/30 transition-all duration-300 rounded-3xl">
                           <div className="flex items-center gap-4">
-                             <div className="w-12 h-12 rounded-xl bg-muted border border-border flex items-center justify-center text-primary font-black text-lg">{biz.name?.[0]}</div>
-                             <div>
-                                <p className="font-bold text-foreground text-sm leading-tight uppercase tracking-tight">{biz.name}</p>
-                                <p className="text-[10px] text-muted-foreground font-medium mt-1">{biz.city} • {biz.category} • {biz.appointments?.[0]?.count || 0} randevu</p>
+                             <div className="w-12 h-12 rounded-xl bg-muted border border-border flex items-center justify-center text-primary font-black text-lg shrink-0">{biz.name?.[0]}</div>
+                             <div className="min-w-0">
+                                <p className="font-bold text-foreground text-sm lg:text-base leading-tight uppercase tracking-tight truncate">{biz.name}</p>
+                                <p className="text-[10px] text-muted-foreground font-medium mt-1 truncate">{biz.city} • {biz.category} • {biz.appointments?.[0]?.count || 0} randevu</p>
                              </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                             <Button size="icon" variant="ghost" className="h-9 w-9 text-muted-foreground hover:text-primary" onClick={() => window.open(`/isletme/${biz.slug}`, '_blank')}><Eye className="w-4 h-4" /></Button>
+                          <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                             <Button size="icon" variant="ghost" className="h-10 w-10 text-muted-foreground hover:text-primary rounded-xl" onClick={() => window.open(`/isletme/${biz.slug}`, '_blank')}><Eye className="w-5 h-5" /></Button>
                              <Button 
-                               size="sm" 
-                               onClick={() => updateBusinessStatus(biz.id, { is_active: !biz.is_active })}
-                               className={cn(
-                                 "h-8 text-[9px] font-black tracking-widest uppercase border-none",
-                                 biz.is_active ? "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20" : "bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"
-                               )}
-                             >
-                               {biz.is_active ? "AKTİF" : "PASİF"}
+                                size="sm" 
+                                onClick={() => updateBusinessStatus(biz.id, { is_active: !biz.is_active })}
+                                className={cn(
+                                  "flex-1 sm:flex-none h-10 text-[10px] font-black tracking-widest uppercase border-none rounded-xl px-6",
+                                  biz.is_active ? "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20" : "bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"
+                                )}
+                              >
+                                {biz.is_active ? "İŞLETME AKTİF" : "İŞLETME PASİF"}
                              </Button>
                           </div>
                        </Card>
@@ -579,20 +578,20 @@ const AdminPage = () => {
                 )}
 
                 {activeTab === "customers" && (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                      {filteredCustomers.map((cust, idx) => (
-                       <Card key={idx} className="bg-card border-border p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-muted/30 transition-all cursor-default">
-                          <div className="flex items-center gap-4">
-                             <div className="w-11 h-11 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black">{cust.name?.[0]}</div>
-                             <div className="space-y-0.5">
-                                <p className="font-bold text-foreground text-sm uppercase tracking-tight">{cust.name}</p>
+                       <Card key={idx} className="bg-card border-border p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-muted/30 transition-all cursor-default rounded-3xl">
+                          <div className="flex items-center gap-5">
+                             <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-lg shrink-0">{cust.name?.[0]}</div>
+                             <div className="space-y-1">
+                                <p className="font-bold text-foreground text-sm lg:text-base uppercase tracking-tight">{cust.name}</p>
                                 <p className="text-[10px] text-muted-foreground font-mono">{cust.phone} • {cust.email}</p>
                              </div>
                           </div>
-                          <div className="flex items-center justify-between md:justify-end gap-10">
-                             <div className="text-center md:text-right"><p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">Sıklık</p><p className="font-black text-foreground text-sm">{cust.appointments} RX</p></div>
-                             <div className="text-center md:text-right cursor-help" title="No-show kaydı"><p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">Risk</p><p className={cn("font-black text-sm", cust.noShows > 0 ? "text-rose-500" : "text-emerald-500")}>{cust.noShows}</p></div>
-                             <div className="text-center md:text-right"><p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">Harcama</p><p className="font-black text-emerald-500 text-sm">₺{cust.totalSpent.toLocaleString()}</p></div>
+                          <div className="grid grid-cols-3 lg:flex items-center gap-4 lg:gap-10 border-t lg:border-none pt-4 lg:pt-0">
+                             <div className="text-center lg:text-right"><p className="text-[8px] lg:text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Sıklık</p><p className="font-black text-foreground text-xs lg:text-sm">{cust.appointments} RX</p></div>
+                             <div className="text-center lg:text-right cursor-help" title="No-show kaydı"><p className="text-[8px] lg:text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Risk</p><p className={cn("font-black text-xs lg:text-sm", cust.noShows > 0 ? "text-rose-500" : "text-emerald-500")}>{cust.noShows}</p></div>
+                             <div className="text-center lg:text-right"><p className="text-[8px] lg:text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Ciro</p><p className="font-black text-emerald-500 text-xs lg:text-sm">₺{cust.totalSpent.toLocaleString()}</p></div>
                           </div>
                        </Card>
                      ))}
@@ -600,32 +599,37 @@ const AdminPage = () => {
                 )}
 
                 {activeTab === "appointments" && (
-                   <div className="space-y-3">
-                      {appointments.slice(0, 50).map(app => (
-                        <div key={app.id} className="p-5 bg-card border border-border rounded-2xl flex items-center justify-between text-sm hover:border-primary/20 transition-colors">
-                           <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center text-muted-foreground"><User className="w-5 h-5" /></div>
-                              <div className="space-y-0.5">
-                                 <p className="font-bold text-foreground uppercase tracking-tight">{app.customer_name}</p>
-                                 <p className="text-[10px] text-muted-foreground font-medium italic">@{app.business?.name}</p>
-                              </div>
-                           </div>
-                           <div className="flex items-center gap-6">
-                              <div className="hidden md:flex flex-col items-end gap-0.5">
-                                <span className="text-[10px] font-bold text-foreground">{app.appointment_date}</span>
-                                <span className="text-[10px] text-muted-foreground">{app.appointment_time}</span>
-                              </div>
-                              <Badge className={cn(
-                                "text-[9px] font-black uppercase px-2.5 h-5 border-none",
-                                app.status === 'confirmed' || app.status === 'completed' ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
-                              )}>
-                                {app.status}
-                              </Badge>
-                           </div>
-                        </div>
-                      ))}
-                   </div>
-                )}
+                    <div className="space-y-4">
+                       {appointments.slice(0, 50).map(app => (
+                         <div key={app.id} className="p-4 lg:p-6 bg-card border border-border rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm hover:border-primary/20 transition-all duration-300 shadow-sm">
+                            <div className="flex items-center gap-4">
+                               <div className="w-12 h-12 rounded-xl bg-muted border border-border flex items-center justify-center text-muted-foreground mb-1 sm:mb-0 shrink-0"><User className="w-6 h-6" /></div>
+                               <div className="min-w-0">
+                                  <p className="font-black text-foreground uppercase tracking-tight truncate">{app.customer_name}</p>
+                                  <p className="text-[10px] text-muted-foreground font-bold italic truncate flex items-center gap-1.5"><Building2 className="w-3 h-3" /> {app.business?.name}</p>
+                                  <div className="flex sm:hidden items-center gap-2 mt-1">
+                                     <span className="text-[10px] font-bold text-foreground">{app.appointment_date}</span>
+                                     <span className="text-[10px] text-muted-foreground">•</span>
+                                     <span className="text-[10px] text-muted-foreground">{app.appointment_time}</span>
+                                  </div>
+                               </div>
+                            </div>
+                            <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-none pt-4 sm:pt-0">
+                               <div className="hidden sm:flex flex-col items-end gap-0.5">
+                                 <span className="text-[10px] font-bold text-foreground">{app.appointment_date}</span>
+                                 <span className="text-[10px] text-muted-foreground">{app.appointment_time}</span>
+                               </div>
+                               <Badge className={cn(
+                                 "text-[10px] font-black uppercase px-4 lg:px-6 h-8 border-none rounded-xl",
+                                 app.status === 'confirmed' || app.status === 'completed' ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-muted text-muted-foreground"
+                               )}>
+                                 {app.status}
+                               </Badge>
+                            </div>
+                         </div>
+                       ))}
+                    </div>
+                 )}
 
                 {activeTab === "banlist" && (
                   <div className="space-y-6">

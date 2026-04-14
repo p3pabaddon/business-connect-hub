@@ -168,7 +168,7 @@ export interface Profile {
   full_name: string | null;
   phone: string | null;
   avatar_url: string | null;
-  role: "user" | "admin" | "business_owner" | "hq_staff";
+  role: "user" | "admin" | "business_owner" | "hq_staff" | "super_admin";
   created_at: string;
   updated_at: string;
 }

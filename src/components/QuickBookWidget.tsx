@@ -27,7 +27,7 @@ export function QuickBookWidget() {
   if (isHiddenPage || !isVisible) return null;
 
   return (
-    <div className="fixed bottom-6 left-6 z-[100] flex flex-col items-start gap-3">
+    <div className="fixed bottom-36 sm:bottom-6 left-6 z-[100] flex flex-col items-start gap-3">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -73,14 +73,14 @@ export function QuickBookWidget() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          "h-16 flex items-center gap-3 px-6 rounded-full shadow-lg transition-all duration-300",
+          "h-14 lg:h-16 flex items-center gap-3 px-4 lg:px-6 rounded-full shadow-lg transition-all duration-300",
           isOpen 
             ? "bg-accent text-white" 
             : "bg-primary text-white hover:bg-primary/90"
         )}
       >
-        <Calendar className="w-6 h-6" />
-        <span className="font-semibold whitespace-nowrap">Randevu Al</span>
+        <Calendar className="w-5 h-5 lg:w-6 lg:h-6" />
+        <span className="font-semibold whitespace-nowrap hidden lg:inline">Randevu Al</span>
       </motion.button>
     </div>
   );

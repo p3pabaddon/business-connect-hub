@@ -24,6 +24,7 @@ export function useBusinessBySlug(slug: string) {
     queryKey: ["business", slug],
     queryFn: () => getBusinessBySlug(slug),
     enabled: !!slug,
+    staleTime: 60_000,
   });
 }
 
@@ -60,6 +61,7 @@ export function useBusinessAppointments(businessId: string, status?: string) {
     queryKey: ["bizAppointments", businessId, status],
     queryFn: () => getBusinessAppointments(businessId, status),
     enabled: !!businessId,
+    staleTime: 15_000,
   });
 }
 
@@ -135,6 +137,7 @@ export function useMyAppointments() {
       return data || [];
     },
     enabled: !!user,
+    staleTime: 30_000,
   });
 }
 

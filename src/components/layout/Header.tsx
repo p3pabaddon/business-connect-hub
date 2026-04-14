@@ -78,57 +78,63 @@ export function Header() {
               </Link>
             </div>
 
-            <div className="w-[1px] h-4 bg-border/50 mx-1" />
+            <div className="w-[1px] h-4 bg-border/50 mx-1 hidden lg:block" />
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                      <User className="w-3.5 h-3.5 text-primary" />
-                    </div>
-                    <span className="max-w-[120px] truncate">
-                      {user.user_metadata?.full_name || user.email?.split("@")[0]}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => navigate("/profil")}>
-                    <User className="w-4 h-4 mr-2" /> {t("common.profile")}
-                  </DropdownMenuItem>
-                  {isAdmin && (
-                    <DropdownMenuItem onClick={() => navigate("/admin-secure-panel-v5-x89j2k1m4n5")} className="text-primary font-semibold bg-primary/5">
-                      <Shield className="w-4 h-4 mr-2" /> {t("common.admin_panel")}
+              <div className="hidden md:block">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                        <User className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <span className="max-w-[120px] truncate">
+                        {user.user_metadata?.full_name || user.email?.split("@")[0]}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => navigate("/profil")}>
+                      <User className="w-4 h-4 mr-2" /> {t("common.profile")}
                     </DropdownMenuItem>
-                  )}
-                  {isBusinessOwner && (
-                    <DropdownMenuItem onClick={() => navigate("/biz-dashboard-secure-x31p9q8w2")}>
-                      <LayoutDashboard className="w-4 h-4 mr-2" /> {t("common.dashboard")}
+                    {isAdmin && (
+                      <DropdownMenuItem onClick={() => navigate("/admin-secure-panel-v5-x89j2k1m4n5")} className="text-primary font-semibold bg-primary/5">
+                        <Shield className="w-4 h-4 mr-2" /> {t("common.admin_panel")}
+                      </DropdownMenuItem>
+                    )}
+                    {isBusinessOwner && (
+                      <DropdownMenuItem onClick={() => navigate("/biz-dashboard-secure-x31p9q8w2")}>
+                        <LayoutDashboard className="w-4 h-4 mr-2" /> {t("common.dashboard")}
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                      <LogOut className="w-4 h-4 mr-2" /> {t("common.logout")}
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                    <LogOut className="w-4 h-4 mr-2" /> {t("common.logout")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
-              <>
+              <div className="hidden md:flex items-center gap-2">
                 <Link to="/giris">
                   <Button variant="outline" size="sm">{t("nav.login")}</Button>
                 </Link>
                 <Link to="/kayit">
                   <Button size="sm">{t("nav.register")}</Button>
                 </Link>
-              </>
+              </div>
             )}
           </div>
 
-          <button
-            className="md:hidden p-2 text-muted-foreground"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="flex md:hidden items-center gap-2">
+            <NotificationBell />
+            <button
+              className="p-2 text-muted-foreground hover:bg-muted rounded-full transition-colors active:scale-90"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {mobileOpen && (

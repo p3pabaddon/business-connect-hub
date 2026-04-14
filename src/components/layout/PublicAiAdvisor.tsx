@@ -80,7 +80,7 @@ export function PublicAiAdvisor() {
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] font-sans">
+    <div className="fixed bottom-36 sm:bottom-6 right-6 z-[100] font-sans">
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -88,12 +88,12 @@ export function PublicAiAdvisor() {
             animate={{ scale: 1, scaleY: 1 }}
             exit={{ scale: 0 }}
             onClick={() => setIsOpen(true)}
-            className="group relative h-16 px-6 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center gap-3 shadow-[0_15px_30px_rgba(59,130,246,0.4)] hover:shadow-[0_20px_40px_rgba(59,130,246,0.6)] hover:-translate-y-1 transition-all duration-300 ring-4 ring-white/10"
+            className="group relative h-14 lg:h-16 px-4 lg:px-6 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center gap-3 shadow-[0_15px_30px_rgba(59,130,246,0.4)] hover:shadow-[0_20px_40px_rgba(59,130,246,0.6)] hover:-translate-y-1 transition-all duration-300 ring-4 ring-white/10"
           >
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                <Bot className="w-5 h-5 text-white animate-bounce" />
             </div>
-            <span className="text-sm font-black text-white uppercase tracking-widest">ASİSTAN'A SOR</span>
+            <span className="text-sm font-black text-white uppercase tracking-widest hidden lg:inline">ASİSTAN'A SOR</span>
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-background animate-pulse" />
           </motion.button>
         )}
@@ -112,7 +112,7 @@ export function PublicAiAdvisor() {
             }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             className={cn(
-              "w-[380px] bg-card/90 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col transition-all duration-500",
+              "w-[calc(100vw-48px)] sm:w-[380px] bg-card/90 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col transition-all duration-500",
               isMinimized ? "rounded-full" : ""
             )}
           >
