@@ -235,36 +235,41 @@ export function AdminSupport() {
         <div className="lg:col-span-8 flex flex-col bg-card border border-border rounded-[2.5rem] overflow-hidden relative shadow-2xl shadow-primary/5">
            {selectedTicket ? (
              <>
-               <div className="p-6 border-b border-border flex items-center justify-between bg-muted/10">
-                  <div className="flex items-center gap-4">
-                     <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20">
-                        <MessageSquare className="w-6 h-6 text-primary" />
-                     </div>
-                     <div>
-                        <h4 className="font-black text-foreground uppercase tracking-tight italic">{selectedTicket.subject}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                           <span className="text-[10px] text-muted-foreground font-bold uppercase">{selectedTicket.business?.name}</span>
-                           <span className="text-[10px] text-muted-foreground/30">•</span>
-                           <span className="text-[10px] text-primary font-mono">{selectedTicket.id.slice(0, 8)}</span>
-                        </div>
-                     </div>
-                  </div>
-                   <div className="flex items-center gap-2">
+                <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between bg-muted/10 gap-4">
+                   <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shrink-0">
+                         <MessageSquare className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                         <h4 className="font-black text-xs sm:text-sm text-foreground uppercase tracking-tight italic truncate">{selectedTicket.subject}</h4>
+                         <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] text-muted-foreground font-bold uppercase truncate max-w-[150px]">{selectedTicket.business?.name}</span>
+                            <span className="text-[10px] text-muted-foreground/30">•</span>
+                            <span className="text-[10px] text-primary font-mono">{selectedTicket.id.slice(0, 8)}</span>
+                         </div>
+                      </div>
+                   </div>
+                   
+                   <div className="flex flex-wrap items-center gap-2">
                       {selectedTicket.status !== 'closed' && (
                         <>
-                          <div className="flex items-center gap-1 bg-muted/20 p-1 rounded-xl mr-2">
+                          <div className="flex items-center gap-1 bg-background/50 border border-border p-1 rounded-2xl shadow-inner">
                              {[
-                               { id: 'open', label: 'Açık', color: 'text-emerald-500' },
-                               { id: 'in_review', label: 'İnceleniyor', color: 'text-amber-500' },
-                               { id: 'queued', label: 'Sıraya Alındı', color: 'text-blue-500' },
-                               { id: 'waiting_reply', label: 'Cevap Bekleniyor', color: 'text-violet-500' }
+                               { id: 'open', label: 'Açık', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                               { id: 'in_review', label: 'İnceleniyor', color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                               { id: 'queued', label: 'Sırada', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                               { id: 'waiting_reply', label: 'Cevap Bekliyor', color: 'text-violet-500', bg: 'bg-violet-500/10' }
                              ].map((st) => (
                                <Button
                                  key={st.id}
-                                 variant={selectedTicket.status === st.id ? "secondary" : "ghost"}
+                                 variant="ghost"
                                  size="sm"
                                  onClick={() => updateTicketStatus(selectedTicket.id, st.id)}
-                                 className={`text-[9px] h-7 px-2 font-bold uppercase ${selectedTicket.status === st.id ? st.color : 'text-muted-foreground'}`}
+                                 className={`text-[9px] h-8 px-3 font-black uppercase transition-all rounded-xl ${
+                                   selectedTicket.status === st.id 
+                                   ? `${st.bg} ${st.color} border border-${st.color.split('-')[1]}-500/20 shadow-sm` 
+                                   : 'text-muted-foreground hover:bg-muted'
+                                 }`}
                                >
                                  {st.label}
                                </Button>
@@ -275,11 +280,16 @@ export function AdminSupport() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleCloseTicket(selectedTicket.id)}
-                            className="rounded-xl font-bold text-rose-500 border-rose-500/20 hover:bg-rose-500/5 h-8 text-[10px]"
+                            className="bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all font-black text-[9px] uppercase h-8 px-4 rounded-xl shadow-lg shadow-rose-500/10"
                           >
-                             KAPAT
+                             TALEBİ KAPAT
                           </Button>
                         </>
+                      )}
+                      {selectedTicket.status === 'closed' && (
+                        <div className="px-4 py-1.5 bg-muted rounded-xl border border-border">
+                          <span className="text-[10px] font-black text-muted-foreground uppercase italic tracking-widest">BU TALEP ARŞİVLENDİ</span>
+                        </div>
                       )}
                    </div>
                 </div>
