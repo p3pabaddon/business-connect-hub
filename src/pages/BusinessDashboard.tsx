@@ -272,11 +272,16 @@ export default function BusinessDashboard() {
            <div className="flex items-center gap-2 lg:gap-4">
               <ThemeToggle />
               <button 
-                onClick={() => setActiveTab("notifications")}
-                className="relative p-2 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveTab("notifications");
+                }}
+                className="relative p-2 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-all duration-200 group flex items-center justify-center cursor-pointer z-[60]"
               >
-                 <Bell className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                 <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full border-2 border-background"></span>
+                 <Bell className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors pointer-events-none" />
+                 <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full border-2 border-background pointer-events-none"></span>
               </button>
 
               <div className="h-6 w-[1px] bg-border mx-1 lg:mx-2"></div>
