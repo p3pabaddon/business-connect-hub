@@ -42,6 +42,7 @@ export function SEOHead({ title, description, url, image, type = "website", json
     setMeta("twitter:title", fullTitle);
     setMeta("twitter:description", desc);
     if (image) setMeta("twitter:image", image);
+    setMeta("google-site-verification", "FvEfSPMfEfB3mM78gk4bndaX8xxO9oXoAapS_a_SG3c");
 
     // JSON-LD
     const existingScript = document.querySelector('script[data-seo-jsonld]');
