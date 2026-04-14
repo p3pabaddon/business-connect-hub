@@ -54,7 +54,7 @@ export function BizSupport({ businessId }: { businessId: string }) {
     try {
       const { data, error } = await supabase
         .from("support_messages")
-        .select("id, sender_id, message, created_at")
+        .select("*")
         .eq("ticket_id", ticketId)
         .order("created_at", { ascending: true });
       
