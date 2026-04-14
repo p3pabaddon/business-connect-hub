@@ -109,8 +109,20 @@ export function BizSupport({ businessId }: { businessId: string }) {
         .eq("ticket_id", ticketId)
         .order("created_at", { ascending: true });
       
-      if (error) throw error;
-      setMessages(data || []);
+      if (error) {
+        console.error("Biz mesaj yükleme hatası:", error);
+        // Fallback
+        const { data: simpleData, error: simpleError } = await supabase
+          .from("support_messages")
+          .select("*")
+          .eq("ticket_id", ticketId)
+          .order("created_at", { ascending: true });
+          
+        if (simpleError) throw simpleError;
+        setMessages(simpleData || []);
+      } else {
+        setMessages(data || []);
+      }
     } catch (err: any) {
       toast.error("Mesajlar yüklenemedi: " + err.message);
     }

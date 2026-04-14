@@ -104,19 +104,38 @@ export function AdminSupport() {
   };
 
   const loadMessages = async (ticketId: string) => {
-    const { data, error } = await supabase
-      .from("support_messages")
-      .select(`
-        *,
-        profiles:sender_id (
-          full_name,
-          role
-        )
-      `)
-      .eq("ticket_id", ticketId)
-      .order("created_at", { ascending: true });
-    
-    if (!error) setMessages(data || []);
+    try {
+      const { data, error } = await supabase
+        .from("support_messages")
+        .select(`
+          *,
+          profiles:sender_id (
+            full_name,
+            role
+          )
+        `)
+        .eq("ticket_id", ticketId)
+        .order("created_at", { ascending: true });
+      
+      if (error) {
+        console.error("Mesaj yükleme hatası:", error);
+        // Fallback: profiles olmadan dene
+        const { data: simpleData, error: simpleError } = await supabase
+          .from("support_messages")
+          .select("*")
+          .eq("ticket_id", ticketId)
+          .order("created_at", { ascending: true });
+          
+        if (simpleError) throw simpleError;
+        setMessages(simpleData || []);
+        toast.error("Profil bilgileri yüklenemedi, sadece mesajlar gösteriliyor.");
+      } else {
+        setMessages(data || []);
+      }
+    } catch (err: any) {
+      console.error("Kritik mesaj hatası:", err);
+      toast.error("Mesajlar yüklenemedi: " + err.message);
+    }
   };
 
   const handleSendMessage = async () => {
