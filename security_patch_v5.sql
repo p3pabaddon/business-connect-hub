@@ -1,4 +1,4 @@
--- Otomatik Bildirim Sistemi
+-- Otomatik Bildirim Sistemi (FIXED)
 -- Yeni randevu geldiğinde veya destek mesajı atıldığında 'notifications' tablosuna kayıt atar.
 
 -- 1. Randevu Bildirim Tetikleyicisi
@@ -9,7 +9,7 @@ BEGIN
   VALUES (
     (SELECT owner_id FROM businesses WHERE id = NEW.business_id),
     'YENİ RANDEVU TALEBİ',
-    'YENİ BİR MÜŞTERİ RANDEVU ALDI: ' || (SELECT name FROM profiles WHERE id = NEW.user_id),
+    'YENİ BİR MÜŞTERİ RANDEVU ALDI: ' || COALESCE((SELECT full_name FROM profiles WHERE id = NEW.user_id), 'BİR MÜŞTERİ'),
     'appointment'
   );
   RETURN NEW;

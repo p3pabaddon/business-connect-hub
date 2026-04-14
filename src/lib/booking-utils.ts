@@ -128,10 +128,10 @@ export function calculateSmartPrice(
   
   // Use provided settings or fall back to defaults
   const config = settings || {
-    peak_multiplier: 1.1,
-    slow_multiplier: 0.9,
-    peak_days: ["saturday", "sunday"],
-    slow_days: ["tuesday", "wednesday"]
+    peak_multiplier: 1.0,
+    slow_multiplier: 1.0,
+    peak_days: [],
+    slow_days: []
   };
 
   let multiplier = 1;
