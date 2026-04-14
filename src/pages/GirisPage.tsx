@@ -55,13 +55,12 @@ const GirisPage = () => {
       <div className="absolute inset-0 z-[1] bg-gradient-to-br from-background/95 via-background/80 to-background/40 backdrop-blur-[2px]" />
 
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8 group">
-          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-            <span className="text-primary-foreground font-heading text-2xl">R</span>
-          </div>
-          <span className="font-heading text-3xl text-foreground tracking-tight">
-            Randevu<span className="text-accent">Dunyasi</span>
-          </span>
+        <Link to="/" className="flex items-center justify-center mb-8">
+          <img 
+            src="/logo.png" 
+            alt="Randevu Dünyası" 
+            className="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105" 
+          />
         </Link>
         <div className="text-center space-y-2">
           <h2 className="text-3xl font-heading text-foreground font-bold tracking-tight">{t("auth.login_title")}</h2>
