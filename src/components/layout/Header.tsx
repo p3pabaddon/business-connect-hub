@@ -96,7 +96,7 @@ export function Header() {
                     <User className="w-4 h-4 mr-2" /> {t("common.profile")}
                   </DropdownMenuItem>
                   {isAdmin && (
-                    <DropdownMenuItem onClick={() => navigate("/admin")} className="text-primary font-semibold bg-primary/5">
+                    <DropdownMenuItem onClick={() => navigate("/rd-secure-gateway-v4-9f82d1b7a5e4b2d8c9f0a1b2c3d4e5f6a7b8c9d0")} className="text-primary font-semibold bg-primary/5">
                       <Shield className="w-4 h-4 mr-2" /> {t("common.admin_panel")}
                     </DropdownMenuItem>
                   )}
@@ -177,7 +177,7 @@ export function Header() {
                   )}
                   {isAdmin && (
                     <Link
-                      to="/admin"
+                      to="/rd-secure-gateway-v4-9f82d1b7a5e4b2d8c9f0a1b2c3d4e5f6a7b8c9d0"
                       className="block px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10 rounded-md"
                       onClick={() => setMobileOpen(false)}
                     >

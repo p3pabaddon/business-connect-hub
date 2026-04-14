@@ -50,7 +50,8 @@ export function ChatbotWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const isHiddenPage = location.pathname.startsWith("/dashboard") || 
-                       location.pathname.startsWith("/hq") ||
+                       location.pathname.startsWith("/rd-secure-gateway") ||
+                       location.pathname.startsWith("/hq-") ||
                        location.pathname === "/giris" || 
                        location.pathname === "/kayit" ||
                        location.pathname === "/isletme-basvuru";

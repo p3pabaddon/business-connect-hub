@@ -13,7 +13,8 @@ export function QuickBookWidget() {
 
   // Hide on dashboard or during login/register
   const isHiddenPage = location.pathname.startsWith("/dashboard") || 
-                       location.pathname.startsWith("/hq") ||
+                       location.pathname.startsWith("/rd-secure-gateway") ||
+                       location.pathname.startsWith("/hq-") ||
                        location.pathname === "/giris" || 
                        location.pathname === "/kayit" ||
                        location.pathname === "/isletme-basvuru";

@@ -42,7 +42,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/hq/login" replace />;
+    return <Navigate to="/hq-gate-entry-7f1a8e9c0d2b4a5c6d7e8f9a0b1c2d3e4f5a6b7c" replace />;
   }
 
   if (!isAdmin) {
