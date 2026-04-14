@@ -11,7 +11,7 @@ const benefits = [
 
 export function CustomerBenefitsSection() {
   return (
-    <section className="py-24 bg-slate-50 dark:bg-slate-900/30 overflow-hidden relative">
+    <section className="py-24 bg-slate-50 dark:bg-background overflow-hidden relative">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         <ScrollReveal>
           <div className="text-center mb-20">

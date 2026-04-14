@@ -1,7 +1,4 @@
-
-import { createAppointment } from "./api"; // Optional: if we want AI to book
-
-const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+import { supabase } from "./supabase";
 
 interface AiMessage {
   role: "system" | "user" | "assistant";
@@ -18,12 +15,6 @@ export async function askAiAdvisor(
     appointments?: any[];
   }
 ) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("OpenAI API anahtarı bulunamadı (.env dosyasını kontrol edin)");
-  }
-
   const systemPrompt = `
     Sen "Business Connect Hub" platformunun uzman işletme danışmanısın. 
     Görevin "${context.businessName}" işletmesinin verilerini analiz ederek dükkan sahibine büyüme stratejileri sunmaktır.
@@ -44,29 +35,23 @@ export async function askAiAdvisor(
     Analizlerini bu verilere dayandır ve somut öneriler (Örn: "Salı günleri randevular az, kampanya yapalım") sun.
   `;
 
-  const response = await fetch(OPENAI_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini", // Cost effective yet smart
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messages
-      ],
-      temperature: 0.7,
-    }),
+  const { data, error } = await supabase.functions.invoke("ai-advisor", {
+    body: {
+      messages,
+      systemPrompt,
+      temperature: 0.7
+    }
   });
 
-  if (!response.ok) {
-    const err = await response.json();
-    console.error("AI Advisor Error:", err);
-    throw new Error(err.error?.message || "OpenAI hatası oluştu");
+  if (error) {
+    console.error("AI Advisor Proxy Error:", error);
+    throw new Error(error.message || "Edge Function çağrısı başarısız oldu.");
   }
 
-  const data = await response.json();
+  if (data.error) {
+    throw new Error(data.error);
+  }
+
   return data.choices[0].message.content;
 }
 
@@ -78,12 +63,6 @@ export async function askPublicAiAdvisor(
     userLocation?: string;
   }
 ) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("OpenAI API anahtarı bulunamadı");
-  }
-
   const systemPrompt = `
     Sen "Business Connect Hub" platformunun akıllı asistanısın. 
     Platformumuzda kullanıcılar kuaför, spor salonu, restoran gibi işletmelerden randevu alabilir.
@@ -100,59 +79,41 @@ export async function askPublicAiAdvisor(
     5. Eğer bir işletme hakkında spesifik bilgi istenirse ve sende yoksa, platformdan arama yapabileceğini hatırlat.
   `;
 
-  const response = await fetch(OPENAI_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messages
-      ],
-      temperature: 0.7,
-    }),
+  const { data, error } = await supabase.functions.invoke("ai-advisor", {
+    body: {
+      messages,
+      systemPrompt,
+      temperature: 0.7
+    }
   });
 
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error?.message || "OpenAI hatası oluştu");
+  if (error) {
+    console.error("Public AI Advisor Error:", error);
+    throw new Error(error.message || "Edge Function çağrısı başarısız oldu.");
   }
 
-  const data = await response.json();
+  if (data.error) throw new Error(data.error);
+
   return data.choices[0].message.content;
 }
 
 export async function generateBusinessStrategy(context: string) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  if (!apiKey) throw new Error("API key missing");
+  const systemPrompt = "Sen 'Business Connect Hub' platformunun baş danışmanısın. Verilen işletme analitik verilerini kullanarak 5-6 maddelik, somut, uygulanabilir ve profesyonel bir büyüme stratejisi oluştur. Markdown formatında başlıklar kullanarak cevap ver.";
 
-  const response = await fetch(OPENAI_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { 
-          role: "system", 
-          content: "Sen 'Business Connect Hub' platformunun baş danışmanısın. Verilen işletme analitik verilerini kullanarak 5-6 maddelik, somut, uygulanabilir ve profesyonel bir büyüme stratejisi oluştur. Markdown formatında başlıklar kullanarak cevap ver." 
-        },
-        { role: "user", content: `Aşağıdaki verileri analiz et ve strateji oluştur:\n\n${context}` }
-      ],
-      temperature: 0.8,
-    }),
+  const { data, error } = await supabase.functions.invoke("ai-advisor", {
+    body: {
+      messages: [{ role: "user", content: `Aşağıdaki verileri analiz et ve strateji oluştur:\n\n${context}` }],
+      systemPrompt,
+      temperature: 0.8
+    }
   });
 
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error?.message || "OpenAI API Error");
+  if (error) {
+    console.error("Strategy Gen Error:", error);
+    throw new Error(error.message || "Edge Function çağrısı başarısız oldu.");
   }
 
-  const data = await response.json();
+  if (data.error) throw new Error(data.error);
+
   return data.choices[0].message.content;
 }

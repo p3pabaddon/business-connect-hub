@@ -32,7 +32,6 @@ import KarsilastirmaPage from "./pages/KarsilastirmaPage";
 import HaritaPage from "./pages/HaritaPage";
 import { TrafficTracker } from "./components/TrafficTracker";
 import { QuickBookWidget } from "./components/QuickBookWidget";
-import { ChatbotWidget } from "./components/ChatbotWidget";
 import KvkkPage from "./pages/KvkkPage";
 import KullanimKosullari from "./pages/KullanimKosullari";
 import GizlilikPolitikasi from "./pages/GizlilikPolitikasi";
@@ -50,7 +49,6 @@ const App = () => (
           <BrowserRouter>
             <TrafficTracker />
             <QuickBookWidget />
-            <ChatbotWidget />
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
