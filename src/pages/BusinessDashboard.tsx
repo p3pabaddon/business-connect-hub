@@ -23,7 +23,8 @@ import { BizAdvancedAnalytics } from "@/components/biz/BizAdvancedAnalytics";
 import { BizCoupons } from "@/components/biz/BizCoupons";
 import { SEOHead } from "@/components/SEOHead";
 import { BizAiAdvisor } from "@/components/biz/BizAiAdvisor";
-import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2, LayoutDashboard, LogOut, ExternalLink } from "lucide-react";
+import { BizNotifications } from "@/components/biz/BizNotifications";
+import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2, LayoutDashboard, LogOut, ExternalLink, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +39,7 @@ const playNotificationSound = () => {
     audio.play().catch(() => {});
 };
 
-type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" | "staff-performance" | "analytics" | "portfolio" | "support" | "coupons";
+type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" | "staff-performance" | "analytics" | "portfolio" | "support" | "coupons" | "notifications";
 
 export default function BusinessDashboard() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -81,20 +82,41 @@ export default function BusinessDashboard() {
     reloadReviews();
   };
 
-  // Realtime appointment listener
+  // Unified Notification & Realtime Listener
+  useEffect(() => {
+    if (user?.id) {
+      const channel = supabase
+        .channel(`global-notifications-${user.id}`)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+          (payload) => {
+            const { title, message } = payload.new;
+            playNotificationSound();
+            toast.success(title, {
+              description: message,
+              duration: 10000,
+            });
+            loadData();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
+
+  // Specific Appointment Listener for immediate refresh (optional if covered by notifications)
   useEffect(() => {
     if (business?.id) {
       const channel = supabase
-        .channel(`biz-updates-${business.id}`)
+        .channel(`biz-updates-appointments-${business.id}`)
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'appointments', filter: `business_id=eq.${business.id}` },
           () => {
-            playNotificationSound();
-            toast.success("YENİ RANDEVU GELDİ!", {
-              description: "Takviminize yeni bir randevu eklendi.",
-              duration: 10000,
-            });
             loadData();
           }
         )
@@ -326,6 +348,9 @@ export default function BusinessDashboard() {
               )}
               {activeTab === "support" && business && (
                 <BizSupport businessId={business.id} />
+              )}
+              {activeTab === "notifications" && business && (
+                <BizNotifications />
               )}
               {activeTab === "analytics" && business && (
                 <BizAdvancedAnalytics businessId={business.id} />
