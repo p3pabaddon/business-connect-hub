@@ -245,14 +245,14 @@ export function AdminSupport() {
                     // - user.id === msg.sender_id → Bu mesajı admin (BEN/SİZ) yazdı
                     // - selectedTicket.owner_id === msg.sender_id → Bu mesajı işletme sahibi yazdı
                     // - Başka bir ID → Başka bir admin yazmış olabilir
-                    const isMe = msg.sender_id === user?.id;
                     const isBusiness = msg.sender_id === selectedTicket?.owner_id;
+                    const isMe = !isBusiness;
 
                     let senderLabel: string;
-                    if (isMe) {
-                      senderLabel = 'SİZ (YÖNETİCİ)';
-                    } else if (isBusiness) {
+                    if (isBusiness) {
                       senderLabel = selectedTicket?.business?.name || 'İŞLETME SAHİBİ';
+                    } else if (msg.sender_id === user?.id) {
+                      senderLabel = 'SİZ (YÖNETİCİ)';
                     } else {
                       senderLabel = 'DESTEK EKİBİ';
                     }

@@ -249,8 +249,8 @@ export function BizSupport({ businessId }: { businessId: string }) {
                >
                      {messages.map((msg) => {
                        // BİZ (İşletme sahibi) bu paneli kullanan kişi:
-                       // Kendi mesajımız mı kontrol et: sender_id === mevcut kullanıcının ID'si
-                       const isMe = msg.sender_id === user?.id;
+                       // Kendi mesajımız mı kontrol et: sender_id === talebi oluşturan işletmenin ID'si
+                       const isMe = msg.sender_id === selectedTicket?.owner_id;
                        
                        // Eğer mesaj bize ait değilse, admin/platform destek yazmış demektir
                        // (Bu panel sadece işletme paneli olduğu için buraya sadece
