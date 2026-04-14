@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,17 @@ export function BizSupport({ businessId }: { businessId: string }) {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [senderRoles, setSenderRoles] = useState<Record<string, string>>({});
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     loadTickets();
@@ -48,14 +58,17 @@ export function BizSupport({ businessId }: { businessId: string }) {
     if (selectedTicket) {
       loadMessages(selectedTicket.id);
       
-      // Realtime listener for new messages
       const channel = supabase
         .channel(`ticket-${selectedTicket.id}`)
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${selectedTicket.id}` },
           (payload) => {
-            setMessages(prev => [...prev, payload.new as Message]);
+            const newMessage = payload.new as Message;
+            setMessages(prev => {
+              if (prev.find(m => m.id === newMessage.id)) return prev;
+              return [...prev, newMessage];
+            });
           }
         )
         .subscribe();
@@ -96,74 +109,36 @@ export function BizSupport({ businessId }: { businessId: string }) {
         .eq("ticket_id", ticketId)
         .order("created_at", { ascending: true });
       
-      if (error) {
-        console.error("Mesaj yükleme hatası:", error);
-        toast.error("Mesajlar yüklenemedi: " + error.message);
-        return;
-      }
+      if (error) throw error;
       setMessages(data || []);
-    } catch (err) {
-      console.error("Mesaj yükleme catch:", err);
+    } catch (err: any) {
+      toast.error("Mesajlar yüklenemedi: " + err.message);
     }
   };
 
   const handleCreateTicket = async () => {
-    console.log("DEBUG: handleCreateTicket tetiklendi.");
-    
-    if (!newSubject) {
-      toast.error("Lütfen bir konu başlığı yazın.");
-      return;
-    }
-
-    if (!user) {
-      toast.error("Oturum bulunamadı. Lütfen sayfayı yenileyip tekrar giriş yapın.");
-      console.error("User object is null in BizSupport");
-      return;
-    }
-
-    if (!businessId) {
-      toast.error("İşletme kimliği alınamadı. Lütfen dashboard'u yenileyin.");
-      console.error("businessId is null in BizSupport");
-      return;
-    }
-
+    if (!newSubject || !user || !businessId) return;
     setSending(true);
-    toast.info("Talep oluşturuluyor...");
-
     try {
-      const ticketData = {
-        owner_id: user.id,
-        business_id: businessId,
-        subject: newSubject,
-        status: "open"
-      };
-
-      console.log("DEBUG: Gönderilen Veri:", ticketData);
-
       const { data, error } = await supabase
         .from("support_tickets")
-        .insert(ticketData)
+        .insert({
+          owner_id: user.id,
+          business_id: businessId,
+          subject: newSubject,
+          status: "open"
+        })
         .select()
         .single();
 
-      if (error) {
-        console.error("Supabase Hata Detayı:", error);
-        toast.error(`Veritabanı Hatası: ${error.message} (Kod: ${error.code})`);
-        return;
-      }
+      if (error) throw error;
       
-      if (!data) {
-        toast.error("Veritabanından yanıt alınamadı ama hata da dönmedi. Sinsi bir durum!");
-        return;
-      }
-
       setTickets(prev => [data, ...prev]);
       setSelectedTicket(data);
       setNewSubject("");
-      toast.success("Destek talebi başarıyla açıldı!");
+      toast.success("Destek talebi açıldı!");
     } catch (err: any) {
-      console.error("CATCH BLOĞU HATASI:", err);
-      toast.error("Bağlantı Hatası: " + (err.message || "Bilinmeyen hata"));
+      toast.error("Talep oluşturulamadı: " + err.message);
     } finally {
       setSending(false);
     }
@@ -206,7 +181,6 @@ export function BizSupport({ businessId }: { businessId: string }) {
       </div>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-hidden">
-        {/* Ticket List */}
         <div className="lg:col-span-4 bg-card border border-border rounded-[2.5rem] flex flex-col overflow-hidden">
            <div className="p-6 border-b border-border bg-muted/20">
               <Label className="text-[10px] uppercase font-bold tracking-tighter text-muted-foreground mb-3 block">Yeni Destek Talebi</Label>
@@ -265,7 +239,6 @@ export function BizSupport({ businessId }: { businessId: string }) {
            </div>
         </div>
 
-        {/* Chat Area */}
         <div className="lg:col-span-8 bg-card border border-border rounded-[2.5rem] flex flex-col overflow-hidden relative shadow-2xl shadow-primary/5">
            {selectedTicket ? (
              <>
@@ -282,16 +255,18 @@ export function BizSupport({ businessId }: { businessId: string }) {
                   <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">Talebi Kapat</Button>
                </div>
                
-               <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.02),transparent_40%)]">
+               <div 
+                  className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.02),transparent_40%)]"
+                  ref={scrollRef}
+               >
                      {messages.map((msg) => {
                        const isMe = msg.sender_id === user?.id;
-                       const senderRole = msg.profiles?.role;
-                       const isAdmin = senderRole === 'admin';
-                       const senderName = msg.profiles?.full_name || 'Kullanıcı';
+                       const isAdmin = msg.profiles?.role === 'admin' || (!isMe && msg.sender_id !== selectedTicket?.owner_id);
+                       const senderName = msg.profiles?.full_name || (isAdmin ? 'PLATFORM DESTEK' : 'KULLANICI');
 
                        return (
-                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[70%] p-4 rounded-2xl text-sm ${
+                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
+                            <div className={`max-w-[70%] p-4 rounded-2xl text-sm transition-all hover:shadow-md ${
                                isMe 
                                ? 'bg-primary text-primary-foreground rounded-tr-none shadow-lg shadow-primary/20' 
                                : 'bg-muted text-foreground rounded-tl-none border border-border'
@@ -302,7 +277,7 @@ export function BizSupport({ businessId }: { businessId: string }) {
                                     {isMe ? 'SİZ' : (isAdmin ? 'PLATFORM DESTEK' : senderName.toUpperCase())}
                                   </span>
                                   <span>•</span>
-                                  {format(new Date(msg.created_at), "HH:mm")}
+                                  {msg.created_at ? format(new Date(msg.created_at), "HH:mm") : '...'}
                                </div>
                             </div>
                          </div>
@@ -343,4 +318,3 @@ export function BizSupport({ businessId }: { businessId: string }) {
     </div>
   );
 }
-

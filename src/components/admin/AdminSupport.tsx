@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,17 @@ export function AdminSupport() {
   const [sending, setSending] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [senderRoles, setSenderRoles] = useState<Record<string, string>>({});
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     loadTickets();
@@ -61,9 +72,10 @@ export function AdminSupport() {
           },
           (payload) => {
             console.log("Anlık mesaj geldi:", payload.new);
+            const newMessage = payload.new as Message;
             setMessages(prev => {
-              if (prev.find(m => m.id === payload.new.id)) return prev;
-              return [...prev, payload.new as Message];
+              if (prev.find(m => m.id === newMessage.id)) return prev;
+              return [...prev, newMessage];
             });
           }
         )
@@ -111,7 +123,7 @@ export function AdminSupport() {
     if (!newMessage.trim() || !selectedTicket || !user) return;
     
     const messageText = newMessage.trim();
-    setNewMessage(""); // Hızlı temizleme
+    setNewMessage(""); 
     setSending(true);
     
     try {
@@ -124,7 +136,7 @@ export function AdminSupport() {
         });
 
       if (error) {
-        setNewMessage(messageText); // Hata varsa geri getir
+        setNewMessage(messageText); 
         throw error;
       }
     } catch (err: any) {
@@ -155,7 +167,6 @@ export function AdminSupport() {
   return (
     <div className="flex flex-col h-[calc(100vh-280px)] animate-in fade-in duration-500">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full overflow-hidden">
-        {/* Ticket Sidebar */}
         <div className="lg:col-span-4 flex flex-col bg-card border border-border rounded-[2.5rem] overflow-hidden">
            <div className="p-6 border-b border-border bg-muted/20">
               <div className="relative">
@@ -205,7 +216,6 @@ export function AdminSupport() {
            </div>
         </div>
 
-        {/* Chat Main */}
         <div className="lg:col-span-8 flex flex-col bg-card border border-border rounded-[2.5rem] overflow-hidden relative shadow-2xl shadow-primary/5">
            {selectedTicket ? (
              <>
@@ -234,31 +244,39 @@ export function AdminSupport() {
                     </Button>
                   )}
                </div>
-                                 {messages.map(msg => {
-                     const isMe = msg.sender_id === user?.id;
-                     const senderRole = msg.profiles?.role;
-                     const isAdmin = senderRole === 'admin';
-                     const senderName = msg.profiles?.full_name || 'İşletme Sahibi';
-                     
-                     return (
-                       <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[80%] p-5 rounded-[1.5rem] text-sm leading-relaxed shadow-sm ${
-                             isMe 
-                             ? 'bg-primary text-white rounded-tr-none' 
-                             : 'bg-muted/80 text-foreground rounded-tl-none border border-border'
-                          }`}>
-                             {msg.message}
-                             <div className={`text-[10px] mt-3 font-bold opacity-60 flex items-center gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                <span className="uppercase tracking-widest italic">
-                                  {isMe ? 'SİZ (YÖNETİCİ)' : senderName}
-                                </span>
-                                <span>•</span>
-                                {format(new Date(msg.created_at), "HH:mm")}
-                             </div>
-                          </div>
-                       </div>
-                     );
+                <div 
+                   className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.01),transparent_40%)]"
+                   ref={scrollRef}
+                >
+                   {messages.map(msg => {
+                      const isMe = msg.sender_id === user?.id;
+                      const isBusiness = msg.sender_id === selectedTicket?.owner_id;
+                      const senderName = isMe 
+                        ? 'SİZ (YÖNETİCİ)' 
+                        : (isBusiness 
+                            ? (selectedTicket?.business?.name || 'İŞLETME SAHİBİ') 
+                            : (msg.profiles?.full_name || 'DESTEK EKİBİ'));
+                      
+                      return (
+                        <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
+                           <div className={`max-w-[80%] p-5 rounded-[1.5rem] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md ${
+                              isMe 
+                              ? 'bg-primary text-white rounded-tr-none' 
+                              : 'bg-muted/80 text-foreground rounded-tl-none border border-border'
+                           }`}>
+                              {msg.message}
+                              <div className={`text-[10px] mt-3 font-bold opacity-60 flex items-center gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                 <span className="uppercase tracking-widest italic">
+                                   {senderName}
+                                 </span>
+                                 <span>•</span>
+                                 {msg.created_at ? format(new Date(msg.created_at), "HH:mm") : '...'}
+                              </div>
+                           </div>
+                        </div>
+                      );
                    })}
+                </div>
 
                <div className="p-6 border-t border-border bg-background/50 backdrop-blur-md">
                   <div className="relative group">
