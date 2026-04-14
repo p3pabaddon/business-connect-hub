@@ -97,6 +97,7 @@ export function BizSupport({ businessId }: { businessId: string }) {
 
   const loadMessages = async (ticketId: string) => {
     try {
+      // Daha kesin bir join syntax'ı deniyoruz
       const { data, error } = await supabase
         .from("support_messages")
         .select(`
@@ -272,10 +273,13 @@ export function BizSupport({ businessId }: { businessId: string }) {
                   ref={scrollRef}
                >
                      {messages.map((msg) => {
-                       const isMe = msg.sender_id === user?.id;
-                       const isAdmin = msg.profiles?.role === 'admin' || (!isMe && msg.sender_id !== selectedTicket?.owner_id);
-                       const senderName = msg.profiles?.full_name || (isAdmin ? 'PLATFORM DESTEK' : 'KULLANICI');
-
+                       const isAdmin = msg.profiles?.role === 'admin';
+                       const isBusinessOwner = msg.sender_id === selectedTicket?.owner_id;
+                       
+                       // Eğer mesajı atan kişi admin ise, her zaman solda görünüp "PLATFORM DESTEK" yazmalı.
+                       // Eğer mesajı atan kişi işletme sahibi ise ve şu anki kullanıcı o ise sağda görünüp "BEN" yazmalı.
+                       const isMe = !isAdmin && msg.sender_id === user?.id;
+                       
                        return (
                          <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
                             <div className={`max-w-[70%] p-4 rounded-2xl text-sm transition-all hover:shadow-md ${
@@ -286,7 +290,7 @@ export function BizSupport({ businessId }: { businessId: string }) {
                                {msg.message}
                                <div className={`text-[9px] mt-2 opacity-50 flex items-center gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
                                   <span className="font-bold uppercase tracking-tighter">
-                                    {isMe ? 'SİZ' : (isAdmin ? 'PLATFORM DESTEK' : senderName.toUpperCase())}
+                                    {isMe ? 'BEN (İŞLETME)' : (isAdmin ? 'PLATFORM DESTEK' : 'KULLANICI')}
                                   </span>
                                   <span>•</span>
                                   {msg.created_at ? format(new Date(msg.created_at), "HH:mm") : '...'}

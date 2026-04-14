@@ -105,6 +105,7 @@ export function AdminSupport() {
 
   const loadMessages = async (ticketId: string) => {
     try {
+      // Daha kesin bir join syntax'ı deniyoruz (profiles!sender_id)
       const { data, error } = await supabase
         .from("support_messages")
         .select(`
@@ -128,7 +129,7 @@ export function AdminSupport() {
           
         if (simpleError) throw simpleError;
         setMessages(simpleData || []);
-        toast.error("Profil bilgileri yüklenemedi, sadece mesajlar gösteriliyor.");
+        // Toast'ı siliyoruz ki kullanıcıyı rahatsız etmesin, zaten isme göre fallback yapıyoruz
       } else {
         setMessages(data || []);
       }
