@@ -49,8 +49,8 @@ export function ChatbotWidget() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const isHiddenPage = location.pathname.startsWith("/dashboard") || 
-                       location.pathname.startsWith("/rd-secure-gateway") ||
+  const isHiddenPage = location.pathname.startsWith("/biz-dashboard-secure") || 
+                       location.pathname.startsWith("/admin-secure-panel") ||
                        location.pathname.startsWith("/hq-") ||
                        location.pathname === "/giris" || 
                        location.pathname === "/kayit" ||

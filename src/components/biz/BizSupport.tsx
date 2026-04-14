@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -23,10 +23,6 @@ interface Message {
   sender_id: string;
   message: string;
   created_at: string;
-  profiles?: {
-    role: string;
-    full_name: string;
-  };
 }
 
 export function BizSupport({ businessId }: { businessId: string }) {
@@ -54,6 +50,21 @@ export function BizSupport({ businessId }: { businessId: string }) {
     loadTickets();
   }, [user]);
 
+  const loadMessages = useCallback(async (ticketId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("support_messages")
+        .select("id, sender_id, message, created_at")
+        .eq("ticket_id", ticketId)
+        .order("created_at", { ascending: true });
+      
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (err: any) {
+      toast.error("Mesajlar yüklenemedi: " + err.message);
+    }
+  }, []);
+
   useEffect(() => {
     if (selectedTicket) {
       loadMessages(selectedTicket.id);
@@ -63,19 +74,17 @@ export function BizSupport({ businessId }: { businessId: string }) {
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${selectedTicket.id}` },
-          (payload) => {
-            const newMessage = payload.new as Message;
-            setMessages(prev => {
-              if (prev.find(m => m.id === newMessage.id)) return prev;
-              return [...prev, newMessage];
-            });
+          () => {
+            // Realtime mesaj geldiğinde listeyi komple yenile
+            // (realtime payload'da profiles join olmaz, bu yüzden refetch yapıyoruz)
+            loadMessages(selectedTicket.id);
           }
         )
         .subscribe();
       
       return () => { supabase.removeChannel(channel); };
     }
-  }, [selectedTicket]);
+  }, [selectedTicket, loadMessages]);
 
   const loadTickets = async () => {
     if (!user) return;
@@ -92,40 +101,6 @@ export function BizSupport({ businessId }: { businessId: string }) {
       toast.error("Talepler yüklenemedi");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadMessages = async (ticketId: string) => {
-    try {
-      // Daha kesin bir join syntax'ı deniyoruz
-      const { data, error } = await supabase
-        .from("support_messages")
-        .select(`
-          *,
-          profiles:sender_id (
-            full_name,
-            role
-          )
-        `)
-        .eq("ticket_id", ticketId)
-        .order("created_at", { ascending: true });
-      
-      if (error) {
-        console.error("Biz mesaj yükleme hatası:", error);
-        // Fallback
-        const { data: simpleData, error: simpleError } = await supabase
-          .from("support_messages")
-          .select("*")
-          .eq("ticket_id", ticketId)
-          .order("created_at", { ascending: true });
-          
-        if (simpleError) throw simpleError;
-        setMessages(simpleData || []);
-      } else {
-        setMessages(data || []);
-      }
-    } catch (err: any) {
-      toast.error("Mesajlar yüklenemedi: " + err.message);
     }
   };
 
@@ -273,12 +248,13 @@ export function BizSupport({ businessId }: { businessId: string }) {
                   ref={scrollRef}
                >
                      {messages.map((msg) => {
-                       const isAdmin = msg.profiles?.role === 'admin';
-                       const isBusinessOwner = msg.sender_id === selectedTicket?.owner_id;
+                       // BİZ (İşletme sahibi) bu paneli kullanan kişi:
+                       // Kendi mesajımız mı kontrol et: sender_id === mevcut kullanıcının ID'si
+                       const isMe = msg.sender_id === user?.id;
                        
-                       // Eğer mesajı atan kişi admin ise, her zaman solda görünüp "PLATFORM DESTEK" yazmalı.
-                       // Eğer mesajı atan kişi işletme sahibi ise ve şu anki kullanıcı o ise sağda görünüp "BEN" yazmalı.
-                       const isMe = !isAdmin && msg.sender_id === user?.id;
+                       // Eğer mesaj bize ait değilse, admin/platform destek yazmış demektir
+                       // (Bu panel sadece işletme paneli olduğu için buraya sadece
+                       // işletme sahibi ve admin mesajları gelir)
                        
                        return (
                          <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
@@ -290,7 +266,7 @@ export function BizSupport({ businessId }: { businessId: string }) {
                                {msg.message}
                                <div className={`text-[9px] mt-2 opacity-50 flex items-center gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
                                   <span className="font-bold uppercase tracking-tighter">
-                                    {isMe ? 'BEN (İŞLETME)' : (isAdmin ? 'PLATFORM DESTEK' : 'KULLANICI')}
+                                    {isMe ? 'BEN (İŞLETME)' : 'PLATFORM DESTEK'}
                                   </span>
                                   <span>•</span>
                                   {msg.created_at ? format(new Date(msg.created_at), "HH:mm") : '...'}
@@ -306,7 +282,7 @@ export function BizSupport({ businessId }: { businessId: string }) {
                     <input 
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                       placeholder="Mesajınızı yazın..."
                       className="w-full bg-muted/30 border border-border rounded-2xl py-4 pl-6 pr-14 focus:ring-2 focus:ring-primary outline-none transition-all text-sm"
                     />

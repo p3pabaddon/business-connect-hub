@@ -375,7 +375,7 @@ export default function BusinessDashboard() {
          staff={staff}
        />
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
@@ -383,13 +383,13 @@ export default function BusinessDashboard() {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: hsl(var(--border));
-          border-radius: 10px;
+          background-color: rgba(156, 163, 175, 0.3);
+          border-radius: 20px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: hsl(var(--muted-foreground));
+          background-color: rgba(156, 163, 175, 0.5);
         }
-      `}} />
+      `}</style>
     </div>
   );
 }

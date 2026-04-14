@@ -43,7 +43,7 @@ export default function GoogleOAuthCallback() {
         setMessage("Google Takvim başarıyla bağlandı!");
         toast.success("Bağlantı başarılı!");
         
-        setTimeout(() => navigate("/dashboard"), 2000);
+        setTimeout(() => navigate("/biz-dashboard-secure-x31p9q8w2"), 2000);
       } catch (err: any) {
         console.error("Google Auth Error:", err);
         setStatus("error");
@@ -78,7 +78,7 @@ export default function GoogleOAuthCallback() {
             <h2 className="text-xl font-bold text-rose-500">Bağlantı Başarısız</h2>
             <p className="text-sm text-muted-foreground">{message}</p>
             <button 
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/biz-dashboard-secure-x31p9q8w2")}
               className="mt-4 px-6 py-2 bg-primary text-white rounded-xl font-bold text-sm"
             >
               Panele Dön

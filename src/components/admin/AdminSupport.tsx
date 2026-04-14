@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { LifeBuoy, Send, MessageSquare, Loader2, Clock, CheckCircle2, Search, User, Building2 } from "lucide-react";
+import { LifeBuoy, Send, MessageSquare, Loader2, Search, Building2 } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,10 +24,6 @@ interface Message {
   sender_id: string;
   message: string;
   created_at: string;
-  profiles?: {
-    role: string;
-    full_name: string;
-  };
 }
 
 export function AdminSupport() {
@@ -39,7 +35,6 @@ export function AdminSupport() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [senderRoles, setSenderRoles] = useState<Record<string, string>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -56,36 +51,48 @@ export function AdminSupport() {
     loadTickets();
   }, []);
 
+  // Mesajları yükle - sadece temel alanlar (profiles join olmadan)
+  // Sender belirleme işini sender_id vs ticket.owner_id üzerinden yapıyoruz
+  const loadMessages = useCallback(async (ticketId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("support_messages")
+        .select("id, ticket_id, sender_id, message, created_at")
+        .eq("ticket_id", ticketId)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (err: any) {
+      console.error("Mesaj yükleme hatası:", err);
+      toast.error("Mesajlar yüklenemedi: " + err.message);
+    }
+  }, []);
+
   useEffect(() => {
     if (selectedTicket) {
       loadMessages(selectedTicket.id);
-      
+
       const channel = supabase
         .channel(`admin-chat-${selectedTicket.id}`)
         .on(
           'postgres_changes',
-          { 
-            event: 'INSERT', 
-            schema: 'public', 
-            table: 'support_messages', 
-            filter: `ticket_id=eq.${selectedTicket.id}` 
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'support_messages',
+            filter: `ticket_id=eq.${selectedTicket.id}`
           },
-          (payload) => {
-            console.log("Anlık mesaj geldi:", payload.new);
-            const newMessage = payload.new as Message;
-            setMessages(prev => {
-              if (prev.find(m => m.id === newMessage.id)) return prev;
-              return [...prev, newMessage];
-            });
+          () => {
+            // Realtime payload'da profiles join olmaz, bu yüzden listeyi yenile
+            loadMessages(selectedTicket.id);
           }
         )
-        .subscribe((status) => {
-          console.log("Realtime durumu:", status);
-        });
-      
+        .subscribe();
+
       return () => { supabase.removeChannel(channel); };
     }
-  }, [selectedTicket]);
+  }, [selectedTicket, loadMessages]);
 
   const loadTickets = async () => {
     try {
@@ -93,7 +100,7 @@ export function AdminSupport() {
         .from("support_tickets")
         .select("*, business:businesses(name), owner_id")
         .order("created_at", { ascending: false });
-      
+
       if (error) throw error;
       setTickets(data || []);
     } catch (err) {
@@ -103,60 +110,24 @@ export function AdminSupport() {
     }
   };
 
-  const loadMessages = async (ticketId: string) => {
-    try {
-      // Daha kesin bir join syntax'ı deniyoruz (profiles!sender_id)
-      const { data, error } = await supabase
-        .from("support_messages")
-        .select(`
-          *,
-          profiles:sender_id (
-            full_name,
-            role
-          )
-        `)
-        .eq("ticket_id", ticketId)
-        .order("created_at", { ascending: true });
-      
-      if (error) {
-        console.error("Mesaj yükleme hatası:", error);
-        // Fallback: profiles olmadan dene
-        const { data: simpleData, error: simpleError } = await supabase
-          .from("support_messages")
-          .select("*")
-          .eq("ticket_id", ticketId)
-          .order("created_at", { ascending: true });
-          
-        if (simpleError) throw simpleError;
-        setMessages(simpleData || []);
-        // Toast'ı siliyoruz ki kullanıcıyı rahatsız etmesin, zaten isme göre fallback yapıyoruz
-      } else {
-        setMessages(data || []);
-      }
-    } catch (err: any) {
-      console.error("Kritik mesaj hatası:", err);
-      toast.error("Mesajlar yüklenemedi: " + err.message);
-    }
-  };
-
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedTicket || !user) return;
-    
+
     const messageText = newMessage.trim();
-    setNewMessage(""); 
+    setNewMessage("");
     setSending(true);
-    
+
     try {
       const { error } = await supabase
         .from("support_messages")
         .insert({
           ticket_id: selectedTicket.id,
-          sender_id: user.id,
+          sender_id: user.id,   // Admin kendi ID'si ile mesaj atıyor
           message: messageText
         });
 
       if (error) {
-        setNewMessage(messageText); 
+        setNewMessage(messageText);
         throw error;
       }
     } catch (err: any) {
@@ -171,7 +142,7 @@ export function AdminSupport() {
       .from("support_tickets")
       .update({ status: 'closed' })
       .eq("id", ticketId);
-    
+
     if (!error) {
       setTickets(tickets.map(t => t.id === ticketId ? { ...t, status: 'closed' } : t));
       if (selectedTicket?.id === ticketId) setSelectedTicket({ ...selectedTicket, status: 'closed' });
@@ -179,8 +150,8 @@ export function AdminSupport() {
     }
   };
 
-  const filteredTickets = tickets.filter(t => 
-    t.subject.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredTickets = tickets.filter(t =>
+    t.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
     t.business?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -191,15 +162,15 @@ export function AdminSupport() {
            <div className="p-6 border-b border-border bg-muted/20">
               <div className="relative">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                 <Input 
+                 <Input
                    value={searchTerm}
                    onChange={(e) => setSearchTerm(e.target.value)}
-                   placeholder="İşletme veya konu ara..." 
+                   placeholder="İşletme veya konu ara..."
                    className="pl-10 h-10 text-sm bg-background rounded-xl"
                  />
               </div>
            </div>
-           
+
            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
               {loading ? (
                   <div className="flex justify-center p-10"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
@@ -211,8 +182,8 @@ export function AdminSupport() {
                     key={ticket.id}
                     onClick={() => setSelectedTicket(ticket)}
                     className={`w-full text-left p-4 rounded-2xl border transition-all ${
-                      selectedTicket?.id === ticket.id 
-                      ? "bg-primary/10 border-primary/30 shadow-sm" 
+                      selectedTicket?.id === ticket.id
+                      ? "bg-primary/10 border-primary/30 shadow-sm"
                       : "bg-muted/10 border-border hover:bg-muted/30"
                     }`}
                   >
@@ -249,14 +220,14 @@ export function AdminSupport() {
                         <div className="flex items-center gap-2 mt-1">
                            <span className="text-[10px] text-muted-foreground font-bold uppercase">{selectedTicket.business?.name}</span>
                            <span className="text-[10px] text-muted-foreground/30">•</span>
-                           <span className="text-[10px] text-primary font-mono">{selectedTicket.id}</span>
+                           <span className="text-[10px] text-primary font-mono">{selectedTicket.id.slice(0, 8)}</span>
                         </div>
                      </div>
                   </div>
                   {selectedTicket.status === 'open' && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleCloseTicket(selectedTicket.id)}
                       className="rounded-xl font-bold text-rose-500 border-rose-500/20 hover:bg-rose-500/5"
                     >
@@ -264,51 +235,62 @@ export function AdminSupport() {
                     </Button>
                   )}
                </div>
-                <div 
-                   className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.01),transparent_40%)]"
-                   ref={scrollRef}
-                >
-                   {messages.map(msg => {
-                      const isMe = msg.sender_id === user?.id;
-                      const isBusiness = msg.sender_id === selectedTicket?.owner_id;
-                      const senderName = isMe 
-                        ? 'SİZ (YÖNETİCİ)' 
-                        : (isBusiness 
-                            ? (selectedTicket?.business?.name || 'İŞLETME SAHİBİ') 
-                            : (msg.profiles?.full_name || 'DESTEK EKİBİ'));
-                      
-                      return (
-                        <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
-                           <div className={`max-w-[80%] p-5 rounded-[1.5rem] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md ${
-                              isMe 
-                              ? 'bg-primary text-white rounded-tr-none' 
-                              : 'bg-muted/80 text-foreground rounded-tl-none border border-border'
-                           }`}>
-                              {msg.message}
-                              <div className={`text-[10px] mt-3 font-bold opacity-60 flex items-center gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                 <span className="uppercase tracking-widest italic">
-                                   {senderName}
-                                 </span>
-                                 <span>•</span>
-                                 {msg.created_at ? format(new Date(msg.created_at), "HH:mm") : '...'}
-                              </div>
-                           </div>
-                        </div>
-                      );
-                   })}
-                </div>
+
+               <div
+                  className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.01),transparent_40%)]"
+                  ref={scrollRef}
+               >
+                  {messages.map(msg => {
+                    // ADMİN PANELİ MANTIĞI:
+                    // - user.id === msg.sender_id → Bu mesajı admin (BEN/SİZ) yazdı
+                    // - selectedTicket.owner_id === msg.sender_id → Bu mesajı işletme sahibi yazdı
+                    // - Başka bir ID → Başka bir admin yazmış olabilir
+                    const isMe = msg.sender_id === user?.id;
+                    const isBusiness = msg.sender_id === selectedTicket?.owner_id;
+
+                    let senderLabel: string;
+                    if (isMe) {
+                      senderLabel = 'SİZ (YÖNETİCİ)';
+                    } else if (isBusiness) {
+                      senderLabel = selectedTicket?.business?.name || 'İŞLETME SAHİBİ';
+                    } else {
+                      senderLabel = 'DESTEK EKİBİ';
+                    }
+
+                    return (
+                      <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
+                         <div className={`max-w-[80%] p-5 rounded-[1.5rem] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md ${
+                            isMe
+                            ? 'bg-primary text-white rounded-tr-none'
+                            : isBusiness
+                              ? 'bg-muted/80 text-foreground rounded-tl-none border border-border'
+                              : 'bg-blue-500/10 text-foreground rounded-tl-none border border-blue-500/20'
+                         }`}>
+                            {msg.message}
+                            <div className={`text-[10px] mt-3 font-bold opacity-60 flex items-center gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                               <span className="uppercase tracking-widest italic">
+                                 {senderLabel}
+                               </span>
+                               <span>•</span>
+                               {msg.created_at ? format(new Date(msg.created_at), "HH:mm") : '...'}
+                            </div>
+                         </div>
+                      </div>
+                    );
+                  })}
+               </div>
 
                <div className="p-6 border-t border-border bg-background/50 backdrop-blur-md">
                   <div className="relative group">
-                    <input 
+                    <input
                       disabled={selectedTicket.status === 'closed'}
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                       placeholder={selectedTicket.status === 'closed' ? "Bu talep kapatıldığı için mesaj gönderilemez." : "Cevabınızı buraya yazın..."}
-                      className="w-full bg-muted/40 border border-border rounded-2xl py-5 pl-8 pr-16 focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm font-medium"
+                      className="w-full bg-muted/40 border border-border rounded-2xl py-5 pl-8 pr-16 focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     />
-                    <Button 
+                    <Button
                       onClick={handleSendMessage}
                       disabled={sending || !newMessage.trim() || selectedTicket.status === 'closed'}
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl h-12 w-12 p-0 shadow-lg shadow-primary/20"

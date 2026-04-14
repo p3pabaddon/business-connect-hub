@@ -62,7 +62,7 @@ const App = () => (
               <Route path="/sss" element={<SSSPage />} />
               <Route path="/isletme-basvuru" element={<IsletmeBasvuruPage />} />
               <Route path="/isletmeler-icin" element={<ForBusinessesPage />} />
-              <Route path="/hq-gate-entry-7f1a8e9c0d2b4a5c6d7e8f9a0b1c2d3e4f5a6b7c" element={<HqLoginPage />} />
+              <Route path="/hq-gate-auth-v2-j5l1z8y9w" element={<HqLoginPage />} />
               <Route path="/karsilastir" element={<KarsilastirmaPage />} />
               <Route path="/harita" element={<HaritaPage />} />
               <Route path="/oauth/google/callback" element={<GoogleOAuthCallback />} />
@@ -77,7 +77,7 @@ const App = () => (
                   <ProfilPage />
                 </ProtectedRoute>
               } />
-              <Route path="/dashboard" element={
+              <Route path="/biz-dashboard-secure-x31p9q8w2" element={
                 <BusinessRoute>
                   <BusinessDashboard />
                 </BusinessRoute>
@@ -89,12 +89,12 @@ const App = () => (
               } />
 
               {/* Admin routes - requires admin email */}
-              <Route path="/rd-secure-gateway-v4-9f82d1b7a5e4b2d8c9f0a1b2c3d4e5f6a7b8c9d0" element={
+              <Route path="/admin-secure-panel-v5-x89j2k1m4n5" element={
                 <AdminRoute>
                   <AdminPage />
                 </AdminRoute>
               } />
-              <Route path="/hq-intelligence-core-x7-a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8g9h0i" element={
+              <Route path="/hq-intelligence-vault-v8-m2n5b4v1" element={
                 <AdminRoute>
                   <HqDashboard />
                 </AdminRoute>

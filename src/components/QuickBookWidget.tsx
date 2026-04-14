@@ -12,8 +12,8 @@ export function QuickBookWidget() {
   const location = useLocation();
 
   // Hide on dashboard or during login/register
-  const isHiddenPage = location.pathname.startsWith("/dashboard") || 
-                       location.pathname.startsWith("/rd-secure-gateway") ||
+  const isHiddenPage = location.pathname.startsWith("/biz-dashboard-secure") || 
+                       location.pathname.startsWith("/admin-secure-panel") ||
                        location.pathname.startsWith("/hq-") ||
                        location.pathname === "/giris" || 
                        location.pathname === "/kayit" ||

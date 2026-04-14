@@ -34,7 +34,7 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-white/70 dark:bg-black/70 backdrop-blur-xl transition-all duration-300">
+    <header className="sticky top-0 z-50 border-b border-white/5 bg-white/80 dark:bg-background/80 backdrop-blur-xl transition-all duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
@@ -96,12 +96,12 @@ export function Header() {
                     <User className="w-4 h-4 mr-2" /> {t("common.profile")}
                   </DropdownMenuItem>
                   {isAdmin && (
-                    <DropdownMenuItem onClick={() => navigate("/rd-secure-gateway-v4-9f82d1b7a5e4b2d8c9f0a1b2c3d4e5f6a7b8c9d0")} className="text-primary font-semibold bg-primary/5">
+                    <DropdownMenuItem onClick={() => navigate("/admin-secure-panel-v5-x89j2k1m4n5")} className="text-primary font-semibold bg-primary/5">
                       <Shield className="w-4 h-4 mr-2" /> {t("common.admin_panel")}
                     </DropdownMenuItem>
                   )}
                   {isBusinessOwner && (
-                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                    <DropdownMenuItem onClick={() => navigate("/biz-dashboard-secure-x31p9q8w2")}>
                       <LayoutDashboard className="w-4 h-4 mr-2" /> {t("common.dashboard")}
                     </DropdownMenuItem>
                   )}
@@ -168,7 +168,7 @@ export function Header() {
                 </Link>
                   {isBusinessOwner && (
                     <Link
-                      to="/dashboard"
+                      to="/biz-dashboard-secure-x31p9q8w2"
                       className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted"
                       onClick={() => setMobileOpen(false)}
                     >
@@ -177,7 +177,7 @@ export function Header() {
                   )}
                   {isAdmin && (
                     <Link
-                      to="/rd-secure-gateway-v4-9f82d1b7a5e4b2d8c9f0a1b2c3d4e5f6a7b8c9d0"
+                      to="/admin-secure-panel-v5-x89j2k1m4n5"
                       className="block px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10 rounded-md"
                       onClick={() => setMobileOpen(false)}
                     >

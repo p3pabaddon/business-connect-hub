@@ -150,7 +150,7 @@ export default function HqDashboard() {
              </div>
           </div>
           <button 
-            onClick={() => { signOut(); navigate("/hq-gate-entry-7f1a8e9c0d2b4a5c6d7e8f9a0b1c2d3e4f5a6b7c"); }}
+            onClick={() => { signOut(); navigate("/hq-gate-auth-v2-j5l1z8y9w"); }}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:text-rose-500 transition-all font-medium"
           >
             <LogOut className="w-5 h-5" />
