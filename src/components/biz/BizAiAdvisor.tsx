@@ -101,9 +101,9 @@ export function BizAiAdvisor({ businessName, stats, services, staff }: BizAiAdvi
             className="group relative w-10 h-10 lg:w-16 lg:h-16 bg-primary rounded-xl lg:rounded-2xl flex items-center justify-center shadow-[0_15px_30px_rgba(59,130,246,0.4)] hover:shadow-[0_20px_40px_rgba(59,130,246,0.6)] hover:-translate-y-1 transition-all duration-300 ring-2 ring-primary/20"
           >
             <Bot className="w-5 h-5 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 lg:w-4 lg:h-4 bg-emerald-500 rounded-full border-2 border-background animate-pulse" />
-            <div className="absolute right-full mr-4 bg-card border border-border px-4 py-2 rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              <p className="text-xs font-black text-foreground uppercase tracking-widest flex items-center gap-2">
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 lg:w-4 lg:h-4 bg-emerald-500 rounded-full border-2 border-background animate-pulse" />
+            <div className="absolute right-full mr-3 bg-card border border-border px-3 py-1.5 rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <p className="text-[10px] font-black text-foreground uppercase tracking-widest flex items-center gap-2">
                 <Sparkles className="w-3 h-3 text-primary" /> Yapay Zeka Danışmanı
               </p>
             </div>

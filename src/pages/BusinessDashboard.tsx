@@ -222,34 +222,34 @@ export default function BusinessDashboard() {
           />
         )}
 
-        <header className="sticky top-0 h-16 lg:h-20 border-b border-border px-4 lg:px-8 flex items-center justify-between bg-background/80 backdrop-blur-xl z-30 transition-all duration-300">
-           <div className="flex items-center gap-3 lg:gap-6 flex-1">
-              <button 
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2.5 bg-muted/50 hover:bg-muted border border-border rounded-xl transition-all lg:hidden active:scale-95 shadow-sm"
-              >
-                <Menu className="w-5 h-5 text-foreground" />
-              </button>
-               <div className="hidden lg:flex items-center gap-6 text-xs font-medium text-muted-foreground">
-                  <Logo className="h-9 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setActiveTab("overview")} />
-                  <div className="h-6 w-px bg-border mx-2"></div>
-                  <button 
-                    onClick={() => setActiveTab("overview")}
-                    className="text-muted-foreground uppercase tracking-widest font-black opacity-40 hover:opacity-100 transition-opacity"
-                  >
-                    Kontrol Merkezi
-                  </button>
-                  <span className="text-muted-foreground/30 mx-2 text-lg">/</span>
-                  <span className="text-primary capitalize font-bold bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">{activeTab}</span>
-               </div>
-               <div className="relative flex-1 max-w-[200px] lg:max-w-xs group">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-20" />
-                  <Input 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-muted/50 border-border pl-9 h-9 text-[10px] lg:text-xs focus:ring-primary/20 transition-all relative z-10" 
-                    placeholder="Ara..." 
-                  />
+        <header className="sticky top-0 h-14 lg:h-20 border-b border-border px-3 lg:px-8 flex items-center justify-between bg-background/80 backdrop-blur-xl z-30 transition-all duration-300">
+         <div className="flex items-center gap-2 lg:gap-6 flex-1">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 bg-muted/50 hover:bg-muted border border-border rounded-lg transition-all lg:hidden active:scale-95 shadow-sm"
+            >
+              <Menu className="w-4 h-4 text-foreground" />
+            </button>
+             <div className="hidden lg:flex items-center gap-6 text-xs font-medium text-muted-foreground">
+                <Logo className="h-9 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setActiveTab("overview")} />
+                <div className="h-6 w-px bg-border mx-2"></div>
+                <button 
+                  onClick={() => setActiveTab("overview")}
+                  className="text-muted-foreground uppercase tracking-widest font-black opacity-40 hover:opacity-100 transition-opacity"
+                >
+                  Kontrol Merkezi
+                </button>
+                <span className="text-muted-foreground/30 mx-2 text-lg">/</span>
+                <span className="text-primary capitalize font-bold bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">{activeTab}</span>
+             </div>
+             <div className="relative flex-1 max-w-[160px] lg:max-w-xs group">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors z-20" />
+                <Input 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-muted/50 border-border pl-8 h-8 text-[9px] lg:h-9 lg:text-xs focus:ring-primary/20 transition-all relative z-10 rounded-lg" 
+                  placeholder="Ara..." 
+                />
                   
                   {searchQuery.length > 1 && (
                     <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
@@ -325,7 +325,7 @@ export default function BusinessDashboard() {
                 <BizOverview stats={stats} recentApts={appointments} inventory={inventory} />
               )}
               {activeTab === "calendar" && (
-                <BizCalendar appointments={appointments} onRefresh={loadData} />
+                <BizCalendar appointments={appointments} staff={staff} onRefresh={loadData} />
               )}
               {activeTab === "crm" && (
                 <BizCRM businessId={business?.id} customers={customers} globalSearch={searchQuery} />
