@@ -131,36 +131,48 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
 
    return (
       <div className="bg-card border border-border rounded-[2.5rem] overflow-hidden flex flex-col h-[calc(100vh-140px)] animate-in fade-in duration-700 shadow-2xl relative">
-         {/* Calendar Header */}
-         <div className="p-4 lg:p-8 border-b border-border flex flex-col sm:flex-row items-center justify-between bg-muted/10 backdrop-blur-md z-30 gap-4 lg:gap-6">
-            <div className="flex items-center gap-4 lg:gap-6">
-               <div className="w-10 h-10 lg:w-14 lg:h-14 bg-primary/10 rounded-xl lg:rounded-[1.25rem] border border-primary/20 flex items-center justify-center shrink-0 shadow-lg ring-4 ring-primary/5">
-                  <CalendarDays className="w-5 h-5 lg:w-7 lg:h-7 text-primary" />
+         {/* Calendar Header - Hidden on Mobile, Premium on Desktop */}
+         <div className="hidden lg:flex p-8 border-b border-border flex-col sm:flex-row items-center justify-between bg-muted/10 backdrop-blur-md z-30 gap-6">
+            <div className="flex items-center gap-6">
+               <div className="w-14 h-14 bg-primary/10 rounded-[1.25rem] border border-primary/20 flex items-center justify-center shrink-0 shadow-lg ring-4 ring-primary/5">
+                  <CalendarDays className="w-7 h-7 text-primary" />
                </div>
                <div>
-                  <h3 className="text-lg lg:text-2xl font-black text-foreground tracking-tight uppercase italic underline decoration-primary/30 underline-offset-8">Randevu Ajandası</h3>
-                  <div className="flex items-center gap-2 mt-1 lg:mt-2">
-                     <Badge variant="outline" className="text-[8px] lg:text-[10px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary px-2 lg:px-3 py-0.5 lg:py-1 rounded-lg">
+                  <h3 className="text-2xl font-black text-foreground tracking-tight uppercase italic underline decoration-primary/30 underline-offset-8">Randevu Ajandası</h3>
+                  <div className="flex items-center gap-2 mt-2">
+                     <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary px-3 py-1 rounded-lg">
                         {format(weekDays[0], 'd MMMM', { locale: tr })} - {format(weekDays[6], 'd MMMM yyyy', { locale: tr })}
                      </Badge>
                   </div>
                </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-background/50 p-1 lg:p-1.5 rounded-2xl lg:rounded-[1.5rem] border border-border shadow-inner ring-1 ring-border/50">
-               <Button onClick={handlePrevWeek} variant="ghost" size="icon" className="h-8 w-8 lg:h-10 lg:w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-lg lg:rounded-xl"><ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5" /></Button>
+            <div className="flex items-center gap-2 bg-background/50 p-1.5 rounded-[1.5rem] border border-border shadow-inner ring-1 ring-border/50">
+               <Button onClick={handlePrevWeek} variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-xl"><ChevronLeft className="w-5 h-5" /></Button>
                <Button 
                   onClick={handleToday} 
                   variant={isCurrentWeek ? "secondary" : "ghost"} 
                   className={cn(
-                     "px-3 lg:px-6 h-8 lg:h-10 text-[8px] lg:text-[10px] font-black uppercase tracking-widest rounded-lg lg:rounded-xl transition-all",
+                     "px-6 h-10 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all",
                      isCurrentWeek ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground"
                   )}
                >
                   {isCurrentWeek ? "BU HAFTA" : "BUGÜNE DÖN"}
                </Button>
-               <Button onClick={handleNextWeek} variant="ghost" size="icon" className="h-8 w-8 lg:h-10 lg:w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-lg lg:rounded-xl"><ChevronRight className="w-4 h-4 lg:w-5 lg:h-5" /></Button>
+               <Button onClick={handleNextWeek} variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-xl"><ChevronRight className="w-5 h-5" /></Button>
             </div>
+         </div>
+
+         {/* Mobile Navigation Strip - Minimalist */}
+         <div className="flex lg:hidden items-center justify-between p-3 border-b border-border bg-muted/5">
+            <div className="flex items-center gap-2">
+               <Button onClick={handlePrevWeek} variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground rounded-lg"><ChevronLeft className="w-4 h-4" /></Button>
+               <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary px-2 py-0.5 rounded-md">
+                   {format(weekDays[selectedDayOffset], 'MMMM yyyy', { locale: tr })}
+               </Badge>
+               <Button onClick={handleNextWeek} variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground rounded-lg"><ChevronRight className="w-4 h-4" /></Button>
+            </div>
+            <Button onClick={handleToday} variant="ghost" className="h-8 text-[7px] font-black uppercase tracking-widest px-2 bg-muted/50 rounded-lg">BUGÜN</Button>
          </div>
 
          {/* Grid Area */}
@@ -189,22 +201,22 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
             </div>
 
             {/* Mobile Date Strip - Thumb Friendly Selection */}
-            <div className="flex lg:hidden bg-card border-b border-border p-2 gap-2 overflow-x-auto no-scrollbar scroll-smooth px-4">
+            <div className="flex lg:hidden bg-card border-b border-border p-1 gap-1 overscroll-contain overflow-x-auto no-scrollbar scroll-smooth px-3">
               {weekDays.map((day, i) => (
                 <button
                   key={i}
                   onClick={() => setSelectedDayOffset(i)}
                   className={cn(
-                    "flex flex-col items-center justify-center min-w-[54px] aspect-square rounded-2xl transition-all duration-300",
+                    "flex flex-col items-center justify-center min-w-[48px] aspect-square rounded-xl transition-all duration-300",
                     selectedDayOffset === i 
                       ? "bg-primary text-white shadow-lg shadow-primary/30 scale-105" 
-                      : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      : "bg-muted/30 text-muted-foreground hover:bg-muted"
                   )}
                 >
-                  <span className="text-[8px] font-black uppercase tracking-tighter opacity-60 mb-0.5">{format(day, 'EEE', { locale: tr })}</span>
-                  <span className="text-lg font-black tracking-tighter leading-none">{format(day, 'd')}</span>
+                  <span className="text-[7px] font-black uppercase tracking-tighter opacity-60 mb-0.5">{format(day, 'EEE', { locale: tr })}</span>
+                  <span className="text-sm font-black tracking-tighter leading-none">{format(day, 'd')}</span>
                   {isSameDay(day, new Date()) && ! (selectedDayOffset === i) && (
-                    <div className="w-1 h-1 bg-primary rounded-full mt-1" />
+                    <div className="w-1 h-1 bg-primary rounded-full mt-0.5" />
                   )}
                 </button>
               ))}
@@ -217,10 +229,10 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                  "lg:min-w-[1000px] w-full"
                )}>
                   {/* Time Strip */}
-                  <div className="w-16 lg:w-24 shrink-0 bg-muted/10 border-r border-border backdrop-blur-sm sticky left-0 z-20">
+                  <div className="w-12 lg:w-24 shrink-0 bg-muted/10 border-r border-border backdrop-blur-sm sticky left-0 z-20">
                      {HOURS.map((hour) => (
                         <div key={hour} className="h-[100px] relative border-b border-border/20 last:border-0">
-                           <span className="absolute top-4 left-0 right-0 text-center text-[9px] lg:text-[11px] font-black text-muted-foreground/30 uppercase tracking-tighter">
+                           <span className="absolute top-4 left-0 right-0 text-center text-[8px] lg:text-[11px] font-black text-muted-foreground/30 uppercase tracking-tighter">
                               {hour}
                            </span>
                         </div>
