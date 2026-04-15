@@ -7,9 +7,11 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectGroup,
   SelectValue,
 } from "@/components/ui/select";
 import { Search, MapPin, Shield, Clock, Star, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { t } from "@/lib/translations";
 import { turkiyeIller } from "@/lib/turkey-locations";
 import { ScrollReveal } from "@/hooks/useScrollReveal";
@@ -78,9 +80,20 @@ function FloatingShapes() {
 }
 
 export function HeroSection() {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedIl, setSelectedIl] = useState("");
   const [selectedIlce, setSelectedIlce] = useState("");
   const ilceler = turkiyeIller.find((l) => l.il === selectedIl)?.ilceler ?? [];
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.append("search", searchQuery);
+    if (selectedIl) params.append("city", selectedIl);
+    if (selectedIlce) params.append("district", selectedIlce);
+    
+    navigate(`/isletmeler?${params.toString()}`);
+  };
 
   const stats = [
     { label: t("hero.stat_business"), value: "2,500+" },
@@ -139,6 +152,9 @@ export function HeroSection() {
                     type="text"
                     placeholder={t("hero.search")}
                     className="pl-10 h-12 border-0 bg-surface focus:bg-card"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   />
                 </div>
                 <Select value={selectedIl} onValueChange={(v) => { setSelectedIl(v); setSelectedIlce(""); }}>
@@ -147,6 +163,7 @@ export function HeroSection() {
                     <SelectValue placeholder={t("common.select_city")} />
                   </SelectTrigger>
                   <SelectContent className="max-h-72 overflow-y-auto">
+                    <SelectItem value="all">{t("isletmeler.all_cities")}</SelectItem>
                     {turkiyeIller.map((loc) => (
                       <SelectItem key={loc.il} value={loc.il}>{loc.il}</SelectItem>
                     ))}
@@ -162,7 +179,7 @@ export function HeroSection() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button size="lg" className="h-12">
+                 <Button size="lg" className="h-12" onClick={handleSearch}>
                   <Search className="w-4 h-4 mr-2" />
                   {t("hero.search_btn")}
                 </Button>

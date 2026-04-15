@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
-export async function getBusinesses(filters?: { city?: string; category?: string; search?: string }) {
+export async function getBusinesses(filters?: { city?: string; district?: string; category?: string; search?: string }) {
   let query = supabase
     .from("businesses")
     .select("id, name, slug, category, rating, review_count, city, district, logo, cover_image, is_verified, is_featured, is_active")
@@ -10,6 +10,9 @@ export async function getBusinesses(filters?: { city?: string; category?: string
 
   if (filters?.city && filters.city !== "all") {
     query = query.eq("city", filters.city);
+  }
+  if (filters?.district && filters.district !== "all") {
+    query = query.eq("district", filters.district);
   }
   if (filters?.category) {
     query = query.ilike("category", filters.category);

@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Search, MapPin, Star, CheckCircle, SlidersHorizontal, Zap, Navigation } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useBusinesses } from "@/hooks/useQueries";
 import { turkiyeIller } from "@/lib/turkey-locations";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -38,9 +39,11 @@ const sortOptions = [
 ];
 
 const IsletmelerPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [selectedCity, setSelectedCity] = useState(searchParams.get("city") || "all");
+  const [selectedDistrict, setSelectedDistrict] = useState(searchParams.get("district") || "all");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
   const [sortBy, setSortBy] = useState("rating");
   const [minRating, setMinRating] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -48,8 +51,21 @@ const IsletmelerPage = () => {
   const [locating, setLocating] = useState(false);
   const [sortByDistance, setSortByDistance] = useState(false);
 
+  // Sync URL with state
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("search", searchQuery);
+    if (selectedCity !== "all") params.set("city", selectedCity);
+    if (selectedDistrict !== "all") params.set("district", selectedDistrict);
+    if (selectedCategory !== "all") params.set("category", selectedCategory);
+    setSearchParams(params, { replace: true });
+  }, [searchQuery, selectedCity, selectedDistrict, selectedCategory, setSearchParams]);
+
+  const availableDistricts = turkiyeIller.find(i => i.il === selectedCity)?.ilceler || [];
+
   const { data: businesses = [], isLoading: loading } = useBusinesses({
     city: selectedCity === "all" ? "" : selectedCity,
+    district: selectedDistrict === "all" ? "" : selectedDistrict,
     category: selectedCategory === "all" ? "" : selectedCategory,
     search: searchQuery,
   });
@@ -142,7 +158,7 @@ const IsletmelerPage = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Select value={selectedCity} onValueChange={setSelectedCity}>
+                <Select value={selectedCity} onValueChange={(v) => { setSelectedCity(v); setSelectedDistrict("all"); }}>
                   <SelectTrigger className="w-full sm:w-48 h-11">
                     <MapPin className="w-4 h-4 text-muted-foreground mr-2" />
                     <SelectValue placeholder={t("isletmeler.all_cities")} />
@@ -151,6 +167,22 @@ const IsletmelerPage = () => {
                     <SelectItem value="all">{t("isletmeler.all_cities")}</SelectItem>
                     {turkiyeIller.map((loc) => (
                       <SelectItem key={loc.il} value={loc.il}>{loc.il}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select 
+                  value={selectedDistrict} 
+                  onValueChange={setSelectedDistrict}
+                  disabled={selectedCity === "all" || !selectedCity}
+                >
+                  <SelectTrigger className="w-full sm:w-48 h-11">
+                    <SelectValue placeholder={selectedCity !== "all" ? t("common.select_district") : t("common.select_city_first")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("isletmeler.all_districts") || "Tüm İlçeler"}</SelectItem>
+                    {availableDistricts.map((ilce) => (
+                      <SelectItem key={ilce} value={ilce}>{ilce}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

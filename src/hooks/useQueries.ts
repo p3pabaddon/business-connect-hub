@@ -11,7 +11,7 @@ import { supabase } from "@/lib/supabase";
 
 // ---- Business Queries ----
 
-export function useBusinesses(filters?: { city?: string; category?: string; search?: string }) {
+export function useBusinesses(filters?: { city?: string; district?: string; category?: string; search?: string }) {
   return useQuery({
     queryKey: ["businesses", filters],
     queryFn: () => getBusinesses(filters),
