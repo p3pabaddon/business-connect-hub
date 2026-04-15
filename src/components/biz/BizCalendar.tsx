@@ -34,6 +34,7 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
    const [currentViewDate, setCurrentViewDate] = useState(new Date());
    const [selectedApt, setSelectedApt] = useState<any>(null);
    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+   const [selectedDayOffset, setSelectedDayOffset] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1); // 0-6 index
 
    const handleStatusUpdate = async (id: string, status: any) => {
       try {
@@ -131,41 +132,41 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
    return (
       <div className="bg-card border border-border rounded-[2.5rem] overflow-hidden flex flex-col h-[calc(100vh-140px)] animate-in fade-in duration-700 shadow-2xl relative">
          {/* Calendar Header */}
-         <div className="p-8 border-b border-border flex flex-col sm:flex-row items-center justify-between bg-muted/10 backdrop-blur-md z-30 gap-6">
-            <div className="flex items-center gap-6">
-               <div className="w-14 h-14 bg-primary/10 rounded-[1.25rem] border border-primary/20 flex items-center justify-center shrink-0 shadow-lg ring-4 ring-primary/5">
-                  <CalendarDays className="w-7 h-7 text-primary" />
+         <div className="p-4 lg:p-8 border-b border-border flex flex-col sm:flex-row items-center justify-between bg-muted/10 backdrop-blur-md z-30 gap-4 lg:gap-6">
+            <div className="flex items-center gap-4 lg:gap-6">
+               <div className="w-10 h-10 lg:w-14 lg:h-14 bg-primary/10 rounded-xl lg:rounded-[1.25rem] border border-primary/20 flex items-center justify-center shrink-0 shadow-lg ring-4 ring-primary/5">
+                  <CalendarDays className="w-5 h-5 lg:w-7 lg:h-7 text-primary" />
                </div>
                <div>
-                  <h3 className="text-2xl font-black text-foreground tracking-tight uppercase italic underline decoration-primary/30 underline-offset-8">Randevu Ajandası</h3>
-                  <div className="flex items-center gap-2 mt-2">
-                     <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary px-3 py-1 rounded-lg">
+                  <h3 className="text-lg lg:text-2xl font-black text-foreground tracking-tight uppercase italic underline decoration-primary/30 underline-offset-8">Randevu Ajandası</h3>
+                  <div className="flex items-center gap-2 mt-1 lg:mt-2">
+                     <Badge variant="outline" className="text-[8px] lg:text-[10px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary px-2 lg:px-3 py-0.5 lg:py-1 rounded-lg">
                         {format(weekDays[0], 'd MMMM', { locale: tr })} - {format(weekDays[6], 'd MMMM yyyy', { locale: tr })}
                      </Badge>
                   </div>
                </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-background/50 p-1.5 rounded-[1.5rem] border border-border shadow-inner ring-1 ring-border/50">
-               <Button onClick={handlePrevWeek} variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-xl"><ChevronLeft className="w-5 h-5" /></Button>
+            <div className="flex items-center gap-2 bg-background/50 p-1 lg:p-1.5 rounded-2xl lg:rounded-[1.5rem] border border-border shadow-inner ring-1 ring-border/50">
+               <Button onClick={handlePrevWeek} variant="ghost" size="icon" className="h-8 w-8 lg:h-10 lg:w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-lg lg:rounded-xl"><ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5" /></Button>
                <Button 
                   onClick={handleToday} 
                   variant={isCurrentWeek ? "secondary" : "ghost"} 
                   className={cn(
-                     "px-6 h-10 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all",
+                     "px-3 lg:px-6 h-8 lg:h-10 text-[8px] lg:text-[10px] font-black uppercase tracking-widest rounded-lg lg:rounded-xl transition-all",
                      isCurrentWeek ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground"
                   )}
                >
                   {isCurrentWeek ? "BU HAFTA" : "BUGÜNE DÖN"}
                </Button>
-               <Button onClick={handleNextWeek} variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-xl"><ChevronRight className="w-5 h-5" /></Button>
+               <Button onClick={handleNextWeek} variant="ghost" size="icon" className="h-8 w-8 lg:h-10 lg:w-10 text-muted-foreground hover:bg-muted hover:text-primary transition-all rounded-lg lg:rounded-xl"><ChevronRight className="w-4 h-4 lg:w-5 lg:h-5" /></Button>
             </div>
          </div>
 
          {/* Grid Area */}
          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Days Header */}
-            <div className="flex bg-muted/20 border-b border-border">
+            {/* Days Header - Desktop Style */}
+            <div className="hidden lg:flex bg-muted/20 border-b border-border">
                <div className="w-24 border-r border-border shrink-0 bg-muted/30" />
                <div className="flex-1 grid grid-cols-7 min-w-[1000px]">
                   {weekDays.map((day, i) => (
@@ -179,7 +180,7 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                         <p className={cn(
                            "text-3xl font-black tracking-tighter transition-transform",
                            isSameDay(day, new Date()) ? "text-primary scale-110" : "text-foreground opacity-90"
-                        )}>
+                         )}>
                            {format(day, 'd')}
                         </p>
                      </div>
@@ -187,14 +188,39 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                </div>
             </div>
 
+            {/* Mobile Date Strip - Thumb Friendly Selection */}
+            <div className="flex lg:hidden bg-card border-b border-border p-2 gap-2 overflow-x-auto no-scrollbar scroll-smooth px-4">
+              {weekDays.map((day, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedDayOffset(i)}
+                  className={cn(
+                    "flex flex-col items-center justify-center min-w-[54px] aspect-square rounded-2xl transition-all duration-300",
+                    selectedDayOffset === i 
+                      ? "bg-primary text-white shadow-lg shadow-primary/30 scale-105" 
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <span className="text-[8px] font-black uppercase tracking-tighter opacity-60 mb-0.5">{format(day, 'EEE', { locale: tr })}</span>
+                  <span className="text-lg font-black tracking-tighter leading-none">{format(day, 'd')}</span>
+                  {isSameDay(day, new Date()) && ! (selectedDayOffset === i) && (
+                    <div className="w-1 h-1 bg-primary rounded-full mt-1" />
+                  )}
+                </button>
+              ))}
+            </div>
+
             {/* Scrollable Body */}
             <div className="flex-1 overflow-auto custom-scrollbar relative bg-grid-slate-900/[0.05] dark:bg-grid-white/[0.02]">
-               <div className="flex min-w-[1000px] h-[1400px]">
+               <div className={cn(
+                 "flex h-[1400px]",
+                 "lg:min-w-[1000px] w-full"
+               )}>
                   {/* Time Strip */}
-                  <div className="w-24 shrink-0 bg-muted/10 border-r border-border backdrop-blur-sm sticky left-0 z-20">
+                  <div className="w-16 lg:w-24 shrink-0 bg-muted/10 border-r border-border backdrop-blur-sm sticky left-0 z-20">
                      {HOURS.map((hour) => (
                         <div key={hour} className="h-[100px] relative border-b border-border/20 last:border-0">
-                           <span className="absolute top-4 left-0 right-0 text-center text-[11px] font-black text-muted-foreground/30 uppercase tracking-tighter">
+                           <span className="absolute top-4 left-0 right-0 text-center text-[9px] lg:text-[11px] font-black text-muted-foreground/30 uppercase tracking-tighter">
                               {hour}
                            </span>
                         </div>
@@ -202,7 +228,7 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                   </div>
 
                   {/* Grid Columns */}
-                  <div className="flex-1 grid grid-cols-7 relative">
+                  <div className="flex-1 grid lg:grid-cols-7 grid-cols-1 relative">
                      {/* Horizontal Grid Lines */}
                      <div className="absolute inset-0 pointer-events-none">
                         {HOURS.map((hour) => (
@@ -210,23 +236,18 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                         ))}
                      </div>
 
-                     {/* Today Highlight Column */}
-                     <div className="absolute inset-0 grid grid-cols-7 pointer-events-none">
-                        {weekDays.map((day, i) => (
-                           <div key={i} className={cn(
-                              "border-r border-border/20 last:border-0",
-                              isSameDay(day, new Date()) && "bg-primary/[0.02]"
-                           )} />
-                        ))}
-                     </div>
-
-                     {/* Appointments */}
+                     {/* Mobile Single Day View Logic */}
                      {weekDays.map((day, dayIndex) => {
                         const dateStr = format(day, 'yyyy-MM-dd');
                         const dayApts = appointmentsByDay[dateStr] || [];
+                        const isSelectedMobile = dayIndex === selectedDayOffset;
 
                         return (
-                           <div key={dayIndex} className="relative group">
+                           <div key={dayIndex} className={cn(
+                             "relative group h-full",
+                             "lg:block", 
+                             isSelectedMobile ? "block" : "hidden"
+                           )}>
                               {dayApts.map((apt, aptIndex) => {
                                  const top = getPosition(apt.appointment_time);
                                  const height = (apt.duration / 60) * 100;
@@ -254,7 +275,7 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                                           setIsDetailsOpen(true);
                                        }}
                                        className={cn(
-                                          "absolute z-10 px-3 py-2 rounded-2xl border backdrop-blur-md transition-all duration-300",
+                                          "absolute z-10 px-2 lg:px-3 py-2 rounded-2xl border backdrop-blur-md transition-all duration-300",
                                           "cursor-pointer hover:z-30 hover:scale-[1.02] hover:shadow-2xl ring-1 ring-white/5",
                                           statusColors[apt.status] || "border-border bg-card",
                                           apt.status === 'confirmed' && "animate-in fade-in zoom-in duration-500"
@@ -262,7 +283,7 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
                                     >
                                        {/* Status Indicator Bar */}
                                        <div className={cn(
-                                          "absolute top-0 bottom-0 left-0 w-1.5 rounded-l-2xl",
+                                          "absolute top-0 bottom-0 left-0 w-1 lg:w-1.5 rounded-l-2xl",
                                           apt.status === 'confirmed' ? "bg-blue-500" :
                                           apt.status === 'completed' ? "bg-emerald-500" :
                                           apt.status === 'cancelled' ? "bg-rose-500" : "bg-amber-500"
@@ -270,32 +291,26 @@ export function BizCalendar({ appointments, onRefresh }: Props) {
 
                                        <div className="flex flex-col h-full overflow-hidden">
                                           <div className="flex items-center justify-between gap-1 mb-1">
-                                             <span className="text-[9px] font-black text-foreground uppercase truncate tracking-tight">
+                                             <span className="text-[8px] lg:text-[9px] font-black text-foreground uppercase truncate tracking-tight">
                                                 {apt.customer_name}
                                              </span>
-                                             <span className="text-[9px] font-mono font-bold text-primary shrink-0">
+                                             <span className="text-[8px] lg:text-[9px] font-mono font-bold text-primary shrink-0">
                                                 {apt.appointment_time}
                                              </span>
                                           </div>
                                           
-                                          {height >= 50 && (
+                                          {height >= 40 && (
                                              <div className="space-y-1">
-                                                <p className="text-[8px] text-muted-foreground font-black uppercase truncate tracking-widest opacity-70">
+                                                <p className="text-[7px] lg:text-[8px] text-muted-foreground font-black uppercase truncate tracking-widest opacity-70">
                                                    {apt.service_name || "Servis"}
                                                 </p>
-                                                {height >= 80 && apt.staff?.name && (
-                                                   <div className="flex items-center gap-1 opacity-60">
-                                                      <User className="w-2.5 h-2.5" />
-                                                      <span className="text-[8px] font-bold truncate">{apt.staff.name}</span>
-                                                   </div>
-                                                )}
                                              </div>
                                           )}
                                        </div>
 
                                        {/* Overlap Badge */}
                                        {apt.totalCols > 1 && (
-                                          <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-white/20 animate-pulse" title="Çakışma var" />
+                                          <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-white/20 animate-pulse" title="Çakışma var" />
                                        )}
                                     </div>
                                  );

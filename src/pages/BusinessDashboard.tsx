@@ -65,7 +65,6 @@ export default function BusinessDashboard() {
     if (!authLoading && !user) navigate("/giris");
   }, [user, authLoading]);
 
-  // Compatibility mapping for legacy components that expect 'loadData'
   const { data: servicesFetch, refetch: reloadServices } = useBizServices(business?.id || "");
   const { data: staffFetch, refetch: reloadStaff } = useBizStaff(business?.id || "");
   const { data: reviewsFetch, refetch: reloadReviews } = useBizReviews(business?.id || "");
@@ -86,7 +85,6 @@ export default function BusinessDashboard() {
   const globalNotifChannelRef = useRef<any>(null);
   const bizAptChannelRef = useRef<any>(null);
 
-  // Unified Notification & Realtime Listener
   useEffect(() => {
     if (user?.id) {
       if (globalNotifChannelRef.current) {
@@ -120,7 +118,6 @@ export default function BusinessDashboard() {
     }
   }, [user?.id]);
 
-  // Specific Appointment Listener for immediate refresh
   useEffect(() => {
     if (business?.id) {
       if (bizAptChannelRef.current) {
@@ -218,7 +215,6 @@ export default function BusinessDashboard() {
       />
 
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
-        {/* Mobile Overlay for Sidebar */}
         {sidebarOpen && (
           <div 
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
@@ -226,7 +222,6 @@ export default function BusinessDashboard() {
           />
         )}
 
-        {/* Top Header */}
         <header className="sticky top-0 h-16 lg:h-20 border-b border-border px-4 lg:px-8 flex items-center justify-between bg-background/80 backdrop-blur-xl z-30 transition-all duration-300">
            <div className="flex items-center gap-3 lg:gap-6 flex-1">
               <button 
@@ -256,14 +251,12 @@ export default function BusinessDashboard() {
                     placeholder="Ara..." 
                   />
                   
-                  {/* Global Search Results Dropdown */}
                   {searchQuery.length > 1 && (
                     <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
                       <div className="p-2 border-b border-border bg-muted/30">
                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Arama Sonuçları</p>
                       </div>
                       <div className="max-h-[400px] overflow-y-auto">
-                        {/* Customers Section */}
                         {customers.filter((c: any) => 
                           (c.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (c.phone || "").includes(searchQuery)
@@ -387,8 +380,8 @@ export default function BusinessDashboard() {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation - Thumb Zone Friendly */}
-      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-card/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-2 flex items-center justify-around shadow-2xl shadow-primary/20 lg:hidden z-[100] animate-in slide-in-from-bottom-5 duration-700">
+      {/* Mobile Bottom Navigation - Compact & Thumb Zone Friendly */}
+      <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-sm bg-card/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-1.5 flex items-center justify-around shadow-2xl shadow-primary/20 lg:hidden z-[100] animate-in slide-in-from-bottom-3 duration-500">
          {[
            { id: "overview", icon: LayoutDashboard, label: "Özet" },
            { id: "calendar", icon: Calendar, label: "Takvim" },
@@ -400,15 +393,12 @@ export default function BusinessDashboard() {
              key={item.id}
              onClick={() => setActiveTab(item.id as BizTab)}
              className={cn(
-               "flex flex-col items-center gap-1 p-3 rounded-3xl transition-all relative overflow-hidden",
-               activeTab === item.id ? "text-primary bg-primary/10 shadow-inner translate-y-[-4px]" : "text-muted-foreground opacity-60"
+               "flex flex-col items-center gap-0.5 p-2 px-3 rounded-2xl transition-all relative overflow-hidden",
+               activeTab === item.id ? "text-primary bg-primary/10" : "text-muted-foreground opacity-50"
              )}
            >
-             <item.icon className={cn("w-5 h-5", activeTab === item.id ? "animate-pulse" : "")} />
-             <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
-             {activeTab === item.id && (
-               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
-             )}
+             <item.icon className={cn("w-4 h-4", activeTab === item.id ? "animate-pulse" : "")} />
+             <span className="text-[9px] font-black uppercase tracking-tighter">{item.label}</span>
            </button>
          ))}
       </nav>

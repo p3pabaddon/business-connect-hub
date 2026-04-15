@@ -98,10 +98,10 @@ export function BizAiAdvisor({ businessName, stats, services, staff }: BizAiAdvi
             animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0, rotate: 45 }}
             onClick={() => setIsOpen(true)}
-            className="group relative w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-[0_15px_30px_rgba(59,130,246,0.4)] hover:shadow-[0_20px_40px_rgba(59,130,246,0.6)] hover:-translate-y-1 transition-all duration-300 ring-2 ring-primary/20"
+            className="group relative w-12 h-12 lg:w-16 lg:h-16 bg-primary rounded-xl lg:rounded-2xl flex items-center justify-center shadow-[0_15px_30px_rgba(59,130,246,0.4)] hover:shadow-[0_20px_40px_rgba(59,130,246,0.6)] hover:-translate-y-1 transition-all duration-300 ring-2 ring-primary/20"
           >
-            <Bot className="w-8 h-8 text-white group-hover:scale-110 transition-transform" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-background animate-pulse" />
+            <Bot className="w-6 h-6 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform" />
+            <span className="absolute -top-1 -right-1 w-3 h-3 lg:w-4 lg:h-4 bg-emerald-500 rounded-full border-2 border-background animate-pulse" />
             <div className="absolute right-full mr-4 bg-card border border-border px-4 py-2 rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               <p className="text-xs font-black text-foreground uppercase tracking-widest flex items-center gap-2">
                 <Sparkles className="w-3 h-3 text-primary" /> Yapay Zeka Danışmanı
