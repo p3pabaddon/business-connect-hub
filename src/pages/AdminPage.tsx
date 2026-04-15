@@ -55,6 +55,7 @@ const AdminPage = () => {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [businesses, setBusinesses] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<any[]>([]);
   const [systemStats, setSystemStats] = useState({
     totalBusinesses: 0,
     totalUsers: 0,
@@ -141,6 +142,14 @@ const AdminPage = () => {
         setSettingsNoShowLimit(sData.no_show_limit ?? 3);
         setSettingsMfa(sData.mfa_required ?? true);
       }
+      // Load profiles for marketing consent view
+      const { data: pData } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      setProfiles(pData || []);
+
       // Load support count
       const { count: sCount } = await supabase.from("support_tickets").select("*", { count: 'exact', head: true }).eq("status", "open");
       setSupportCount(sCount || 0);
@@ -279,28 +288,27 @@ const AdminPage = () => {
     }, 1000);
   };
 
-  // Aggregated Customers
-  const aggregatedCustomers = useMemo(() => {
-    const customerMap = new Map();
-    appointments.forEach(app => {
-      const phone = app.customer_phone;
-      if (!customerMap.has(phone)) {
-        customerMap.set(phone, {
-          name: app.customer_name,
-          email: app.customer_email || 'E-posta yok',
-          phone: phone,
-          appointments: 0,
-          noShows: 0,
-          totalSpent: 0
-        });
-      }
-      const customer = customerMap.get(phone);
-      customer.appointments += 1;
-      if (app.status === 'no_show') customer.noShows += 1;
-      customer.totalSpent += (Number(app.total_price) || 0);
+  // Combined View: Users with Consent and Appointment History
+  const combinedCustomerData = useMemo(() => {
+    return profiles.map(profile => {
+      const userApps = appointments.filter(a => a.customer_phone === profile.phone || a.customer_email === profile.email);
+      const totalSpent = userApps.reduce((acc, app) => acc + (Number(app.total_price) || 0), 0);
+      const noShows = userApps.filter(a => a.status === 'no_show').length;
+
+      return {
+        ...profile,
+        appointmentsCount: userApps.length,
+        noShows,
+        totalSpent
+      };
     });
-    return Array.from(customerMap.values());
-  }, [appointments]);
+  }, [profiles, appointments]);
+
+  const filteredCustomers = combinedCustomerData.filter(c => 
+    (c.full_name?.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    (c.phone?.includes(searchTerm)) || 
+    (c.email?.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   if (authLoading || loading) {
     return (
@@ -317,7 +325,6 @@ const AdminPage = () => {
 
   const pendingCount = businesses.filter(b => b.status === "pending" || !b.status).length;
   const filteredBusinesses = businesses.filter(b => b.name?.toLowerCase().includes(searchTerm.toLowerCase()));
-  const filteredCustomers = aggregatedCustomers.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.phone.includes(searchTerm));
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -579,17 +586,25 @@ const AdminPage = () => {
 
                 {activeTab === "customers" && (
                   <div className="space-y-4">
-                     {filteredCustomers.map((cust, idx) => (
-                       <Card key={idx} className="bg-card border-border p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-muted/30 transition-all cursor-default rounded-3xl">
+                     {filteredCustomers.map((cust) => (
+                       <Card key={cust.id} className="bg-card border-border p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-muted/30 transition-all cursor-default rounded-3xl">
                           <div className="flex items-center gap-5">
-                             <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-lg shrink-0">{cust.name?.[0]}</div>
+                             <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-lg shrink-0">{cust.full_name?.[0] || "?"}</div>
                              <div className="space-y-1">
-                                <p className="font-bold text-foreground text-sm lg:text-base uppercase tracking-tight">{cust.name}</p>
-                                <p className="text-[10px] text-muted-foreground font-mono">{cust.phone} • {cust.email}</p>
+                                <p className="font-bold text-foreground text-sm lg:text-base uppercase tracking-tight">{cust.full_name || "İsimsiz Kullanıcı"}</p>
+                                <p className="text-[10px] text-muted-foreground font-mono">{cust.phone || "No phone"} • {cust.email}</p>
+                                <div className="flex gap-2 mt-2">
+                                  <Badge variant={cust.kvkk_consent ? "default" : "outline"} className={cn("text-[8px] h-4", cust.kvkk_consent ? "bg-emerald-500/20 text-emerald-500 border-none" : "text-muted-foreground")}>
+                                    KVKK {cust.kvkk_consent ? "ONAYLI" : "YOK"}
+                                  </Badge>
+                                  <Badge variant={cust.marketing_consent ? "default" : "outline"} className={cn("text-[8px] h-4", cust.marketing_consent ? "bg-blue-500/20 text-blue-500 border-none" : "text-muted-foreground")}>
+                                    PAZARLAMA {cust.marketing_consent ? "ONAYLI" : "YOK"}
+                                  </Badge>
+                                </div>
                              </div>
                           </div>
                           <div className="grid grid-cols-3 lg:flex items-center gap-4 lg:gap-10 border-t lg:border-none pt-4 lg:pt-0">
-                             <div className="text-center lg:text-right"><p className="text-[8px] lg:text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Sıklık</p><p className="font-black text-foreground text-xs lg:text-sm">{cust.appointments} RX</p></div>
+                             <div className="text-center lg:text-right"><p className="text-[8px] lg:text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Sıklık</p><p className="font-black text-foreground text-xs lg:text-sm">{cust.appointmentsCount} RX</p></div>
                              <div className="text-center lg:text-right cursor-help" title="No-show kaydı"><p className="text-[8px] lg:text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Risk</p><p className={cn("font-black text-xs lg:text-sm", cust.noShows > 0 ? "text-rose-500" : "text-emerald-500")}>{cust.noShows}</p></div>
                              <div className="text-center lg:text-right"><p className="text-[8px] lg:text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Ciro</p><p className="font-black text-emerald-500 text-xs lg:text-sm">₺{cust.totalSpent.toLocaleString()}</p></div>
                           </div>

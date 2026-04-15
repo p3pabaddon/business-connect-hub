@@ -47,6 +47,7 @@ export interface Staff {
   experience?: string;
   rating: number;
   is_active: boolean;
+  working_hours?: Record<string, { start: string; end: string; active: boolean }>;
 }
 
 export interface Appointment {
@@ -171,4 +172,9 @@ export interface Profile {
   role: "user" | "admin" | "business_owner" | "hq_staff" | "super_admin";
   created_at: string;
   updated_at: string;
+  sms_notifications?: boolean;
+  email_notifications?: boolean;
+  marketing_consent?: boolean;
+  kvkk_consent?: boolean;
+  marketing_accepted_at?: string;
 }

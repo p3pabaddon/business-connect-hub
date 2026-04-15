@@ -37,6 +37,7 @@ import KvkkPage from "./pages/KvkkPage";
 import KullanimKosullari from "./pages/KullanimKosullari";
 import GizlilikPolitikasi from "./pages/GizlilikPolitikasi";
 import CerezPolitikasi from "./pages/CerezPolitikasi";
+import CookieConsent from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -105,6 +106,7 @@ const App = () => (
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
+            <CookieConsent />
           </BrowserRouter>
           </TooltipProvider>
           <Toaster />

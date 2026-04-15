@@ -13,8 +13,11 @@ import { supabase } from "@/lib/supabase";
 import {
   Calendar, Clock, Star, XCircle, MessageSquare, User,
   MapPin, CheckCircle, Heart, RefreshCw, Gift, Ticket, Share2, Megaphone,
-  Info, Map, FileText, Phone
+  Info, Map, FileText, Phone, Settings, Shield, BellRing, Mail, Cookie
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { getMyPromoCodes, claimReferral } from "@/lib/api";
@@ -29,7 +32,7 @@ const statusMap: Record<string, { label: string; variant: "default" | "secondary
 };
 
 const ProfilPage = () => {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, profile, loading: authLoading, signOut, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -204,6 +207,7 @@ const ProfilPage = () => {
               <TabsTrigger value="favorites">Favoriler ({favorites.length})</TabsTrigger>
               <TabsTrigger value="reviews">Yorumlarım ({reviews.length})</TabsTrigger>
               <TabsTrigger value="loyalty">Ödüller</TabsTrigger>
+              <TabsTrigger value="settings">Ayarlar</TabsTrigger>
             </TabsList>
 
             <TabsContent value="upcoming">
@@ -498,6 +502,87 @@ const ProfilPage = () => {
                   </p>
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-6">
+              <div className="bg-card border border-border rounded-xl p-6">
+                <div className="flex items-center gap-2 mb-6">
+                  <Settings className="w-5 h-5 text-primary" />
+                  <h3 className="text-lg font-heading text-foreground">Hesap ve Pazarlama Ayarları</h3>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="marketing-consent" className="text-base font-semibold">Pazarlama İletişimi</Label>
+                        <Badge variant="outline" className="text-[10px] h-4">Bülten & SMS</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        En yeni kampanya ve fırsat önerilerini almayı kabul edersiniz.
+                      </p>
+                    </div>
+                    <Switch 
+                      id="marketing-consent" 
+                      checked={profile?.marketing_consent || false} 
+                      onCheckedChange={async (val) => {
+                        const { error } = await supabase.from('profiles').update({ marketing_consent: val }).eq('id', user?.id);
+                        if (!error) {
+                          toast({ title: "Pazarlama tercihi güncellendi" });
+                          refreshProfile();
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <Cookie className="w-5 h-5 text-primary" />
+                        <Label className="text-base font-semibold">Çerez Tercihleri</Label>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Tarayıcınızda sakladığımız çerez tercihlerini sıfırlayın.
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="text-[10px] font-black tracking-widest uppercase h-9 rounded-xl border-primary/20 hover:bg-primary/5"
+                      onClick={() => {
+                        localStorage.removeItem('cookie-consent');
+                        window.location.reload();
+                      }}
+                    >
+                      Ayarları Sıfırla
+                    </Button>
+                  </div>
+
+                  <div className="mt-8 p-4 bg-muted/30 rounded-lg border border-border/50">
+                    <div className="flex items-center gap-2 text-primary mb-2">
+                      <Shield className="w-4 h-4" />
+                      <span className="text-xs font-bold uppercase tracking-wider">KVKK & Gizlilik Bilgilendirmesi</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Pazarlama tercihlerinizi dilediğiniz zaman buradan değiştirebilirsiniz. 
+                      İzin onaylarınız, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında 
+                      güvenli bir şekilde loglanmaktadır.
+                    </p>
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest opacity-60">KVKK Durumu:</span>
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-none font-black text-[10px] tracking-widest px-3 py-1">
+                        ONAYLANDI (Kayıt Esnasında)
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Button variant="outline" className="w-full text-destructive border-destructive/20 hover:bg-destructive/10" onClick={signOut}>
+                    Oturumu Kapat
+                  </Button>
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </div>

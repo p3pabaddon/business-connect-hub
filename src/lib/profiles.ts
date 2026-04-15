@@ -7,6 +7,8 @@ export interface Profile {
   phone: string | null;
   avatar_url: string | null;
   role: "user" | "admin" | "business_owner" | "hq_staff" | "super_admin";
+  kvkk_consent: boolean;
+  marketing_consent: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -33,6 +35,8 @@ export async function ensureProfile(user: User): Promise<Profile | null> {
       full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || null,
       phone: user.user_metadata?.phone || null,
       avatar_url: user.user_metadata?.avatar_url || null,
+      kvkk_consent: user.user_metadata?.kvkk_consent === "true" || user.user_metadata?.kvkk_consent === true,
+      marketing_consent: user.user_metadata?.marketing_consent === "true" || user.user_metadata?.marketing_consent === true,
     }, { onConflict: "id" })
     .select()
     .single();
@@ -53,7 +57,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   return data as Profile | null;
 }
 
-export async function updateProfile(userId: string, updates: Partial<Pick<Profile, "full_name" | "phone" | "avatar_url">>): Promise<Profile | null> {
+export async function updateProfile(userId: string, updates: Partial<Profile>): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .update({ ...updates, updated_at: new Date().toISOString() })
