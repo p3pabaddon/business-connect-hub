@@ -144,19 +144,13 @@ const IsletmeBasvuruPage = () => {
                   Otomatik Yönlendiriliyorsunuz
                 </p>
                 <div className="w-24 h-1 bg-border/50 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 animate-[progress_4s_linear]" />
+                  <div className="h-full bg-emerald-500 animate-progress" />
                 </div>
               </div>
             </div>
           </div>
         </main>
         <Footer />
-        <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes progress {
-            from { width: 100%; }
-            to { width: 0%; }
-          }
-        `}} />
       </div>
     );
   }

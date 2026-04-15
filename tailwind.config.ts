@@ -114,6 +114,10 @@ export default {
           "0%, 100%": { opacity: "0.3", transform: "scale(1)" },
           "50%": { opacity: "0.8", transform: "scale(1.5)" },
         },
+        "progress": {
+          "from": { width: "100%" },
+          "to": { width: "0%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -124,6 +128,7 @@ export default {
         "float-medium": "float-medium 10s ease-in-out infinite",
         "float-fast": "float-fast 8s ease-in-out infinite",
         "pulse-slow": "pulse-slow 4s ease-in-out infinite",
+        "progress": "progress 4s linear",
       },
     },
   },
