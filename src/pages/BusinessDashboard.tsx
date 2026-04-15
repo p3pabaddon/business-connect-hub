@@ -318,90 +318,67 @@ export default function BusinessDashboard() {
         </header>
 
         {/* Dynamic Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-24 lg:pb-10 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.03),transparent_40%)]">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-10 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.03),transparent_40%)]">
            <div className="max-w-[1600px] mx-auto">
               <VerificationGuard>
               {activeTab === "overview" && stats && (
-                <BizOverview stats={stats} recentApts={appointments} inventory={inventory} />
+                 <BizOverview stats={stats} recentApts={appointments} inventory={inventory} />
               )}
               {activeTab === "calendar" && (
-                <BizCalendar appointments={appointments} staff={staff} onRefresh={loadData} />
+                 <BizCalendar appointments={appointments} staff={staff} onRefresh={loadData} />
               )}
               {activeTab === "crm" && (
-                <BizCRM businessId={business?.id} customers={customers} globalSearch={searchQuery} />
+                 <BizCRM businessId={business?.id} customers={customers} globalSearch={searchQuery} />
               )}
               {activeTab === "waitlist" && (
-                <WaitlistManager businessId={business?.id || ""} />
+                 <WaitlistManager businessId={business?.id || ""} />
               )}
               {activeTab === "marketing" && (
-                <BizMarketing businessId={business?.id} onRefresh={loadData} />
+                 <BizMarketing businessId={business?.id} onRefresh={loadData} />
               )}
               {activeTab === "reviews" && (
-                <BizReviews reviews={reviews} onRefresh={loadData} />
+                 <BizReviews reviews={reviews} onRefresh={loadData} />
               )}
               {activeTab === "catalog" && (
-                <BizCatalog businessId={business?.id} services={services} staff={staff} personnelLimit={business?.personnel_limit || 2} onRefresh={loadData} />
+                 <BizCatalog businessId={business?.id} services={services} staff={staff} personnelLimit={business?.personnel_limit || 2} onRefresh={loadData} />
               )}
               {activeTab === "loyalty" && (
-                <BizLoyaltySettings businessId={business?.id} />
+                 <BizLoyaltySettings businessId={business?.id} />
               )}
               {activeTab === "performance" && business && (
-                <BizChurnSentinel businessId={business.id} />
+                 <BizChurnSentinel businessId={business.id} />
               )}
               {activeTab === "inventory" && business && (
-                <BizInventory businessId={business.id} />
+                 <BizInventory businessId={business.id} />
               )}
               {activeTab === "settings" && business && (
-                <BizSettingsTab businessId={business.id} />
+                 <BizSettingsTab businessId={business.id} />
               )}
               {activeTab === "premium" && business && (
-                <BizPremiumHub business={business} onUpdate={loadData} />
+                 <BizPremiumHub business={business} onUpdate={loadData} />
               )}
               {activeTab === "staff-performance" && business && (
-                <StaffPerformance businessId={business.id} appointments={appointments} staff={staff} reviews={reviews} />
+                 <StaffPerformance businessId={business.id} appointments={appointments} staff={staff} reviews={reviews} />
               )}
               {activeTab === "portfolio" && business && (
-                <BizPortfolio businessId={business.id} />
+                 <BizPortfolio businessId={business.id} />
               )}
               {activeTab === "support" && business && (
-                <BizSupport businessId={business.id} />
+                 <BizSupport businessId={business.id} />
               )}
               {activeTab === "notifications" && business && (
-                <BizNotifications />
+                 <BizNotifications />
               )}
               {activeTab === "analytics" && business && (
-                <BizAdvancedAnalytics businessId={business.id} />
+                 <BizAdvancedAnalytics businessId={business.id} />
               )}
               {activeTab === "coupons" && business && (
-                <BizCoupons businessId={business.id} />
+                 <BizCoupons businessId={business.id} />
               )}
               </VerificationGuard>
            </div>
         </div>
       </main>
-
-      {/* Mobile Bottom Navigation - Compact & Thumb Zone Friendly */}
-      <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[320px] bg-card/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-1 flex items-center justify-around shadow-2xl shadow-primary/20 lg:hidden z-[100] animate-in slide-in-from-bottom-3 duration-500">
-         {[
-           { id: "overview", icon: LayoutDashboard, label: "Özet" },
-           { id: "calendar", icon: Calendar, label: "Takvim" },
-           { id: "catalog", icon: ShoppingBag, label: "Hizmet" },
-           { id: "crm", icon: Users, label: "Müşteri" },
-           { id: "support", icon: LifeBuoy, label: "Destek" }
-         ].map((item) => (
-           <button
-             key={item.id}
-             onClick={() => setActiveTab(item.id as BizTab)}
-             className={cn(
-               "flex flex-col items-center gap-0.5 p-2 px-3 rounded-2xl transition-all relative overflow-hidden",
-               activeTab === item.id ? "text-primary bg-primary/10" : "text-muted-foreground opacity-50"
-             )}
-           >
-             <item.icon className={cn("w-3.5 h-3.5", activeTab === item.id ? "animate-pulse" : "")} />
-             <span className="text-[8px] font-black uppercase tracking-tighter">{item.label}</span>
-           </button>
-         ))}
-      </nav>
 
       <BizAiAdvisor 
          businessName={business?.name || "İşletme"}
