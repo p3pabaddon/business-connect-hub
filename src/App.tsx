@@ -46,7 +46,7 @@ const App = () => (
       <ThemeProvider>
         <AuthProvider>
           <TooltipProvider>
-          <Sonner position="top-right" expand={true} richColors />
+          <Sonner position="top-right" expand={true} richColors duration={2500} />
           <BrowserRouter>
             <TrafficTracker />
             <QuickBookWidget />
