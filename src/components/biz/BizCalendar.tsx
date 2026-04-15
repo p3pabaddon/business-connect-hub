@@ -139,7 +139,10 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
       const map: Record<string, any[]> = {};
       
       const filteredAppointments = focusedStaffId 
-         ? appointments.filter(a => a.staff_id === focusedStaffId)
+         ? appointments.filter(a => {
+            const aptStaffId = typeof a.staff_id === 'object' ? a.staff_id?.id : a.staff_id;
+            return aptStaffId === focusedStaffId;
+         })
          : appointments;
 
       filteredAppointments.forEach(apt => {
@@ -187,8 +190,9 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
             });
          } else {
             dayApts.forEach(apt => {
-               const staffIndex = staff.findIndex(s => s.id === apt.staff_id);
-               apt.col = staffIndex >= 0 ? staffIndex : 0;
+               const aptStaffId = typeof apt.staff_id === 'object' ? apt.staff_id?.id : apt.staff_id;
+               const staffIndex = staff.findIndex(s => s.id === aptStaffId);
+               apt.col = staffIndex >= 0 ? staffIndex : -1; // -1 means don't show or show in a special way
                apt.totalCols = staff.length || 1;
             });
          }
