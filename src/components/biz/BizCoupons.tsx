@@ -15,6 +15,15 @@ import {
   SelectTrigger, SelectValue 
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Calendar as CalendarIcon } from "lucide-react";
 
 interface Coupon {
   id: string;
@@ -35,7 +44,7 @@ export function BizCoupons({ businessId }: { businessId: string }) {
   const [code, setCode] = useState("");
   const [type, setType] = useState<'percentage' | 'fixed'>('percentage');
   const [value, setValue] = useState("");
-  const [expiry, setExpiry] = useState("");
+  const [expiry, setExpiry] = useState<Date | undefined>();
 
   useEffect(() => {
     loadCoupons();
@@ -74,7 +83,7 @@ export function BizCoupons({ businessId }: { businessId: string }) {
           code: code.toUpperCase(),
           discount_type: type,
           discount_value: Number(value),
-          expires_at: expiry || null,
+          expires_at: expiry ? format(expiry, "yyyy-MM-dd") : null,
           is_active: true
         })
         .select()
@@ -85,7 +94,7 @@ export function BizCoupons({ businessId }: { businessId: string }) {
       setCoupons([data, ...coupons]);
       setCode("");
       setValue("");
-      setExpiry("");
+      setExpiry(undefined);
       toast.success("Kupon oluşturuldu! 🎫");
     } catch (err) {
       toast.error("Kupon oluşturulamadı");
@@ -181,15 +190,33 @@ export function BizCoupons({ businessId }: { businessId: string }) {
                     </div>
                  </div>
 
-                 <div className="space-y-2">
+                  <div className="space-y-2">
                     <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Son Kullanma (Opsiyonel)</Label>
-                    <Input 
-                      type="date"
-                      value={expiry} 
-                      onChange={(e) => setExpiry(e.target.value)} 
-                      className="bg-muted/30 border-border h-12 rounded-xl font-bold"
-                    />
-                 </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full bg-muted/30 border-border h-12 rounded-xl font-bold justify-start text-left",
+                            !expiry && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                          {expiry ? format(expiry, "d MMMM yyyy", { locale: tr }) : <span>Tarih seçin</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 rounded-[2rem] border-border shadow-2xl" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={expiry}
+                          onSelect={setExpiry}
+                          disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+                          initialFocus
+                          className="p-4"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
 
                  <Button 
                    onClick={handleCreateCoupon}

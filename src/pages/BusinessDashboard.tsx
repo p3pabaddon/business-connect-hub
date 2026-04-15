@@ -377,7 +377,7 @@ export default function BusinessDashboard() {
                  <StaffPerformance businessId={business.id} appointments={appointments} staff={staff} reviews={reviews} />
               )}
               {activeTab === "portfolio" && business && (
-                 <BizPortfolio businessId={business.id} />
+                 <BizPortfolio businessId={business.id} businessSlug={business.slug} />
               )}
               {activeTab === "support" && business && (
                  <BizSupport businessId={business.id} />

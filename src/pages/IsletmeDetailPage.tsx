@@ -220,7 +220,7 @@ const IsletmeDetailPage = () => {
 
         {/* Portfolio / Gallery */}
         {portfolio && portfolio.length > 0 && (
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+          <div id="portfolio" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-2xl font-black text-foreground uppercase tracking-tight italic flex items-center gap-2">

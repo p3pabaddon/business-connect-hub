@@ -72,7 +72,7 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
   return (
     <>
       <aside className={cn(
-        "bg-card border-r border-border flex flex-col transition-all duration-500 relative z-50 h-screen shadow-sm",
+        "bg-card border-r border-border flex flex-col transition-[width,transform] duration-500 relative z-50 h-screen shadow-sm",
         "fixed lg:relative inset-y-0 left-0",
         sidebarOpen ? "translate-x-0 w-72" : "-translate-x-full lg:translate-x-0 w-72 lg:w-16",
         "lg:translate-x-0"
@@ -84,7 +84,7 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
           <X className="w-6 h-6" />
         </button>
 
-        <div className="p-6 flex items-center justify-between">
+        <div className={cn("p-6 flex items-center", !sidebarOpen && "px-3")}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 shrink-0">
               <UserCircle className="w-6 h-6 text-primary" />
@@ -98,7 +98,10 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
           </div>
         </div>
 
-      <nav className="flex-1 px-3 space-y-8 mt-6 overflow-y-auto custom-scrollbar">
+      <nav className={cn(
+        "flex-1 space-y-8 mt-6 overflow-y-auto custom-scrollbar",
+        sidebarOpen ? "px-3" : "px-0"
+      )}>
         {navGroups.map((group, idx) => (
           <div key={idx} className="space-y-2">
             {sidebarOpen && <p className="text-[10px] uppercase font-bold text-muted-foreground/60 px-4 tracking-[3px] mb-2">{group.label}</p>}
@@ -108,11 +111,13 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
                   <button
                     onClick={() => setActiveTab(item.id as BizTab)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+                      "w-full flex items-center rounded-xl transition-all duration-200 group",
+                      sidebarOpen ? "gap-3 px-4 py-3 justify-start" : "px-0 py-3 justify-center",
                       activeTab === item.id 
                         ? 'bg-primary/10 text-primary shadow-sm' 
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     )}
+                    title={!sidebarOpen ? item.label : undefined}
                   >
                     <item.icon className={cn("w-5 h-5 shrink-0 transition-transform group-hover:scale-110", activeTab === item.id ? 'text-primary' : '')} />
                     {sidebarOpen && <span className="font-medium text-sm tracking-tight whitespace-nowrap">{item.label}</span>}
@@ -124,10 +129,14 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
         ))}
       </nav>
 
-      <div className="p-4 border-t border-border mt-auto">
+      <div className={cn("p-4 border-t border-border mt-auto", !sidebarOpen && "p-0 py-4 flex justify-center")}>
         <button 
           onClick={async () => { await signOut(); navigate("/"); }}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:text-rose-600 hover:bg-rose-500/5 transition-all font-medium"
+          className={cn(
+            "flex items-center rounded-xl text-muted-foreground hover:text-rose-600 hover:bg-rose-500/5 transition-all font-medium",
+            sidebarOpen ? "w-full gap-3 px-4 py-3" : "p-3"
+          )}
+          title={!sidebarOpen ? "Güvenli Çıkış" : undefined}
         >
           <LogOut className="w-5 h-5" />
           {sidebarOpen && <span className="text-sm">Güvenli Çıkış</span>}

@@ -23,7 +23,7 @@ interface PortfolioItem {
   created_at: string;
 }
 
-export function BizPortfolio({ businessId }: { businessId: string }) {
+export function BizPortfolio({ businessId, businessSlug }: { businessId: string, businessSlug?: string }) {
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -146,12 +146,16 @@ export function BizPortfolio({ businessId }: { businessId: string }) {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-muted/30 p-8 rounded-[2rem] border border-border">
-        <div>
-          <h2 className="text-2xl font-black text-foreground tracking-tight uppercase italic flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-accent" /> Çalışmalarımız
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Vitrin Yönetimi</span>
+          </div>
+          <h2 className="text-2xl lg:text-3xl font-black text-foreground tracking-tight uppercase italic block">
+            Çalışmalarımız <span className="text-primary font-serif normal-case">Portfolio</span>
           </h2>
-          <p className="text-sm text-muted-foreground font-medium mt-1">
-            En iyi sonuçlarınızı müşterilerinizle paylaşın
+          <p className="text-muted-foreground mt-2 max-w-md font-medium text-sm leading-relaxed">
+            Uzmanlığınızı sergileyerek müşterilerinizin güvenini kazanın ve dükkanınızın en iyi işlerini ön plana çıkarın.
           </p>
         </div>
         
@@ -225,19 +229,19 @@ export function BizPortfolio({ businessId }: { businessId: string }) {
       </div>
 
       {items.length === 0 ? (
-        <div className="text-center py-20 bg-muted/10 rounded-[3rem] border border-dashed border-border">
-          <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-            <Grid className="w-10 h-10 text-muted-foreground/30" />
+        <div className="max-w-md mx-auto text-center py-20 bg-muted/20 rounded-[3rem] border border-dashed border-border/50">
+          <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6 opacity-40">
+            <ImageIcon className="w-10 h-10 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-black text-foreground uppercase tracking-tight mb-2">Henüz Çalışma Yok</h3>
-          <p className="text-sm text-muted-foreground font-medium max-w-xs mx-auto">
-            İlk çalışmanızı ekleyerek potansiyel müşterilerinize neler yapabildiğinizi gösterin.
+          <h3 className="text-xl font-black text-foreground uppercase tracking-tight mb-2">Henüz Çalışma Yok</h3>
+          <p className="text-muted-foreground text-sm px-6 font-medium leading-relaxed">
+            Müşterilerinizin dükkanınızı ziyaret etmeden önce neler başarabildiğinizi görmeleri için ilk portföy çalışmanızı ekleyin.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {items.map((item) => (
-            <div key={item.id} className="group bg-card border border-border rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+            <div key={item.id} className="group bg-card border border-border/60 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-accent/5 hover:-translate-y-2 transition-all duration-500 flex flex-col">
               <div className="aspect-video relative overflow-hidden">
                 <img src={item.main_image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
@@ -250,7 +254,12 @@ export function BizPortfolio({ businessId }: { businessId: string }) {
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="secondary" size="icon" className="rounded-xl">
+                    <Button 
+                      variant="secondary" 
+                      size="icon" 
+                      className="rounded-xl"
+                      onClick={() => businessSlug && window.open(`/isletme/${businessSlug}#portfolio`, '_blank')}
+                    >
                       <ExternalLink className="w-4 h-4" />
                     </Button>
                   </div>
