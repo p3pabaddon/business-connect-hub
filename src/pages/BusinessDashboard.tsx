@@ -381,7 +381,7 @@ export default function BusinessDashboard() {
       </main>
 
       {/* Mobile Bottom Navigation - Compact & Thumb Zone Friendly */}
-      <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-sm bg-card/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-1.5 flex items-center justify-around shadow-2xl shadow-primary/20 lg:hidden z-[100] animate-in slide-in-from-bottom-3 duration-500">
+      <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[320px] bg-card/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-1 flex items-center justify-around shadow-2xl shadow-primary/20 lg:hidden z-[100] animate-in slide-in-from-bottom-3 duration-500">
          {[
            { id: "overview", icon: LayoutDashboard, label: "Özet" },
            { id: "calendar", icon: Calendar, label: "Takvim" },
@@ -397,8 +397,8 @@ export default function BusinessDashboard() {
                activeTab === item.id ? "text-primary bg-primary/10" : "text-muted-foreground opacity-50"
              )}
            >
-             <item.icon className={cn("w-4 h-4", activeTab === item.id ? "animate-pulse" : "")} />
-             <span className="text-[9px] font-black uppercase tracking-tighter">{item.label}</span>
+             <item.icon className={cn("w-3.5 h-3.5", activeTab === item.id ? "animate-pulse" : "")} />
+             <span className="text-[8px] font-black uppercase tracking-tighter">{item.label}</span>
            </button>
          ))}
       </nav>

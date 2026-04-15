@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [user?.id]); // Add user?.id to dependencies to ensure handleAuthChange sees latest user state
+  }, []); // Changed [user?.id] to [] to prevent re-initialization loops
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });

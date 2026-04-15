@@ -35,19 +35,19 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
       {/* KPI Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-8">
         {kpis.map((kpi, i) => (
-          <div key={i} className="bg-card border border-border p-4 lg:p-8 rounded-2xl lg:rounded-[2.5rem] hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-24 lg:h-24 bg-muted/50 rounded-bl-full -mr-8 -mt-8 group-hover:scale-110 transition-transform duration-500" />
-            <div className="flex justify-between items-start mb-3 lg:mb-6">
-              <div className="p-2 lg:p-4 bg-muted/50 rounded-lg lg:rounded-2xl border border-border group-hover:border-primary/20 transition-colors shadow-inner">
-                <kpi.icon className={cn("w-4 h-4 lg:w-6 lg:h-6", kpi.color)} />
+          <div key={i} className="bg-card border border-border p-3 lg:p-8 rounded-2xl lg:rounded-[2.5rem] hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-12 h-12 lg:w-24 lg:h-24 bg-muted/50 rounded-bl-full -mr-6 -mt-6 group-hover:scale-110 transition-transform duration-500" />
+            <div className="flex justify-between items-start mb-2 lg:mb-6">
+              <div className="p-1.5 lg:p-4 bg-muted/50 rounded-lg lg:rounded-2xl border border-border group-hover:border-primary/20 transition-colors shadow-inner">
+                <kpi.icon className={cn("w-3.5 h-3.5 lg:w-6 lg:h-6", kpi.color)} />
               </div>
-              <Badge variant="outline" className="text-[7px] lg:text-[10px] font-black text-muted-foreground border-border uppercase tracking-widest px-1.5 lg:px-3 py-0.5 lg:py-1 bg-background/50 backdrop-blur-sm">
+              <Badge variant="outline" className="text-[6px] lg:text-[10px] font-black text-muted-foreground border-border uppercase tracking-widest px-1 lg:px-3 py-0.5 lg:py-1 bg-background/50 backdrop-blur-sm">
                 {kpi.trend}
               </Badge>
             </div>
             <div className="space-y-0.5 lg:space-y-2">
-              <p className="text-xl lg:text-4xl font-black text-foreground tracking-tighter group-hover:translate-x-1 transition-transform">{kpi.value}</p>
-              <p className="text-[7px] lg:text-[10px] uppercase font-black text-muted-foreground tracking-[0.05em] lg:tracking-[0.2em] opacity-60 truncate">{kpi.label}</p>
+              <p className="text-lg lg:text-4xl font-black text-foreground tracking-tighter group-hover:translate-x-1 transition-transform">{kpi.value}</p>
+              <p className="text-[6px] lg:text-[10px] uppercase font-black text-muted-foreground tracking-[0.05em] lg:tracking-[0.2em] opacity-60 truncate">{kpi.label}</p>
             </div>
           </div>
         ))}
@@ -149,16 +149,16 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {recentApts.filter(a => a.status === 'pending').slice(0, 2).map((apt, i) => (
-                <div key={i} className="p-6 bg-muted/30 border border-border rounded-3xl hover:border-primary/20 transition-all shadow-sm group">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-[10px] text-primary font-black uppercase tracking-widest">{apt.appointment_time}</span>
+                <div key={i} className="p-4 lg:p-6 bg-muted/30 border border-border rounded-2xl lg:rounded-3xl hover:border-primary/20 transition-all shadow-sm group">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3 h-3 text-primary" />
+                      <span className="text-[9px] text-primary font-black uppercase tracking-widest">{apt.appointment_time}</span>
                     </div>
-                    <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black px-3 py-1">BEKLEYEN</Badge>
+                    <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black px-2 py-0.5">BEKLEYEN</Badge>
                   </div>
-                  <h4 className="text-lg font-black text-foreground tracking-tight mb-2 group-hover:text-primary transition-colors">{apt.customer_name}</h4>
-                  <p className="text-[10px] text-muted-foreground font-medium leading-relaxed opacity-60">{apt.notes || "Not bırakılmamış..."}</p>
+                  <h4 className="text-base lg:text-lg font-black text-foreground tracking-tight mb-1 group-hover:text-primary transition-colors">{apt.customer_name}</h4>
+                  <p className="text-[9px] text-muted-foreground font-medium leading-relaxed opacity-60 line-clamp-1">{apt.notes || "Not bırakılmamış..."}</p>
                 </div>
               ))}
               {inventory.filter(i => i.quantity <= i.low_stock_threshold).slice(0, 1).map((item, i) => (
