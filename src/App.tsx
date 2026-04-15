@@ -50,8 +50,7 @@ const App = () => (
           <BrowserRouter>
             <TrafficTracker />
             <QuickBookWidget />
-            <MobileNav />
-            <div className="pb-20 md:pb-0">
+            <div>
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<Index />} />

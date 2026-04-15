@@ -519,70 +519,78 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                            </Badge>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
-                           <div className="bg-muted/30 border border-border p-6 rounded-[2rem] space-y-2 relative overflow-hidden group">
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="bg-muted/30 border border-border p-5 rounded-[2rem] space-y-3 relative overflow-hidden group">
                               <div className="absolute -right-4 -top-4 w-12 h-12 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors" />
-                              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Zamanlama</p>
-                              <div className="flex items-center gap-2">
-                                 <CalendarIcon className="w-4 h-4 text-primary" />
-                                 <p className="font-black text-sm uppercase">{selectedApt.appointment_date}</p>
-                              </div>
-                              <div className="flex items-center gap-2 mt-1">
-                                 <Clock className="w-4 h-4 text-primary" />
-                                 <p className="font-black text-xl">{selectedApt.appointment_time}</p>
+                              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">Zamanlama</p>
+                              <div className="flex flex-col gap-1">
+                                 <div className="flex items-center gap-2">
+                                    <CalendarIcon className="w-3 h-3 text-primary/60" />
+                                    <p className="font-black text-[11px] uppercase tracking-tight">{selectedApt.appointment_date}</p>
+                                 </div>
+                                 <div className="flex items-center gap-2">
+                                    <Clock className="w-3 h-3 text-primary/60" />
+                                    <p className="font-black text-lg tracking-tighter">{selectedApt.appointment_time}</p>
+                                 </div>
                               </div>
                            </div>
 
-                           <div className="bg-muted/30 border border-border p-6 rounded-[2rem] space-y-2 relative overflow-hidden group">
+                           <div className="bg-muted/30 border border-border p-5 rounded-[2rem] space-y-3 relative overflow-hidden group">
                               <div className="absolute -right-4 -top-4 w-12 h-12 bg-violet-500/5 rounded-full blur-xl group-hover:bg-violet-500/10 transition-colors" />
-                              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Hizmet & Personel</p>
-                              <div className="flex items-center gap-2">
-                                 <Scissors className="w-4 h-4 text-violet-400" />
-                                 <p className="font-black text-sm uppercase">{selectedApt.service_name || 'Servis'}</p>
-                              </div>
-                              <div className="mt-2 pt-2 border-t border-border/50">
-                                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">Personel: <span className="text-foreground">{selectedApt.staff_name || selectedApt.staff?.name || 'Atanmamış'}</span></p>
+                              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">Hizmet & Personel</p>
+                              <div className="flex flex-col gap-1">
+                                 <div className="flex items-center gap-2">
+                                    <Scissors className="w-3 h-3 text-violet-400/60" />
+                                    <p className="font-black text-[11px] uppercase tracking-tight truncate">{selectedApt.service_name || 'Servis'}</p>
+                                 </div>
+                                 <div className="flex items-center gap-2">
+                                    <UserIcon className="w-3 h-3 text-violet-400/60" />
+                                    <p className="font-black text-[11px] uppercase tracking-tight truncate">{selectedApt.staff?.name || 'Atanmamış'}</p>
+                                 </div>
                               </div>
                            </div>
                         </div>
 
                         {selectedApt.notes && (
-                           <div className="bg-amber-500/5 border border-amber-500/10 p-6 rounded-[2.5rem]">
-                              <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-3 italic underline underline-offset-4">Müşteri Notu</p>
-                              <p className="text-sm text-foreground/80 font-medium italic leading-relaxed">"{selectedApt.notes.replace(/\[DURATION:\d+\]/, '').trim() || 'Not bırakılmadı'}"</p>
+                           <div className="bg-amber-500/5 border border-amber-500/10 p-5 rounded-[2rem]">
+                              <p className="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em] mb-2 opacity-60">Müşteri Notu</p>
+                              <p className="text-[11px] text-foreground/80 font-medium italic leading-relaxed">"{selectedApt.notes.replace(/\[DURATION:\d+\]/, '').trim() || 'Not bırakılmadı'}"</p>
                            </div>
                         )}
 
-                        <DialogFooter className="gap-4">
-                           {selectedApt.status === 'pending' && (
+                        <div className="flex flex-col gap-3">
+                           <div className="flex gap-3">
+                              {selectedApt.status === 'pending' && (
+                                 <Button
+                                    onClick={() => {
+                                       handleStatusUpdate(selectedApt.id, 'confirmed');
+                                       setIsDetailsOpen(false);
+                                    }}
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 h-12 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-blue-500/20"
+                                 >
+                                    ONAYLA
+                                 </Button>
+                              )}
+                              {selectedApt.status === 'confirmed' && (
+                                 <Button
+                                    onClick={() => {
+                                       handleStatusUpdate(selectedApt.id, 'completed');
+                                       setIsDetailsOpen(false);
+                                    }}
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 h-12 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-emerald-500/20"
+                                 >
+                                    TAMAMLA
+                                 </Button>
+                              )}
                               <Button
-                                 onClick={() => {
-                                    handleStatusUpdate(selectedApt.id, 'confirmed');
-                                    setIsDetailsOpen(false);
-                                 }}
-                                 className="flex-1 bg-blue-600 hover:bg-blue-700 h-14 rounded-2xl font-black text-xs uppercase shadow-lg shadow-blue-500/20"
+                                 variant="outline"
+                                 onClick={() => setIsDetailsOpen(false)}
+                                 className="flex-1 border-border hover:bg-muted h-12 rounded-2xl font-black text-[10px] uppercase"
                               >
-                                 RANDEVUYU ONAYLA
+                                 KAPAT
                               </Button>
-                           )}
-                           {selectedApt.status === 'confirmed' && (
-                              <Button
-                                 onClick={() => {
-                                    handleStatusUpdate(selectedApt.id, 'completed');
-                                    setIsDetailsOpen(false);
-                                 }}
-                                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 h-14 rounded-2xl font-black text-xs uppercase shadow-lg shadow-emerald-500/20"
-                              >
-                                 HİZMET TAMAMLANDI
-                              </Button>
-                           )}
-                           <Button
-                              variant="outline"
-                              onClick={() => setIsDetailsOpen(false)}
-                              className="flex-1 border-border hover:bg-muted h-14 rounded-2xl font-black text-xs uppercase"
-                           >
-                              KAPAT
-                           </Button>
+                           </div>
+                           
                            <Button 
                               variant="ghost" 
                               onClick={async () => {
@@ -596,11 +604,11 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                                     }
                                  }
                               }}
-                              className="flex-1 text-rose-500 hover:bg-rose-500/10 h-14 rounded-2xl font-black text-xs uppercase"
+                              className="h-12 w-full text-rose-500 hover:bg-rose-500/10 rounded-2xl font-black text-[10px] uppercase"
                            >
-                              İPTAL ET
+                              RANDEVUYU İPTAL ET
                            </Button>
-                        </DialogFooter>
+                        </div>
                      </div>
                   )}
                </DialogContent>
