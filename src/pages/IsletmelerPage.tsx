@@ -180,7 +180,7 @@ const IsletmelerPage = () => {
                     <SelectValue placeholder={selectedCity !== "all" ? t("common.select_district") : t("common.select_city_first")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t("isletmeler.all_districts") || "Tüm İlçeler"}</SelectItem>
+                    <SelectItem value="all">Tüm İlçeler</SelectItem>
                     {availableDistricts.map((ilce) => (
                       <SelectItem key={ilce} value={ilce}>{ilce}</SelectItem>
                     ))}

@@ -328,9 +328,7 @@ const IsletmeBasvuruPage = () => {
                     </div>
                   ) : t("apply.submit")}
                 </Button>
-                <p className="text-[10px] text-center text-muted-foreground mt-4 uppercase tracking-widest font-semibold opacity-50">
-                  {t("apply.submit_info") || "Başvurunuz onaylandığında e-posta ile bilgilendirileceksiniz."}
-                </p>
+
               </div>
             </form>
           </div>

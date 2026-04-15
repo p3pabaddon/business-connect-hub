@@ -63,7 +63,7 @@ export function Header() {
             <div className="flex items-center gap-1.5 mr-2 pr-2 border-r border-border/50">
               <LanguageToggle />
               <ThemeToggle />
-              <NotificationBell />
+
             </div>
             
             <div className="flex items-center gap-4">
@@ -123,6 +123,7 @@ export function Header() {
                 </Link>
               </div>
             )}
+            <NotificationBell />
           </div>
 
           <div className="flex md:hidden items-center gap-2">

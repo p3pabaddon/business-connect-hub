@@ -192,10 +192,10 @@ export function HeroSection() {
             <div className="flex flex-wrap items-center justify-center gap-3 mb-16">
               <span className="text-sm text-muted-foreground">{t("hero.popular")}</span>
               {[
-                { name: t("sectors.barber"), href: "/isletmeler" },
-                { name: t("sectors.beauty"), href: "/isletmeler" },
-                { name: t("sectors.spa"), href: "/isletmeler" },
-                { name: t("sectors.dental"), href: "/isletmeler" },
+                { name: t("sectors.barber"), href: "/isletmeler?category=Berber" },
+                { name: t("sectors.beauty"), href: "/isletmeler?category=Güzellik Salonu" },
+                { name: t("sectors.spa"), href: "/isletmeler?category=Spa & Wellness" },
+                { name: t("sectors.dental"), href: "/isletmeler?category=Diş Kliniği" },
               ].map((link) => (
                 <Link
                   key={link.name}
