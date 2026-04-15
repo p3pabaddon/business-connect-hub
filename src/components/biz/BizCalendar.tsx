@@ -96,7 +96,8 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
    const [selectedApt, setSelectedApt] = useState<any>(null);
    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
    const [selectedDayOffset, setSelectedDayOffset] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1); // 0-6 index
-   const [viewMode, setViewMode] = useState<'weekly' | 'staff'>('staff'); // Default to staff view as requested
+   const [viewMode, setViewMode] = useState<'weekly' | 'staff'>('staff');
+   const [focusedStaffId, setFocusedStaffId] = useState<string | null>(null);
 
    const handleStatusUpdate = async (id: string, status: any) => {
       try {
@@ -137,7 +138,11 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
    const appointmentsByDay = useMemo(() => {
       const map: Record<string, any[]> = {};
       
-      appointments.forEach(apt => {
+      const filteredAppointments = focusedStaffId 
+         ? appointments.filter(a => a.staff_id === focusedStaffId)
+         : appointments;
+
+      filteredAppointments.forEach(apt => {
          const dateStr = apt.appointment_date;
          if (!map[dateStr]) map[dateStr] = [];
          
@@ -158,7 +163,7 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
       Object.keys(map).forEach(date => {
          const dayApts = map[date].sort((a, b) => a.startTime - b.startTime);
          
-         if (viewMode === 'weekly') {
+         if (viewMode === 'weekly' || focusedStaffId) {
             const columns: any[][] = [];
             dayApts.forEach(apt => {
                let placed = false;
@@ -190,13 +195,16 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
       });
 
       return map;
-   }, [appointments, staff, viewMode]);
+   }, [appointments, staff, viewMode, focusedStaffId]);
 
    const getPosition = (timeStr: string) => {
       const [hours, minutes] = timeStr.split(":").map(Number);
       const totalMinutes = (hours - 8) * 60 + minutes;
       return totalMinutes * (100 / 60); // 100px per hour
    };
+
+   const selectedDay = weekDays[selectedDayOffset];
+   const focusedStaff = staff.find(s => s.id === focusedStaffId);
 
    return (
       <div className="bg-card border border-border rounded-[2.5rem] overflow-hidden flex flex-col h-[calc(100vh-140px)] animate-in fade-in duration-700 shadow-2xl relative">
@@ -214,7 +222,7 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                          {format(currentViewDate, 'MMMM yyyy', { locale: tr })}
                       </p>
                       <Badge variant="outline" className="text-[8px] font-black border-primary/20 bg-primary/5 text-primary">
-                         {viewMode === 'staff' ? 'Personel Görünümü' : 'Haftalık Görünüm'}
+                         {focusedStaffId ? `${focusedStaff?.name} - Haftalık` : (viewMode === 'staff' ? 'Tüm Ekip' : 'Genel Haftalık')}
                       </Badge>
                   </div>
                </div>
@@ -222,25 +230,33 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
 
             <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-2xl border border-border/50">
                <Button 
-                  onClick={() => setViewMode('staff')}
-                  variant={viewMode === 'staff' ? 'default' : 'ghost'}
+                  onClick={() => { setViewMode('staff'); setFocusedStaffId(null); }}
+                  variant={viewMode === 'staff' && !focusedStaffId ? 'default' : 'ghost'}
                   className={cn(
                      "h-10 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all",
-                     viewMode === 'staff' && "shadow-lg shadow-primary/20"
+                     viewMode === 'staff' && !focusedStaffId && "shadow-lg shadow-primary/20"
                   )}
                >
                   Personel
                </Button>
                <Button 
-                  onClick={() => setViewMode('weekly')}
-                  variant={viewMode === 'weekly' ? 'default' : 'ghost'}
+                  onClick={() => { setViewMode('weekly'); setFocusedStaffId(null); }}
+                  variant={viewMode === 'weekly' && !focusedStaffId ? 'default' : 'ghost'}
                   className={cn(
                      "h-10 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all",
-                     viewMode === 'weekly' && "shadow-lg shadow-primary/20"
+                     viewMode === 'weekly' && !focusedStaffId && "shadow-lg shadow-primary/20"
                   )}
                >
                   Haftalık
                </Button>
+               {focusedStaffId && (
+                  <Button 
+                     variant="default"
+                     className="h-10 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 bg-primary"
+                  >
+                     {focusedStaff?.name}
+                  </Button>
+               )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -269,12 +285,15 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                <Button onClick={handleNextWeek} variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground rounded-lg"><ChevronRight className="w-4 h-4" /></Button>
             </div>
             <div className="flex items-center gap-2">
+               {focusedStaffId && (
+                  <Button variant="ghost" onClick={() => setFocusedStaffId(null)} className="h-8 text-[7px] font-black uppercase tracking-widest px-2 bg-rose-500/10 text-rose-500 rounded-lg border border-rose-500/20">KALDIR</Button>
+               )}
                <Button 
-                 onClick={() => setViewMode(viewMode === 'staff' ? 'weekly' : 'staff')}
+                 onClick={() => { setViewMode(viewMode === 'staff' ? 'weekly' : 'staff'); setFocusedStaffId(null); }}
                  variant="ghost" 
                  className="h-8 text-[7px] font-black uppercase tracking-widest px-2 bg-primary/10 text-primary rounded-lg border border-primary/20"
                >
-                 {viewMode === 'staff' ? 'PERSONEL' : 'HAFTALIK'}
+                 {focusedStaffId ? focusedStaff?.name : (viewMode === 'staff' ? 'EKİP' : 'HAFTALIK')}
                </Button>
                <Button onClick={handleToday} variant="ghost" className="h-8 text-[7px] font-black uppercase tracking-widest px-2 bg-muted/50 rounded-lg">BUGÜN</Button>
             </div>
@@ -290,9 +309,9 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                   </div>
                   <div className={cn(
                      "flex-1 grid transition-all duration-500 overflow-x-auto no-scrollbar",
-                     viewMode === 'weekly' ? "lg:grid-cols-7 grid-cols-1" : `grid-cols-${staff.length || 1} min-w-[${(staff.length || 1) * 150}px]`
+                     (viewMode === 'weekly' || focusedStaffId) ? "lg:grid-cols-7 grid-cols-1" : `grid-cols-${staff.length || 1} min-w-[${(staff.length || 1) * 150}px]`
                   )}>
-                     {viewMode === 'weekly' ? weekDays.map((day, i) => (
+                     {(viewMode === 'weekly' || focusedStaffId) ? weekDays.map((day, i) => (
                         <div key={i} className={cn(
                            "py-3 lg:py-6 text-center border-r border-border/50 last:border-0 transition-all duration-300",
                            isSameDay(day, new Date()) && "bg-primary/5 shadow-[inset_0_-3px_0_0_#3b82f6]",
@@ -310,12 +329,16 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                            </p>
                         </div>
                      )) : staff.map((s, i) => (
-                        <div key={s.id} className="py-3 lg:py-4 px-2 text-center border-r border-border/50 last:border-0 bg-muted/5 flex flex-col items-center justify-center gap-1 min-w-[150px]">
-                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm transition-transform hover:scale-110">
-                              <UserIcon className="w-4 h-4 text-primary" />
+                        <div 
+                           key={s.id} 
+                           onClick={() => { setFocusedStaffId(s.id); setViewMode('weekly'); }}
+                           className="py-3 lg:py-4 px-2 text-center border-r border-border/50 last:border-0 bg-muted/5 flex flex-col items-center justify-center gap-1 min-w-[150px] cursor-pointer hover:bg-primary/5 transition-colors group"
+                        >
+                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm transition-transform group-hover:scale-110 group-hover:bg-primary group-hover:border-primary">
+                              <UserIcon className="w-4 h-4 text-primary group-hover:text-white transition-colors" />
                            </div>
                            <div className="overflow-hidden w-full">
-                              <p className="text-[9px] lg:text-[11px] font-black text-foreground uppercase tracking-tight truncate">{s.name}</p>
+                              <p className="text-[9px] lg:text-[11px] font-black text-foreground uppercase tracking-tight truncate group-hover:text-primary transition-colors">{s.name}</p>
                               <p className="text-[7px] lg:text-[8px] text-muted-foreground font-black uppercase opacity-40 tracking-widest truncate">{s.role || "Personel"}</p>
                            </div>
                         </div>
@@ -347,7 +370,7 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
             <div className="flex-1 overflow-auto custom-scrollbar relative bg-grid-slate-900/[0.05] dark:bg-grid-white/[0.02]">
                <div className={cn(
                  "flex h-[1400px]",
-                 viewMode === 'staff' ? `min-w-[${(staff.length || 1) * 150 + 96}px]` : "lg:min-w-[1000px] w-full"
+                 viewMode === 'staff' && !focusedStaffId ? `min-w-[${(staff.length || 1) * 150 + 96}px]` : "lg:min-w-[1000px] w-full"
                )}>
                   {/* Time Column */}
                   <div className="w-12 lg:w-24 shrink-0 bg-muted/5 border-r border-border backdrop-blur-sm sticky left-0 z-20">
@@ -363,7 +386,7 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                   {/* Appointment Grid */}
                   <div className={cn(
                       "flex-1 grid relative",
-                      viewMode === 'weekly' ? "lg:grid-cols-7 grid-cols-1" : `grid-cols-${staff.length || 1}`
+                      (viewMode === 'weekly' || focusedStaffId) ? "lg:grid-cols-7 grid-cols-1" : `grid-cols-${staff.length || 1}`
                    )}>
                      {/* Grid Horizontal Help Lines */}
                      <div className="absolute inset-0 pointer-events-none">
@@ -372,7 +395,7 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                         ))}
                      </div>
 
-                     {viewMode === 'weekly' ? weekDays.map((day, dayIndex) => {
+                     {(viewMode === 'weekly' || focusedStaffId) ? weekDays.map((day, dayIndex) => {
                         const dateStr = format(day, 'yyyy-MM-dd');
                         const dayApts = appointmentsByDay[dateStr] || [];
                         const isSelectedMobile = dayIndex === selectedDayOffset;
