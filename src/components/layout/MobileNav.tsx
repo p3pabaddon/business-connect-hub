@@ -13,6 +13,17 @@ export function MobileNav() {
     { icon: User, label: t("common.profile"), href: "/profil" },
   ];
 
+  const excludedRoutes = [
+    "/biz-dashboard-secure-x31p9q8w2",
+    "/admin-secure-panel-v5-x89j2k1m4n5",
+    "/hq-intelligence-vault-v8-m2n5b4v1",
+    "/personel-paneli"
+  ];
+
+  if (excludedRoutes.some(route => location.pathname.startsWith(route))) {
+    return null;
+  }
+
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-t border-border px-4 pb-safe-area-inset-bottom">
       <div className="flex items-center justify-around h-16">
