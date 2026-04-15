@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { LifeBuoy, Send, MessageSquare, Loader2, Clock, CheckCircle2, ChevronRight, Lock, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface Ticket {
   id: string;
@@ -41,6 +42,7 @@ export function BizSupport({ businessId }: { businessId: string }) {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [isViewingTicketMobile, setIsViewingTicketMobile] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -165,27 +167,34 @@ export function BizSupport({ businessId }: { businessId: string }) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-180px)] animate-in fade-in duration-700">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-heading text-foreground uppercase tracking-tight flex items-center gap-3">
-            <LifeBuoy className="w-8 h-8 text-primary" /> Destek Merkezi
+    <div className="flex flex-col h-[calc(100vh-120px)] lg:h-[calc(100vh-180px)] animate-in fade-in duration-700">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-10">
+        <div className="space-y-1">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading text-foreground uppercase tracking-tight flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-xl">
+              <LifeBuoy className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+            </div> 
+            Destek Merkezi
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">Platform uzmanlarımızla doğrudan iletişim kurun.</p>
+          <p className="text-xs md:text-sm text-muted-foreground ml-1">Platform uzmanlarımızla doğrudan iletişim kurun.</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+        <div className="flex items-center gap-2.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+           <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
            <Lock className="w-3.5 h-3.5 text-emerald-500" />
-           <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Şifreli Uçtan Uca Destek</span>
+           <span className="text-[10px] md:text-xs font-bold text-emerald-500 uppercase tracking-widest whitespace-nowrap">Şifreli Uçtan Uca Destek</span>
         </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-hidden">
-        <div className="lg:col-span-4 bg-card border border-border rounded-[2.5rem] flex flex-col overflow-hidden">
-           <div className="p-6 border-b border-border bg-muted/20">
-              <Label className="text-[10px] uppercase font-bold tracking-tighter text-muted-foreground mb-3 block">Yeni Destek Talebi</Label>
-                <div className="flex gap-2">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-8 overflow-hidden relative">
+        <div className={cn(
+          "lg:col-span-4 bg-card/30 backdrop-blur-md border border-border rounded-[2rem] lg:rounded-[2.5rem] flex flex-col overflow-hidden transition-all duration-500 ease-in-out",
+          selectedTicket && isViewingTicketMobile ? "hidden lg:flex" : "flex"
+        )}>
+           <div className="p-5 md:p-7 border-b border-border bg-muted/20">
+              <Label className="text-[10px] md:text-xs uppercase font-black tracking-[0.15em] text-muted-foreground/60 mb-4 block">Yeni Destek Talebi Aç</Label>
+                <div className="flex gap-3">
                   <Input 
-                    placeholder="Konu başlığı..."
+                    placeholder="Yardım almak istediğiniz konuyu yazın..."
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
                     onKeyDown={(e) => {
@@ -193,15 +202,15 @@ export function BizSupport({ businessId }: { businessId: string }) {
                         handleCreateTicket();
                       }
                     }}
-                    className="bg-white/5 border-white/10 rounded-xl h-12"
+                    className="bg-background/50 border-border rounded-2xl h-12 md:h-14 text-sm px-5 focus:ring-primary/20 transition-all"
                   />
                   <Button 
                     size="icon" 
                     onClick={handleCreateTicket} 
                     disabled={sending} 
-                    className="rounded-xl shrink-0 bg-primary hover:bg-primary/90 transition-all text-white"
+                    className="rounded-2xl shrink-0 bg-primary hover:bg-primary/90 transition-all text-white h-12 w-12 md:h-14 md:w-14 shadow-lg shadow-primary/20"
                   >
-                    {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                    {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-6 h-6" />}
                   </Button>
                 </div>
            </div>
@@ -214,7 +223,10 @@ export function BizSupport({ businessId }: { businessId: string }) {
                 tickets.map(ticket => (
                   <button
                     key={ticket.id}
-                    onClick={() => setSelectedTicket(ticket)}
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      setIsViewingTicketMobile(true);
+                    }}
                     className={`w-full text-left p-4 rounded-2xl border transition-all ${
                       selectedTicket?.id === ticket.id 
                       ? "bg-primary/10 border-primary/30 shadow-sm" 
@@ -245,20 +257,31 @@ export function BizSupport({ businessId }: { businessId: string }) {
            </div>
         </div>
 
-        <div className="lg:col-span-8 bg-card border border-border rounded-[2.5rem] flex flex-col overflow-hidden relative shadow-2xl shadow-primary/5">
+        <div className={cn(
+          "lg:col-span-8 bg-card/30 backdrop-blur-md border border-border rounded-[2rem] lg:rounded-[2.5rem] flex flex-col overflow-hidden relative shadow-2xl shadow-primary/5 transition-all duration-500 ease-in-out",
+          !isViewingTicketMobile ? "hidden lg:flex" : "flex"
+        )}>
            {selectedTicket ? (
              <>
-               <div className="p-6 border-b border-border flex items-center justify-between bg-muted/10">
-                  <div className="flex items-center gap-4">
-                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <MessageSquare className="w-5 h-5 text-primary" />
+               <div className="p-4 md:p-6 border-b border-border flex items-center justify-between bg-muted/10">
+                  <div className="flex items-center gap-2 md:gap-4">
+                     <Button 
+                       variant="ghost" 
+                       size="icon" 
+                       className="lg:hidden rounded-full" 
+                       onClick={() => setIsViewingTicketMobile(false)}
+                     >
+                        <ChevronRight className="w-5 h-5 rotate-180" />
+                     </Button>
+                     <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                        <MessageSquare className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                      </div>
-                     <div>
-                        <h4 className="font-bold text-foreground">{selectedTicket.subject}</h4>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Talep ID: {selectedTicket.id.slice(0,8)}</p>
+                     <div className="min-w-0">
+                        <h4 className="font-bold text-sm md:text-base text-foreground truncate">{selectedTicket.subject}</h4>
+                        <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest truncate">Talep ID: {selectedTicket.id.slice(0,8)}</p>
                      </div>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">Talebi Kapat</Button>
+                  <Button variant="ghost" size="sm" className="text-[10px] md:text-xs text-muted-foreground hover:text-foreground shrink-0 uppercase font-bold">Kapat</Button>
                </div>
                
                <div 
@@ -314,15 +337,15 @@ export function BizSupport({ businessId }: { businessId: string }) {
                   </div>
                </div>
              </>
-           ) : (
-             <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-10 text-center">
-                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6 opacity-30">
-                   <LifeBuoy className="w-10 h-10" />
-                </div>
-                <h3 className="text-lg font-bold text-foreground">Yardım Almaya Hazır mısınız?</h3>
-                <p className="text-sm max-w-xs mt-2">Sol taraftan bir talep seçin veya yeni bir konu açarak bizimle iletişime geçin.</p>
-             </div>
-           )}
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-6 md:p-10 text-center">
+                 <div className="w-16 h-16 md:w-20 md:h-20 bg-muted rounded-full flex items-center justify-center mb-4 md:mb-6 opacity-30">
+                    <LifeBuoy className="w-8 h-8 md:w-10 md:h-10" />
+                 </div>
+                 <h3 className="text-base md:text-lg font-bold text-foreground">Yardım Almaya Hazır mısınız?</h3>
+                 <p className="text-xs md:text-sm max-w-xs mt-2 opacity-70">Sol taraftan bir talep seçin veya yeni bir konu açarak bizimle iletişime geçin.</p>
+              </div>
+            )}
         </div>
       </div>
     </div>

@@ -3,9 +3,10 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
-import { Bell, CheckCircle2, Circle, Trash2, Loader2, Info, AlertTriangle, MessageCircle } from "lucide-react";
+import { Bell, Circle, Trash2, Loader2, Info, AlertTriangle, MessageCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface Notification {
   id: string;
@@ -14,10 +15,12 @@ interface Notification {
   type: string;
   is_read: boolean;
   created_at: string;
+  payload?: any;
 }
 
 export function BizNotifications() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +46,6 @@ export function BizNotifications() {
   useEffect(() => {
     fetchNotifications();
 
-    // Real-time subscription for notifications
     const channel = supabase
       .channel(`user-notifications-${user?.id}-${Date.now()}`)
       .on(
@@ -71,6 +73,21 @@ export function BizNotifications() {
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
     } catch (error) {
       toast.error("Bildirim güncellenemedi.");
+    }
+  };
+
+  const handleNotifClick = async (notif: Notification) => {
+    if (!notif.is_read) {
+      await markAsRead(notif.id);
+    }
+
+    if (notif.type === 'appointment' && notif.payload) {
+      const { appointment_date, appointment_id } = notif.payload;
+      if (appointment_date) {
+        navigate(`/isletme-paneli?tab=calendar&date=${appointment_date}&aptId=${appointment_id || ''}`);
+        toast.info("Takvimde randevu detayına yönlendiriliyorsunuz...");
+        // Sayfayı yenilemeye gerek yok, dashboard search params dinleyecek
+      }
     }
   };
 
@@ -150,7 +167,8 @@ export function BizNotifications() {
           notifications.map((notif) => (
             <div
               key={notif.id}
-              className={`group relative p-5 rounded-3xl border transition-all duration-300 ${
+              onClick={() => handleNotifClick(notif)}
+              className={`group relative p-5 rounded-3xl border transition-all duration-300 cursor-pointer ${
                 notif.is_read 
                 ? "bg-card/30 border-border/50 opacity-80" 
                 : "bg-card border-primary/20 shadow-lg shadow-primary/5 ring-1 ring-primary/10"
@@ -158,16 +176,19 @@ export function BizNotifications() {
             >
               <div className="flex gap-4">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 ${
-                   notif.is_read ? 'bg-muted/50 border-border/50' : 'bg-primary/10 border-primary/20'
+                    notif.is_read ? 'bg-muted/50 border-border/50' : 'bg-primary/10 border-primary/20'
                 }`}>
                   {getIcon(notif.type)}
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h4 className={`text-sm font-black uppercase tracking-tight ${notif.is_read ? 'text-muted-foreground' : 'text-foreground'}`}>
-                      {notif.title}
-                    </h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className={`text-sm font-black uppercase tracking-tight ${notif.is_read ? 'text-muted-foreground' : 'text-foreground'}`}>
+                        {notif.title}
+                      </h4>
+                      {notif.payload && <ExternalLink className="w-3 h-3 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />}
+                    </div>
                     <span className="text-[10px] font-mono text-muted-foreground">
                       {format(new Date(notif.created_at), "d MMMM yyyy HH:mm", { locale: tr })}
                     </span>
@@ -180,7 +201,10 @@ export function BizNotifications() {
                 <div className="flex flex-col gap-2 ml-4">
                   {!notif.is_read && (
                     <button
-                      onClick={() => markAsRead(notif.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markAsRead(notif.id);
+                      }}
                       className="p-2 hover:bg-emerald-500/10 rounded-xl transition-colors text-emerald-500"
                       title="Okundu işaretle"
                     >
@@ -188,7 +212,10 @@ export function BizNotifications() {
                     </button>
                   )}
                   <button
-                    onClick={() => deleteNotification(notif.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteNotification(notif.id);
+                    }}
                     className="p-2 hover:bg-rose-500/10 rounded-xl transition-colors text-rose-500 opacity-0 group-hover:opacity-100"
                     title="Sil"
                   >

@@ -1,5 +1,5 @@
 // BUSINESS CONNECT HUB - CALENDAR ENGINE V2.1 (FIXED COLLISION)
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
    ChevronLeft, ChevronRight, Calendar as CalendarIcon,
    Clock, CheckCircle, XCircle, MoreVertical,
@@ -87,17 +87,44 @@ interface Props {
    appointments: any[];
    staff: any[];
    onRefresh?: () => void;
+   initialDate?: string;
+   initialAptId?: string;
 }
 
 const HOURS = Array.from({ length: 14 }, (_, i) => `${i + 8}:00`); // 8am to 9pm
 
-export function BizCalendar({ appointments, staff, onRefresh }: Props) {
+export function BizCalendar({ appointments, staff, onRefresh, initialDate, initialAptId }: Props) {
    const [currentViewDate, setCurrentViewDate] = useState(new Date());
    const [selectedApt, setSelectedApt] = useState<any>(null);
    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
    const [selectedDayOffset, setSelectedDayOffset] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1); // 0-6 index
    const [viewMode, setViewMode] = useState<'weekly' | 'staff'>('staff');
    const [focusedStaffId, setFocusedStaffId] = useState<string | null>(null);
+
+   useState(() => {
+      if (initialDate) {
+         const date = parseISO(initialDate);
+         if (!isNaN(date.getTime())) {
+            setCurrentViewDate(date);
+         }
+      }
+   });
+
+   useEffect(() => {
+      if (initialAptId && appointments.length > 0) {
+         const apt = appointments.find(a => a.id === initialAptId);
+         if (apt) {
+            setSelectedApt(apt);
+            setIsDetailsOpen(true);
+            
+            // If the appointment date is different from current view date, update it
+            const aptDate = parseISO(apt.appointment_date);
+            if (!isSameDay(aptDate, currentViewDate)) {
+               setCurrentViewDate(aptDate);
+            }
+         }
+      }
+   }, [initialAptId, appointments]);
 
    const handleStatusUpdate = async (id: string, status: any) => {
       try {
@@ -222,12 +249,12 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                <div>
                   <h2 className="text-xl font-black italic uppercase tracking-tight leading-none mb-1">Takvim</h2>
                   <div className="flex items-center gap-2">
-                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
-                         {format(currentViewDate, 'MMMM yyyy', { locale: tr })}
-                      </p>
-                      <Badge variant="outline" className="text-[8px] font-black border-primary/20 bg-primary/5 text-primary">
-                         {focusedStaffId ? `${focusedStaff?.name} - Haftalık` : (viewMode === 'staff' ? 'Tüm Ekip' : 'Genel Haftalık')}
-                      </Badge>
+                       <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
+                          {format(currentViewDate, 'MMMM yyyy', { locale: tr })}
+                       </p>
+                       <Badge variant="outline" className="text-[8px] font-black border-primary/20 bg-primary/5 text-primary">
+                          {focusedStaffId ? `${focusedStaff?.name} - Haftalık` : (viewMode === 'staff' ? 'Tüm Ekip' : 'Genel Haftalık')}
+                       </Badge>
                   </div>
                </div>
             </div>
@@ -430,36 +457,36 @@ export function BizCalendar({ appointments, staff, onRefresh }: Props) {
                                        }}
                                     />
                                  );
-                              })}
+                               })}
                            </div>
                         );
                      }) : staff.map((s, staffIdx) => {
-                         const dateStr = format(weekDays[selectedDayOffset], 'yyyy-MM-dd');
-                         const dayApts = (appointmentsByDay[dateStr] || []).filter(a => a.staff_id === s.id);
+                          const dateStr = format(weekDays[selectedDayOffset], 'yyyy-MM-dd');
+                          const dayApts = (appointmentsByDay[dateStr] || []).filter(a => a.staff_id === s.id);
 
-                         return (
-                           <div key={s.id} className="relative group h-full border-r border-border/20 last:border-0 bg-muted/5 min-w-[150px]">
-                              {dayApts.map((apt, aptIndex) => {
-                                 const top = getPosition(apt.appointment_time);
-                                 const height = (apt.duration / 60) * 100;
-                                 return (
-                                    <AppointmentBlock 
-                                       key={apt.id || aptIndex}
-                                       apt={apt}
-                                       top={top}
-                                       height={height}
-                                       width={100}
-                                       left={0}
-                                       onClick={() => {
-                                          setSelectedApt(apt);
-                                          setIsDetailsOpen(true);
-                                       }}
-                                       isCompact={staff.length > 5}
-                                    />
-                                 );
-                              })}
-                           </div>
-                         );
+                          return (
+                            <div key={s.id} className="relative group h-full border-r border-border/20 last:border-0 bg-muted/5 min-w-[150px]">
+                               {dayApts.map((apt, aptIndex) => {
+                                  const top = getPosition(apt.appointment_time);
+                                  const height = (apt.duration / 60) * 100;
+                                  return (
+                                     <AppointmentBlock 
+                                        key={apt.id || aptIndex}
+                                        apt={apt}
+                                        top={top}
+                                        height={height}
+                                        width={100}
+                                        left={0}
+                                        onClick={() => {
+                                           setSelectedApt(apt);
+                                           setIsDetailsOpen(true);
+                                        }}
+                                        isCompact={staff.length > 5}
+                                     />
+                                  );
+                               })}
+                            </div>
+                          );
                      })}
                   </div>
                </div>

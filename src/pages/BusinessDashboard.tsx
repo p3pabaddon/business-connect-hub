@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyBusiness, useBizAnalytics, useInventory, useBizServices, useBizStaff, useBizReviews } from "@/hooks/useQueries";
 import { VerificationGuard } from "@/components/VerificationGuard";
@@ -45,10 +45,20 @@ type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "c
 export default function BusinessDashboard() {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') as BizTab;
+  const dateParam = searchParams.get('date');
+  const aptIdParam = searchParams.get('aptId');
   
-  const [activeTab, setActiveTab] = useState<BizTab>("overview");
+  const [activeTab, setActiveTab] = useState<BizTab>(tabParam || "overview");
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam, activeTab]);
   
   const { data: business, isLoading: loading, refetch: reloadBusiness } = useMyBusiness();
   const { data: bizData, refetch: reloadAnalytics } = useBizAnalytics(business?.id || "");
@@ -325,7 +335,13 @@ export default function BusinessDashboard() {
                  <BizOverview stats={stats} recentApts={appointments} inventory={inventory} />
               )}
               {activeTab === "calendar" && (
-                 <BizCalendar appointments={appointments} staff={staff} onRefresh={loadData} />
+                 <BizCalendar 
+                   appointments={appointments} 
+                   staff={staff} 
+                   onRefresh={loadData}
+                   initialDate={dateParam || undefined}
+                   initialAptId={aptIdParam || undefined}
+                 />
               )}
               {activeTab === "crm" && (
                  <BizCRM businessId={business?.id} customers={customers} globalSearch={searchQuery} />
