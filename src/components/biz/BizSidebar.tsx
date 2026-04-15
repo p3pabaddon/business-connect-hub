@@ -79,24 +79,24 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
       )}>
         <button 
           onClick={() => setSidebarOpen(false)}
-          className="absolute top-4 -right-12 p-2 bg-card border border-border rounded-xl lg:hidden text-foreground"
+          className="absolute top-6 right-6 p-2 lg:hidden text-foreground hover:bg-muted rounded-xl transition-all z-[60]"
         >
-          <X className="w-5 h-5" />
+          <X className="w-6 h-6" />
         </button>
 
         <div className="p-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 shrink-0">
-            <UserCircle className="w-6 h-6 text-primary" />
-          </div>
-          {sidebarOpen && (
-            <div className="overflow-hidden">
-              <span className="font-heading font-black text-foreground text-base tracking-tighter block whitespace-nowrap">{businessName.toUpperCase()}</span>
-              <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-1 block">Yönetim Paneli</span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 shrink-0">
+              <UserCircle className="w-6 h-6 text-primary" />
             </div>
-          )}
+            {sidebarOpen && (
+              <div className="overflow-hidden">
+                <span className="font-heading font-black text-foreground text-base tracking-tighter block whitespace-nowrap">{businessName.toUpperCase()}</span>
+                <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-1 block">Yönetim Paneli</span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
       <nav className="flex-1 px-3 space-y-8 mt-6 overflow-y-auto custom-scrollbar">
         {navGroups.map((group, idx) => (

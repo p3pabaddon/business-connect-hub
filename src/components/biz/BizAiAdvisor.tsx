@@ -90,7 +90,7 @@ export function BizAiAdvisor({ businessName, stats, services, staff }: BizAiAdvi
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] font-sans">
+    <div className="fixed bottom-24 lg:bottom-6 right-6 z-[100] font-sans">
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -123,7 +123,7 @@ export function BizAiAdvisor({ businessName, stats, services, staff }: BizAiAdvi
             }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             className={cn(
-              "w-[380px] bg-card/80 backdrop-blur-xl border border-white/20 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col transition-all duration-500",
+              "w-[92vw] sm:w-[380px] bg-card/80 backdrop-blur-xl border border-white/20 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col transition-all duration-500",
               isMinimized ? "rounded-full" : ""
             )}
           >

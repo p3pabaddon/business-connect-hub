@@ -33,21 +33,21 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
   return (
     <div className="space-y-6 lg:space-y-10 animate-in fade-in duration-700">
       {/* KPI Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-8">
         {kpis.map((kpi, i) => (
-          <div key={i} className="bg-card border border-border p-4 lg:p-8 rounded-3xl lg:rounded-[2.5rem] hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-muted/50 rounded-bl-full -mr-12 -mt-12 group-hover:scale-110 transition-transform duration-500" />
-            <div className="flex justify-between items-start mb-4 lg:mb-6">
-              <div className="p-2 lg:p-4 bg-muted/50 rounded-xl lg:rounded-2xl border border-border group-hover:border-primary/20 transition-colors shadow-inner">
+          <div key={i} className="bg-card border border-border p-4 lg:p-8 rounded-2xl lg:rounded-[2.5rem] hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 lg:w-24 lg:h-24 bg-muted/50 rounded-bl-full -mr-8 -mt-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="flex justify-between items-start mb-3 lg:mb-6">
+              <div className="p-2 lg:p-4 bg-muted/50 rounded-lg lg:rounded-2xl border border-border group-hover:border-primary/20 transition-colors shadow-inner">
                 <kpi.icon className={cn("w-4 h-4 lg:w-6 lg:h-6", kpi.color)} />
               </div>
-              <Badge variant="outline" className="text-[8px] lg:text-[10px] font-black text-muted-foreground border-border uppercase tracking-widest px-2 lg:px-3 py-0.5 lg:py-1 bg-background/50 backdrop-blur-sm">
+              <Badge variant="outline" className="text-[7px] lg:text-[10px] font-black text-muted-foreground border-border uppercase tracking-widest px-1.5 lg:px-3 py-0.5 lg:py-1 bg-background/50 backdrop-blur-sm">
                 {kpi.trend}
               </Badge>
             </div>
-            <div className="space-y-1 lg:space-y-2">
+            <div className="space-y-0.5 lg:space-y-2">
               <p className="text-xl lg:text-4xl font-black text-foreground tracking-tighter group-hover:translate-x-1 transition-transform">{kpi.value}</p>
-              <p className="text-[8px] lg:text-[10px] uppercase font-black text-muted-foreground tracking-[0.1em] lg:tracking-[0.2em] opacity-60">{kpi.label}</p>
+              <p className="text-[7px] lg:text-[10px] uppercase font-black text-muted-foreground tracking-[0.05em] lg:tracking-[0.2em] opacity-60 truncate">{kpi.label}</p>
             </div>
           </div>
         ))}

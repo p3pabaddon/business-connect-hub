@@ -24,13 +24,14 @@ import { BizCoupons } from "@/components/biz/BizCoupons";
 import { SEOHead } from "@/components/SEOHead";
 import { BizAiAdvisor } from "@/components/biz/BizAiAdvisor";
 import { BizNotifications } from "@/components/biz/BizNotifications";
-import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2, LayoutDashboard, LogOut, ExternalLink, MessageSquare } from "lucide-react";
+import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2, LayoutDashboard, LogOut, ExternalLink, MessageSquare, Calendar, ShoppingBag, Users, LifeBuoy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/layout/Logo";
 import { supabase } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 
 const NOTIFICATION_SOUND = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
 
@@ -226,13 +227,13 @@ export default function BusinessDashboard() {
         )}
 
         {/* Top Header */}
-        <header className="h-16 lg:h-20 border-b border-border px-4 lg:px-8 flex items-center justify-between bg-background/50 backdrop-blur-md relative z-10">
+        <header className="sticky top-0 h-16 lg:h-20 border-b border-border px-4 lg:px-8 flex items-center justify-between bg-background/80 backdrop-blur-xl z-30 transition-all duration-300">
            <div className="flex items-center gap-3 lg:gap-6 flex-1">
               <button 
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-muted rounded-lg transition-colors lg:hidden"
+                className="p-2.5 bg-muted/50 hover:bg-muted border border-border rounded-xl transition-all lg:hidden active:scale-95 shadow-sm"
               >
-                <Menu className="w-5 h-5 text-muted-foreground" />
+                <Menu className="w-5 h-5 text-foreground" />
               </button>
                <div className="hidden lg:flex items-center gap-6 text-xs font-medium text-muted-foreground">
                   <Logo className="h-9 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setActiveTab("overview")} />
@@ -312,19 +313,19 @@ export default function BusinessDashboard() {
                   <span className="text-[10px] font-bold text-muted-foreground uppercase hidden lg:block">Panel</span>
                </button>
 
-               <button 
-                 onClick={async () => { await signOut(); navigate("/"); }}
-                 className="flex items-center gap-2 p-1 bg-muted/50 border border-border rounded-xl hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors group"
-               >
+                <button 
+                  onClick={async () => { await signOut(); navigate("/"); }}
+                  className="flex items-center gap-2 p-1 bg-muted/50 border border-border rounded-xl hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors group"
+                >
                   <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/20 group-hover:bg-rose-500/20 group-hover:border-rose-500/20 shadow-sm">
                      <LogOut className="w-4 h-4 text-primary group-hover:text-rose-500" />
                   </div>
-               </button>
-            </div>
+                </button>
+             </div>
         </header>
 
         {/* Dynamic Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 lg:p-10 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.03),transparent_40%)]">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-24 lg:pb-10 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.03),transparent_40%)]">
            <div className="max-w-[1600px] mx-auto">
               <VerificationGuard>
               {activeTab === "overview" && stats && (
@@ -385,6 +386,32 @@ export default function BusinessDashboard() {
            </div>
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation - Thumb Zone Friendly */}
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-card/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-2 flex items-center justify-around shadow-2xl shadow-primary/20 lg:hidden z-[100] animate-in slide-in-from-bottom-5 duration-700">
+         {[
+           { id: "overview", icon: LayoutDashboard, label: "Özet" },
+           { id: "calendar", icon: Calendar, label: "Takvim" },
+           { id: "catalog", icon: ShoppingBag, label: "Hizmet" },
+           { id: "crm", icon: Users, label: "Müşteri" },
+           { id: "support", icon: LifeBuoy, label: "Destek" }
+         ].map((item) => (
+           <button
+             key={item.id}
+             onClick={() => setActiveTab(item.id as BizTab)}
+             className={cn(
+               "flex flex-col items-center gap-1 p-3 rounded-3xl transition-all relative overflow-hidden",
+               activeTab === item.id ? "text-primary bg-primary/10 shadow-inner translate-y-[-4px]" : "text-muted-foreground opacity-60"
+             )}
+           >
+             <item.icon className={cn("w-5 h-5", activeTab === item.id ? "animate-pulse" : "")} />
+             <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
+             {activeTab === item.id && (
+               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+             )}
+           </button>
+         ))}
+      </nav>
 
       <BizAiAdvisor 
          businessName={business?.name || "İşletme"}
