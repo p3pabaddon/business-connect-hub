@@ -2,8 +2,18 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Flag, CheckCircle, XCircle, Star, MessageSquare } from "lucide-react";
+import { Flag, CheckCircle, XCircle, Star, MessageSquare, ShieldAlert } from "lucide-react";
 import { getReportedReviews, resolveReviewReport } from "@/lib/biz-api";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
@@ -11,6 +21,15 @@ import { cn } from "@/lib/utils";
 export const ReviewReports = () => {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Confirmation Modal States
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    reportId: string;
+    reviewId: string;
+    action: 'resolved' | 'dismissed';
+  } | null>(null);
+  const [processing, setProcessing] = useState(false);
 
   const loadReports = async () => {
     setLoading(true);
@@ -29,19 +48,25 @@ export const ReviewReports = () => {
     loadReports();
   }, []);
 
-  const handleAction = async (reportId: string, action: 'resolved' | 'dismissed', reviewId: string) => {
+  const handleAction = (reportId: string, action: 'resolved' | 'dismissed', reviewId: string) => {
+    if (action === 'resolved') {
+      setPendingAction({ reportId, reviewId, action });
+      setIsConfirmOpen(true);
+    } else {
+      executeAction(reportId, action, reviewId);
+    }
+  };
+
+  const executeAction = async (reportId: string, action: 'resolved' | 'dismissed', reviewId: string, deleteReview: boolean = false) => {
+    setProcessing(true);
     try {
       await resolveReviewReport(reportId, action);
       
-      if (action === 'resolved') {
-        // If resolved, we might want to delete the review too
-        const confirmDelete = window.confirm("Raporu onayladınız. Bu yorumu kalıcı olarak silmek istiyor musunuz?");
-        if (confirmDelete) {
-          await supabase.from("reviews").delete().eq("id", reviewId);
-          toast.success("Yorum silindi ve rapor çözüldü.");
-        } else {
-          toast.success("Rapor çözüldü (yorum silinmedi).");
-        }
+      if (deleteReview) {
+        await supabase.from("reviews").delete().eq("id", reviewId);
+        toast.success("Yorum silindi ve rapor çözüldü.");
+      } else if (action === 'resolved') {
+        toast.success("Rapor çözüldü (yorum silinmedi).");
       } else {
         toast.info("Rapor reddedildi.");
       }
@@ -49,6 +74,10 @@ export const ReviewReports = () => {
       loadReports();
     } catch (err) {
       toast.error("İşlem başarısız");
+    } finally {
+      setProcessing(false);
+      setIsConfirmOpen(false);
+      setPendingAction(null);
     }
   };
 
@@ -147,6 +176,43 @@ export const ReviewReports = () => {
           </div>
         )}
       </div>
+
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent className="bg-card border-border rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-black uppercase tracking-tight italic flex items-center gap-3 text-rose-500">
+               <ShieldAlert className="w-6 h-6" /> YORUMU SİLSİN Mİ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground font-medium pt-2">
+              Raporu onayladınız. Bu yorumu platformdan kalıcı olarak silmek istiyor musunuz? Bu işlem geri alınamaz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-between gap-4 border-t border-border/50 pt-6">
+            <AlertDialogCancel 
+              disabled={processing}
+              className="text-[10px] font-black uppercase tracking-widest rounded-2xl h-14 flex-1 border-border/50 hover:bg-muted"
+              onClick={() => {
+                if (pendingAction) {
+                  executeAction(pendingAction.reportId, 'resolved', pendingAction.reviewId, false);
+                }
+              }}
+            >
+              SADECE RAPORU ÇÖZ
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={processing}
+              className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-[10px] font-black uppercase tracking-widest h-14 flex-1 shadow-xl shadow-rose-500/25 rounded-2xl"
+              onClick={() => {
+                if (pendingAction) {
+                  executeAction(pendingAction.reportId, 'resolved', pendingAction.reviewId, true);
+                }
+              }}
+            >
+              YORUMU KALICI OLARAK SİL
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

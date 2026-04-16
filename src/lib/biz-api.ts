@@ -253,8 +253,17 @@ export const replyToReview = async (reviewId: string, reply: string) => {
 };
 
 export const markReviewHelpful = async (reviewId: string) => {
-  const { error } = await supabase.rpc("increment_review_helpful", { target_review_id: reviewId });
-  if (error) throw error;
+  // Try RPC first (atomic)
+  const { error: rpcError } = await supabase.rpc("increment_review_helpful", { target_review_id: reviewId });
+  
+  if (rpcError) {
+    console.warn("RPC failed, falling back to manual update", rpcError);
+    // Fallback: Fetch current and increment
+    const { data: rev } = await supabase.from("reviews").select("helpful_count").eq("id", reviewId).single();
+    if (rev) {
+      await supabase.from("reviews").update({ helpful_count: (rev.helpful_count || 0) + 1 }).eq("id", reviewId);
+    }
+  }
   return true;
 };
 

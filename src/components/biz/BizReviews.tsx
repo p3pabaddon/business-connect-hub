@@ -4,6 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { replyToReview, markReviewHelpful, reportReview } from "@/lib/biz-api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -17,6 +25,12 @@ export function BizReviews({ reviews, onRefresh }: Props) {
   const [replyId, setReplyId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Report Modal States
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [reportReviewId, setReportReviewId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [reporting, setReporting] = useState(false);
 
   const averageRating = reviews.length > 0 
     ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length).toFixed(1)
@@ -53,15 +67,24 @@ export function BizReviews({ reviews, onRefresh }: Props) {
     }
   };
 
-  const handleReport = async (reviewId: string) => {
-    const reason = window.prompt("Rapor etme nedeniniz nedir? (Kötüye kullanım, spam, argo vb.)");
-    if (!reason) return;
+  const handleReport = (reviewId: string) => {
+    setReportReviewId(reviewId);
+    setReportReason("");
+    setIsReportOpen(true);
+  };
+
+  const submitReport = async () => {
+    if (!reportReviewId || !reportReason.trim()) return;
     
+    setReporting(true);
     try {
-      await reportReview(reviewId, reason);
+      await reportReview(reportReviewId, reportReason);
       toast.success("Yorum başarıyla raporlandı. Yönetim ekibi inceleyecektir.");
+      setIsReportOpen(false);
     } catch (error) {
       toast.error("Rapor gönderilemedi.");
+    } finally {
+      setReporting(false);
     }
   };
 
@@ -221,6 +244,48 @@ export function BizReviews({ reviews, onRefresh }: Props) {
          </div>
       </div>
 
+      <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-card border-border rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black uppercase tracking-tight italic flex items-center gap-3">
+              <ShieldAlert className="w-6 h-6 text-rose-500" /> YORUMU RAPOR ET
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground font-medium pt-2">
+              Lütfen bu yorumun neden topluluk kurallarımızı ihlal ettiğini düşündüğünüzü belirtin.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-6 space-y-4">
+            <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl flex items-center gap-3">
+              <ShieldAlert className="w-5 h-5 text-rose-500" />
+              <p className="text-[10px] text-rose-500 font-bold leading-tight uppercase tracking-widest">Güvenli Deneyim Politikası</p>
+            </div>
+            <Input
+              id="reason"
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="Raporlama nedeninizi detaylandırın..."
+              className="bg-muted/30 border-border/50 rounded-2xl h-14 text-sm focus:ring-primary/20 backdrop-blur-md"
+              autoFocus
+            />
+          </div>
+          <DialogFooter className="sm:justify-between gap-4 border-t border-border/50 pt-6">
+            <Button
+              variant="outline"
+              onClick={() => setIsReportOpen(false)}
+              className="text-[10px] font-black uppercase tracking-widest rounded-2xl h-12 flex-1 border-border/50 hover:bg-muted"
+            >
+              VAZGEÇ
+            </Button>
+            <Button
+              onClick={submitReport}
+              disabled={reporting || !reportReason.trim()}
+              className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-[10px] font-black uppercase tracking-widest h-12 flex-1 shadow-lg shadow-rose-500/20 rounded-2xl"
+            >
+              {reporting ? <Loader2 className="w-4 h-4 animate-spin" /> : "RAPORU TAMAMLA"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
