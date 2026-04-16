@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { updateBusiness } from "@/lib/biz-api";
 import { Slider } from "@/components/ui/slider";
+import { ImageUpload } from "@/components/ImageUpload";
+import { Link } from "lucide-react";
 
 interface BizPageEditorProps {
   business: any;
@@ -267,55 +269,39 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 bg-card border border-border rounded-[2rem] shadow-sm">
                 <div className="space-y-4">
-                   <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground ml-1">Logo URL</Label>
-                   <div className="relative">
+                   <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground ml-1">Logo</Label>
+                   <ImageUpload 
+                     defaultValue={localBusiness.logo}
+                     onUpload={(url) => setLocalBusiness({...localBusiness, logo: url})}
+                     path={`${localBusiness.id}/logos`}
+                     label="Logo Yükle"
+                   />
+                   <div className="space-y-2 mt-4 pt-4 border-t border-border/50">
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-1.5 opacity-60">
+                        <Link className="w-3 h-3" /> Veya Direkt URL
+                      </Label>
                       <Input 
-                        value={localBusiness.logo} 
+                        value={localBusiness.logo || ""} 
                         onChange={(e) => setLocalBusiness({...localBusiness, logo: e.target.value})}
                         placeholder="https://örnek.com/logo.png"
-                        className="h-12 rounded-xl pl-10 border-border"
+                        className="h-10 rounded-xl text-xs border-border bg-muted/20"
                       />
-                      <ImageIcon className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                   </div>
-                   <div className="mt-4 flex justify-center p-6 bg-muted/20 border-2 border-dashed border-border rounded-2xl">
-                     {localBusiness.logo ? (
-                       <img src={localBusiness.logo} alt="Logo Preview" className="h-16 object-contain" />
-                     ) : (
-                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Logo Seçilmedi</p>
-                     )}
                    </div>
                 </div>
 
                 <div className="space-y-4">
-                   <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground ml-1">Kapak Fotoğrafı URL</Label>
-                   <div className="relative">
-                      <Input 
-                        value={branding.header_banner} 
-                        onChange={(e) => handleUpdateBranding({ header_banner: e.target.value })}
-                        placeholder="https://örnek.com/banner.jpg"
-                        className="h-12 rounded-xl pl-10 border-border"
-                      />
-                      <ImageIcon className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                   </div>
-                   <div className="mt-4 aspect-video bg-muted/20 border-2 border-dashed border-border rounded-2xl overflow-hidden relative">
-                     {branding.header_banner ? (
-                       <img 
-                        src={branding.header_banner} 
-                        alt="Banner Preview" 
-                        className="w-full h-full object-cover" 
-                        style={{ objectPosition: `center ${branding.header_banner_position || 50}%` }}
-                       />
-                     ) : (
-                       <div className="absolute inset-0 flex items-center justify-center">
-                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Banner Seçilmedi</p>
-                       </div>
-                     )}
-                   </div>
+                   <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground ml-1">Kapak Fotoğrafı</Label>
+                   <ImageUpload 
+                     defaultValue={branding.header_banner}
+                     onUpload={(url) => handleUpdateBranding({ header_banner: url })}
+                     path={`${localBusiness.id}/covers`}
+                     label="Kapak Fotoğrafı Yükle"
+                   />
                    
                    {branding.header_banner && (
                      <div className="space-y-3 pt-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Dikey Hizalama</Label>
+                          <Label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Banner Dikey Konumu</Label>
                           <span className="text-[10px] font-bold text-primary">%{branding.header_banner_position || 50}</span>
                         </div>
                         <Slider 
@@ -323,9 +309,25 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
                           max={100} 
                           step={1} 
                           onValueChange={(vals) => handleUpdateBranding({ header_banner_position: vals[0] })}
+                          className="py-2"
                         />
+                        <p className="text-[10px] text-muted-foreground italic leading-tight">
+                          * Fotoğrafın hangi kısmının görüneceğini yukarı/aşağı kaydırarak ayarlayın.
+                        </p>
                      </div>
                    )}
+
+                   <div className="space-y-2 mt-4 pt-4 border-t border-border/50">
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-1.5 opacity-60">
+                        <Link className="w-3 h-3" /> Veya Direkt URL
+                      </Label>
+                      <Input 
+                        value={branding.header_banner || ""} 
+                        onChange={(e) => handleUpdateBranding({ header_banner: e.target.value })}
+                        placeholder="https://örnek.com/banner.jpg"
+                        className="h-10 rounded-xl text-xs border-border bg-muted/20"
+                      />
+                   </div>
                 </div>
               </div>
             </div>
