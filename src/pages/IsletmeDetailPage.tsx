@@ -3,7 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/lib/translations";
-import { Star, MapPin, Clock, CheckCircle, Phone, Calendar, MessageSquare, Gift, ArrowRight, Reply, ThumbsUp, Flag } from "lucide-react";
+import { Star, MapPin, Clock, CheckCircle, Phone, Calendar, MessageSquare, Gift, ArrowRight, Reply, ThumbsUp, Flag, Briefcase } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -16,7 +16,7 @@ import { useBusinessBySlug } from "@/hooks/useQueries";
 import { getLoyaltyProgram, getCustomerLoyalty, joinLoyaltyProgram } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { SEOHead } from "@/components/SEOHead";
-import { cn, getCategoryPlaceholder, toTitleCase } from "@/lib/utils";
+import { cn, getCategoryPlaceholder, toTitleCase, hexToHsl } from "@/lib/utils";
 import { toast } from "sonner";
 import { StampCard } from "@/components/loyalty/StampCard";
 import { ReviewAISummary } from "@/components/ReviewAISummary";
@@ -203,6 +203,19 @@ const IsletmeDetailPage = () => {
         image={biz.image_url || biz.logo || getCategoryPlaceholder(biz.category)}
         jsonLd={businessJsonLd}
       />
+      
+      {/* Dynamic Custom Branding Styles */}
+      {biz.branding_config?.custom_colors && (
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root {
+            --primary: ${hexToHsl(biz.branding_config.primary_color)};
+            --accent: ${hexToHsl(biz.branding_config.primary_color)};
+            --secondary: ${hexToHsl(biz.branding_config.secondary_color || biz.branding_config.primary_color)};
+            --ring: ${hexToHsl(biz.branding_config.primary_color)};
+          }
+        `}} />
+      )}
+
       <Header />
       <main className="flex-1 bg-surface">
         {/* Hero */}
@@ -210,15 +223,33 @@ const IsletmeDetailPage = () => {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="secondary">{toTitleCase(biz.category)}</Badge>
-                  {biz.is_verified && (
-                    <Badge className="bg-accent/10 text-accent border-accent/20">
-                      <CheckCircle className="w-3 h-3 mr-1" /> Onaylı
-                    </Badge>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 border-b border-border/10 pb-6 mb-6">
+                  {biz.logo ? (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden border-2 border-white shadow-xl bg-white shrink-0">
+                      <img src={biz.logo} alt={biz.name} className="w-full h-full object-contain p-2" />
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-primary/10 flex items-center justify-center shrink-0 border-2 border-white/50 shadow-lg">
+                      <Briefcase className="w-10 h-10 text-primary opacity-40" />
+                    </div>
                   )}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="secondary">{toTitleCase(biz.category)}</Badge>
+                      {biz.is_verified && (
+                        <Badge className="bg-accent/10 text-accent border-accent/20">
+                          <CheckCircle className="w-3 h-3 mr-1" /> Onaylı
+                        </Badge>
+                      )}
+                    </div>
+                    <h1 className="text-3xl sm:text-4xl font-heading text-foreground mb-1">{biz.name}</h1>
+                    <div className="flex items-center gap-1.5">
+                      <Star className="w-4 h-4 text-warning fill-warning" />
+                      <span className="font-bold text-foreground text-lg">{biz.rating}</span>
+                      <span className="text-muted-foreground text-sm">({biz.review_count} yorum)</span>
+                    </div>
+                  </div>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-heading text-foreground mb-2">{biz.name}</h1>
                 <p className="text-muted-foreground mb-3">{biz.description}</p>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">

@@ -3,7 +3,7 @@ import {
   Building2, MapPin, Globe, Phone, Mail, 
   Settings2, Save, Clock, Trash2, Plus,
   Camera, Briefcase, ExternalLink, ShieldCheck,
-  Zap, TrendingUp, Sparkles
+  Zap, TrendingUp, Sparkles, Palette
 } from "lucide-react";
 import { ImageUpload } from "@/components/ImageUpload";
 import { supabase } from "@/lib/supabase";
@@ -379,6 +379,96 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                   ))}
                 </div>
               </div>
+            </div>
+          </SectionCard>
+
+          {/* Custom Branding Colors */}
+          <SectionCard 
+            icon={Palette} 
+            title="Özel Markalama" 
+            desc="Dükkanınızın profilinde kendi kurumsal renklerinizi kullanın."
+          >
+            <div className="space-y-6">
+              {!business.branding_config?.custom_colors ? (
+                <div className="p-6 bg-amber-500/5 border border-dashed border-amber-500/30 rounded-3xl text-center space-y-4">
+                  <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto border border-amber-500/20">
+                    <Sparkles className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-foreground uppercase tracking-tight">Premium Özellik</h4>
+                    <p className="text-muted-foreground text-xs font-medium mt-1">Bu dükkan için henüz "Kendi Renklerin" paketi tanımlanmamış.</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="border-amber-500/30 text-amber-600 hover:bg-amber-500/10 rounded-xl font-bold"
+                    onClick={() => {
+                        // Mock purchase activation
+                        setBusiness({
+                          ...business,
+                          branding_config: { 
+                            ...(business.branding_config || {}), 
+                            custom_colors: true,
+                            primary_color: "#0d9488",
+                            secondary_color: "#f0fdfa"
+                          }
+                        });
+                        toast({ title: "Tebrikler!", description: "Özel markalama özelliği dükkanınız için aktif edildi." });
+                    }}
+                  >
+                    Hemen Satın Al (Demo)
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Ana Renk (Primary)</Label>
+                    <div className="flex gap-3">
+                      <div 
+                        className="w-12 h-12 rounded-xl border border-border shrink-0 shadow-inner"
+                        style={{ backgroundColor: business.branding_config?.primary_color || "#0d9488" }}
+                      />
+                      <Input 
+                        type="color"
+                        value={business.branding_config?.primary_color || "#0d9488"} 
+                        onChange={(e) => setBusiness({
+                          ...business, 
+                          branding_config: { 
+                            ...business.branding_config, 
+                            primary_color: e.target.value 
+                          }
+                        })}
+                        className="h-12 flex-1 rounded-xl p-1 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Yardımcı Renk (Secondary)</Label>
+                    <div className="flex gap-3">
+                      <div 
+                        className="w-12 h-12 rounded-xl border border-border shrink-0 shadow-inner"
+                        style={{ backgroundColor: business.branding_config?.secondary_color || "#f0fdfa" }}
+                      />
+                      <Input 
+                        type="color"
+                        value={business.branding_config?.secondary_color || "#f0fdfa"} 
+                        onChange={(e) => setBusiness({
+                          ...business, 
+                          branding_config: { 
+                            ...business.branding_config, 
+                            secondary_color: e.target.value 
+                          }
+                        })}
+                        className="h-12 flex-1 rounded-xl p-1 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:col-span-2 p-4 bg-muted/30 rounded-2xl border border-border">
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest leading-relaxed">
+                      💡 İPUCU: Bu renkler işletme detay sayfanızda butonlarda, badge'lerde ve görsel vurgularda otomatik olarak uygulanacaktır.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </SectionCard>
         </div>
