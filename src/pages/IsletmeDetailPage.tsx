@@ -208,10 +208,10 @@ const IsletmeDetailPage = () => {
       {biz.branding_config?.custom_colors && (
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
-            --primary: ${hexToHsl(biz.branding_config.primary_color)};
-            --accent: ${hexToHsl(biz.branding_config.primary_color)};
-            --secondary: ${hexToHsl(biz.branding_config.secondary_color || biz.branding_config.primary_color)};
-            --ring: ${hexToHsl(biz.branding_config.primary_color)};
+            --primary: ${hexToHsl(biz.branding_config.primary_color || "#7c3aed")};
+            --accent: ${hexToHsl(biz.branding_config.primary_color || "#7c3aed")};
+            --secondary: ${hexToHsl(biz.branding_config.secondary_color || biz.branding_config.primary_color || "#7c3aed")};
+            --ring: ${hexToHsl(biz.branding_config.primary_color || "#7c3aed")};
           }
         `}} />
       )}

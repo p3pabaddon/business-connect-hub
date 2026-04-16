@@ -24,12 +24,13 @@ export function getCategoryPlaceholder(category: string): string {
   return "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800&auto=format&fit=crop"; // Default to hairdressing/general salon
 }
 
-export function toTitleCase(str: string): string {
+export function toTitleCase(str: string | null | undefined): string {
   if (!str) return "";
   return str.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
 }
 
-export function hexToHsl(hex: string): string {
+export function hexToHsl(hex: string | null | undefined): string {
+  if (!hex) return "0 0% 0%"; // Default to black or something safe
   // Remove # if present
   hex = hex.replace(/^#/, '');
 
