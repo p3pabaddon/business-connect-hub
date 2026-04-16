@@ -15,6 +15,7 @@ import { TrafficTracker } from "./components/TrafficTracker";
 import { QuickBookWidget } from "./components/QuickBookWidget";
 import { MobileNav } from "./components/layout/MobileNav";
 import CookieConsent from "./components/CookieConsent";
+import { PWAUpdateHandler } from "./components/PWAUpdateHandler";
 
 // Lazy Pages
 const Index = lazy(() => import("./pages/Index"));
@@ -58,6 +59,7 @@ const App = () => (
           <TooltipProvider>
           <Sonner position="top-right" expand={true} richColors duration={2500} />
           <BrowserRouter>
+            <PWAUpdateHandler />
             <TrafficTracker />
             <QuickBookWidget />
             <div className="min-h-screen">

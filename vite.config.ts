@@ -17,6 +17,26 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "favicon.png", "icon-192.png", "icon-512.png"],
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        navigateFallback: "index.html",
+        // index.html should be network first
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages',
+              expiration: {
+                maxEntries: 50,
+              },
+            },
+          },
+        ],
+      },
       manifest: {
         name: "RandevuDunyasi",
         short_name: "Randevu",
