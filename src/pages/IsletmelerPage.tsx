@@ -4,13 +4,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Star, CheckCircle, SlidersHorizontal, Zap, Navigation } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
