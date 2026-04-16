@@ -128,14 +128,26 @@ export function StaffPerformance({ businessId, appointments, staff, reviews }: S
           <CardContent className="p-0">
             {barData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: "hsl(var(--muted-foreground))" }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: "hsl(var(--muted-foreground))" }} />
+                <BarChart data={barData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 9, fontWeight: 700, fill: "hsl(var(--muted-foreground))" }} 
+                    minTickGap={10}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 9, fontWeight: 700, fill: "hsl(var(--muted-foreground))" }}
+                    width={35}
+                  />
                   <Tooltip 
                     contentStyle={{ backgroundColor: "hsl(var(--card))", borderRadius: "1rem", border: "1px solid hsl(var(--border))", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }}
                     itemStyle={{ fontSize: "12px", fontWeight: "bold" }}
+                    cursor={{ fill: "hsl(var(--muted))", opacity: 0.1 }}
                   />
-                  <Bar dataKey="randevu" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} barSize={40} />
+                  <Bar dataKey="randevu" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} barSize={24} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

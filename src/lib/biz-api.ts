@@ -113,7 +113,7 @@ export const getBizAnalytics = async (businessId: string) => {
   }).reverse();
 
   const dailyRevenue = last7Days.map(date => ({
-    date: date.split("-").slice(1).join("/"),
+    date: date.split("-").reverse().slice(0, 2).join("/"),
     revenue: apts
       .filter(a => a.appointment_date === date && a.status === "completed")
       .reduce((sum, a) => sum + (Number(a.total_price) || 0), 0)

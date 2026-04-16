@@ -78,17 +78,29 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
                     <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }} />
+                <XAxis 
+                  dataKey="date" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 9, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }} 
+                  minTickGap={20}
+                />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }}
-                  tickFormatter={(value) => value >= 1000 ? `${(value / 1000).toLocaleString()}k` : value}
+                  tick={{ fontSize: 9, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }}
+                  width={50}
+                  tickFormatter={(value) => {
+                    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M ₺`;
+                    if (value >= 1000) return `${Math.round(value / 1000)}B ₺`;
+                    return `${value} ₺`;
+                  }}
                 />
                 <Tooltip
                   contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '1.5rem', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '12px 16px' }}
                   itemStyle={{ color: 'hsl(var(--foreground))', fontSize: '13px', fontWeight: '900' }}
                   labelStyle={{ fontSize: '10px', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', marginBottom: '4px' }}
+                  formatter={(value: number) => [`₺${value.toLocaleString()}`, "Ciro"]}
                 />
                 <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={4} fill="url(#colorCount)" animationDuration={2000} />
               </AreaChart>
