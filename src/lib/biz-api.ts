@@ -325,3 +325,9 @@ export const getStaffProfile = async (userId: string) => {
   if (error) return null;
   return data;
 };
+
+export const updateBusiness = async (id: string, updates: any) => {
+  const { data, error } = await supabase.from("businesses").update(updates).eq("id", id).select().single();
+  if (error) throw error;
+  return data;
+};
