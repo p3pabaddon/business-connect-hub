@@ -11,15 +11,16 @@ export function QuickBookWidget() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Sadece anasayfada gösterilsin
+  useEffect(() => {
+    if (location.pathname === "/") {
+      const timer = setTimeout(() => setIsVisible(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname]);
+
   if (location.pathname !== "/") {
     return null;
   }
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 1500); // Show after 1.5s
-    return () => clearTimeout(timer);
-  }, []);
 
   if (!isVisible) return null;
 

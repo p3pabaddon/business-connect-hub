@@ -141,7 +141,6 @@ const IsletmelerPage = () => {
           "keywords": "yakınımdaki berber, en iyi kuaför, yakınımdaki güzellik merkezi, online randevu al, berber randevu"
         }}
       />
-      <Header />
       <main className="flex-1 bg-surface">
         {/* Search Header */}
         <div className="bg-background border-b border-border py-8">
@@ -351,7 +350,6 @@ const IsletmelerPage = () => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

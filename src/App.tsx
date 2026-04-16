@@ -69,67 +69,73 @@ const App = () => (
             <A2HSPrompt />
             <TrafficTracker />
             <QuickBookWidget />
-            <div className="min-h-screen">
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/isletmeler" element={<IsletmelerPage />} />
-                  <Route path="/isletme/:slug" element={<IsletmeDetailPage />} />
-                  <Route path="/giris" element={<GirisPage />} />
-                  <Route path="/register" element={<KayitPage />} />
-                  <Route path="/kayit" element={<KayitPage />} />
-                  <Route path="/hakkimizda" element={<HakkimizdaPage />} />
-                  <Route path="/iletisim" element={<IletisimPage />} />
-                  <Route path="/sss" element={<SSSPage />} />
-                  <Route path="/isletme-basvuru" element={<IsletmeBasvuruPage />} />
-                  <Route path="/isletmeler-icin" element={<ForBusinessesPage />} />
-                  <Route path="/hq-gate-auth-v2-j5l1z8y9w" element={<HqLoginPage />} />
-                  <Route path="/karsilastir" element={<KarsilastirmaPage />} />
-                  <Route path="/harita" element={<HaritaPage />} />
-                  <Route path="/kesfet" element={<Discover />} />
-                  <Route path="/blog" element={<BlogPage />} />
-                  <Route path="/blog/:slug" element={<BlogPostPage />} />
-                  <Route path="/stil-danismani" element={<StyleAdvisor />} />
-                  <Route path="/sehir/:citySlug" element={<CityGuide />} />
-                  <Route path="/oauth/google/callback" element={<GoogleOAuthCallback />} />
-                  <Route path="/kvkk" element={<KvkkPage />} />
-                  <Route path="/kullanim-kosullari" element={<KullanimKosullari />} />
-                  <Route path="/gizlilik-politikasi" element={<GizlilikPolitikasi />} />
-                  <Route path="/cerez-politikasi" element={<CerezPolitikasi />} />
+            <div className="min-h-screen flex flex-col">
+              <ScrollToTop />
+              <Header />
+              <main className="flex-1">
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    {/* Public routes */}
+                    <Route path="/" element={<Index />} />
+                    <Route path="/isletmeler" element={<IsletmelerPage />} />
+                    <Route path="/isletme/:slug" element={<IsletmeDetailPage />} />
+                    <Route path="/giris" element={<GirisPage />} />
+                    <Route path="/register" element={<KayitPage />} />
+                    <Route path="/kayit" element={<KayitPage />} />
+                    <Route path="/hakkimizda" element={<HakkimizdaPage />} />
+                    <Route path="/iletisim" element={<IletisimPage />} />
+                    <Route path="/sss" element={<SSSPage />} />
+                    <Route path="/isletme-basvuru" element={<IsletmeBasvuruPage />} />
+                    <Route path="/isletmeler-icin" element={<ForBusinessesPage />} />
+                    <Route path="/hq-gate-auth-v2-j5l1z8y9w" element={<HqLoginPage />} />
+                    <Route path="/karsilastir" element={<KarsilastirmaPage />} />
+                    <Route path="/harita" element={<HaritaPage />} />
+                    <Route path="/kesfet" element={<Discover />} />
+                    <Route path="/blog" element={<BlogPage />} />
+                    <Route path="/blog/:slug" element={<BlogPostPage />} />
+                    <Route path="/stil-danismani" element={<StyleAdvisor />} />
+                    <Route path="/sehir/:citySlug" element={<CityGuide />} />
+                    <Route path="/oauth/google/callback" element={<GoogleOAuthCallback />} />
+                    <Route path="/kvkk" element={<KvkkPage />} />
+                    <Route path="/kullanim-kosullari" element={<KullanimKosullari />} />
+                    <Route path="/gizlilik-politikasi" element={<GizlilikPolitikasi />} />
+                    <Route path="/cerez-politikasi" element={<CerezPolitikasi />} />
 
-                  {/* Protected routes - requires login */}
-                  <Route path="/profil" element={
-                    <ProtectedRoute>
-                      <ProfilPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/biz-dashboard-secure-x31p9q8w2" element={
-                    <BusinessRoute>
-                      <BusinessDashboard />
-                    </BusinessRoute>
-                  } />
-                  <Route path="/personel-paneli" element={
-                    <ProtectedRoute>
-                      <StaffDashboardPage />
-                    </ProtectedRoute>
-                  } />
+                    {/* Protected routes - requires login */}
+                    <Route path="/profil" element={
+                      <ProtectedRoute>
+                        <ProfilPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/biz-dashboard-secure-x31p9q8w2" element={
+                      <BusinessRoute>
+                        <BusinessDashboard />
+                      </BusinessRoute>
+                    } />
+                    <Route path="/personel-paneli" element={
+                      <ProtectedRoute>
+                        <StaffDashboardPage />
+                      </ProtectedRoute>
+                    } />
 
-                  {/* Admin routes - requires admin email */}
-                  <Route path="/admin-secure-panel-v5-x89j2k1m4n5" element={
-                    <AdminRoute>
-                      <AdminPage />
-                    </AdminRoute>
-                  } />
-                  <Route path="/hq-intelligence-vault-v8-m2n5b4v1" element={
-                    <AdminRoute>
-                      <HqDashboard />
-                    </AdminRoute>
-                  } />
+                    {/* Admin routes - requires admin email */}
+                    <Route path="/admin-secure-panel-v5-x89j2k1m4n5" element={
+                      <AdminRoute>
+                        <AdminPage />
+                      </AdminRoute>
+                    } />
+                    <Route path="/hq-intelligence-vault-v8-m2n5b4v1" element={
+                      <AdminRoute>
+                        <HqDashboard />
+                      </AdminRoute>
+                    } />
 
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </Suspense>
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
+              </main>
+              <Footer />
+              <MobileNav />
             </div>
             <CookieConsent />
           </BrowserRouter>
