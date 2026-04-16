@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, MessageSquare, ThumbsUp, Reply, ShieldAlert, Sparkles, Loader2, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,23 @@ export function BizReviews({ reviews, onRefresh }: Props) {
   const [reportReviewId, setReportReviewId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState("");
   const [reporting, setReporting] = useState(false);
+  
+  // Voting States
+  const [votedReviews, setVotedReviews] = useState<string[]>([]);
+  const [localHelpfulCounts, setLocalHelpfulCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const savedVotes = localStorage.getItem("randevu_helpful_votes");
+    if (savedVotes) {
+      setVotedReviews(JSON.parse(savedVotes));
+    }
+  }, []);
+
+  const saveVote = (id: string) => {
+    const newVotes = [...votedReviews, id];
+    setVotedReviews(newVotes);
+    localStorage.setItem("randevu_helpful_votes", JSON.stringify(newVotes));
+  };
 
   const averageRating = reviews.length > 0 
     ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length).toFixed(1)
@@ -58,12 +75,29 @@ export function BizReviews({ reviews, onRefresh }: Props) {
   };
 
   const handleHelpful = async (reviewId: string) => {
+    if (votedReviews.includes(reviewId)) {
+      toast.info("Bu yorumu zaten yararlı olarak işaretlediniz.");
+      return;
+    }
+
+    // Optimistic update
+    setLocalHelpfulCounts(prev => ({
+      ...prev,
+      [reviewId]: (prev[reviewId] || reviews.find(r => r.id === reviewId)?.helpful_count || 0) + 1
+    }));
+    
+    saveVote(reviewId);
+
     try {
       await markReviewHelpful(reviewId);
-      toast.success("Yorum yararlı olarak işaretlendi.");
-      onRefresh();
+      toast.success("Oyunuz kaydedildi!");
+      // No need to refresh immediately if we have optimistic update, 
+      // but we do it to keep sync with DB
+      setTimeout(onRefresh, 2000); 
     } catch (error) {
       toast.error("İşlem başarısız.");
+      // Rollback on error
+      setVotedReviews(prev => prev.filter(id => id !== reviewId));
     }
   };
 
@@ -183,9 +217,17 @@ export function BizReviews({ reviews, onRefresh }: Props) {
                      <div className="flex gap-4">
                         <button 
                           onClick={() => handleHelpful(rev.id)}
-                          className="flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-all uppercase tracking-tight"
+                          disabled={votedReviews.includes(rev.id)}
+                          className={cn(
+                            "flex items-center gap-2 text-[10px] font-black transition-all uppercase tracking-tight px-3 py-1.5 rounded-lg",
+                            votedReviews.includes(rev.id) 
+                              ? "text-emerald-500 bg-emerald-500/10 cursor-default" 
+                              : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                          )}
                         >
-                          <ThumbsUp className="w-4 h-4" /> YARARLI {rev.helpful_count > 0 && `(${rev.helpful_count})`}
+                          <ThumbsUp className={cn("w-4 h-4", votedReviews.includes(rev.id) && "fill-emerald-500")} /> 
+                          {votedReviews.includes(rev.id) ? "YARARLI BULDUNUZ" : "YARARLI"} 
+                          {(localHelpfulCounts[rev.id] ?? rev.helpful_count) > 0 && `(${(localHelpfulCounts[rev.id] ?? rev.helpful_count)})`}
                         </button>
                         <button 
                           onClick={() => handleReport(rev.id)}
