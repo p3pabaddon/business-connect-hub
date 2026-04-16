@@ -15,6 +15,9 @@ check_user.js
 env_backup.tmp
 setup-full-system.cjs
 setup-waitlist.cjs
+FIX_SUPABASE.bat
+apply-secrets.js
+query.json
 .vscode/
 .idea/
 .DS_Store
