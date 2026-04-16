@@ -15,7 +15,7 @@ import {
   Building2, Users, Calendar, TrendingUp,
   FileText, LayoutDashboard,
   Bell, LogOut, Menu, X, ScrollText, Settings,
-  Search, RefreshCw, Wallet, Ban, Megaphone, LifeBuoy
+  Search, RefreshCw, Wallet, Ban, Megaphone, LifeBuoy, Flag
 } from "lucide-react";
 
 // Admin Tab Components
@@ -31,6 +31,7 @@ import { SystemHealth } from "@/components/admin/tabs/SystemHealth";
 import { AuditLogs } from "@/components/admin/tabs/AuditLogs";
 import { SystemSettings } from "@/components/admin/tabs/SystemSettings";
 import { AdminSupport } from "@/components/admin/AdminSupport";
+import { ReviewReports } from "@/components/admin/tabs/ReviewReports";
 
 const navigation = [
   { name: "Dashboard", id: "overview", icon: LayoutDashboard },
@@ -43,6 +44,7 @@ const navigation = [
   { name: "Finans", id: "finans", icon: Wallet },
   { name: "Sistem Sağlığı", id: "system", icon: TrendingUp },
   { name: "Destek Talepleri", id: "support", icon: LifeBuoy, badge: true },
+  { name: "Yorum Raporları", id: "reports", icon: Flag, badge: true },
   { name: "Loglar", id: "logs", icon: ScrollText },
   { name: "Ayarlar", id: "settings", icon: Settings },
 ];
@@ -56,6 +58,7 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [supportCount, setSupportCount] = useState(0);
+  const [reportsCount, setReportsCount] = useState(0);
 
   // Data States
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -155,6 +158,9 @@ const AdminPage = () => {
 
       const { count: sCount } = await supabase.from("support_tickets").select("*", { count: 'exact', head: true }).eq("status", "open");
       setSupportCount(sCount || 0);
+
+      const { count: rCount } = await supabase.from("review_reports").select("*", { count: 'exact', head: true }).eq("status", "pending");
+      setReportsCount(rCount || 0);
 
     } catch (err) {
       console.error("Admin data load error:", err);
@@ -361,6 +367,9 @@ const AdminPage = () => {
                   {item.badge && item.id === "support" && supportCount > 0 && (
                     <span className="ml-auto bg-amber-500 text-white text-[9px] px-2 py-0.5 rounded-full ring-2 ring-card">{supportCount}</span>
                   )}
+                  {item.badge && item.id === "reports" && reportsCount > 0 && (
+                    <span className="ml-auto bg-rose-500 text-white text-[9px] px-2 py-0.5 rounded-full ring-2 ring-card">{reportsCount}</span>
+                  )}
                 </button>
               ))}
             </nav>
@@ -500,6 +509,10 @@ const AdminPage = () => {
 
               {activeTab === "support" && (
                 <AdminSupport />
+              )}
+
+              {activeTab === "reports" && (
+                <ReviewReports />
               )}
             </div>
           </div>

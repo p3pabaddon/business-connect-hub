@@ -3,7 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/lib/translations";
-import { Star, MapPin, Clock, CheckCircle, Phone, Calendar, MessageSquare, Gift, ArrowRight, Reply } from "lucide-react";
+import { Star, MapPin, Clock, CheckCircle, Phone, Calendar, MessageSquare, Gift, ArrowRight, Reply, ThumbsUp, Flag } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +21,7 @@ import { StampCard } from "@/components/loyalty/StampCard";
 import { ReviewAISummary } from "@/components/ReviewAISummary";
 import { supabase } from "@/lib/supabase";
 import { MoveRight, ImageIcon, Sparkles } from "lucide-react";
+import { markReviewHelpful, reportReview } from "@/lib/biz-api";
 
 const IsletmeDetailPage = () => {
   const { slug } = useParams();
@@ -97,6 +98,42 @@ const IsletmeDetailPage = () => {
       });
     } finally {
       setJoining(false);
+    }
+  };
+
+  const [markedHelpful, setMarkedHelpful] = useState<Set<string>>(new Set());
+
+  const handleHelpful = async (reviewId: string) => {
+    if (!user) {
+      toast.error("Giriş Yapın", { description: "Yorumları değerlendirmek için giriş yapmalısınız." });
+      return;
+    }
+    if (markedHelpful.has(reviewId)) return;
+
+    try {
+      await markReviewHelpful(reviewId);
+      setMarkedHelpful(prev => new Set([...prev, reviewId]));
+      toast.success("Teşekkürler!", { description: "Geri bildiriminiz kaydedildi." });
+      reloadBusiness();
+    } catch (err) {
+      toast.error("Hata", { description: "İşlem yapılırken bir hata oluştu." });
+    }
+  };
+
+  const handleReport = async (reviewId: string) => {
+    if (!user) {
+      toast.error("Giriş Yapın", { description: "Raporlamak için giriş yapmalısınız." });
+      return;
+    }
+
+    const reason = window.prompt("Lütfen raporlama nedeninizi belirtin (Örn: Hakaret, Yanıltıcı içerik vb.):");
+    if (!reason) return;
+
+    try {
+      await reportReview(reviewId, reason);
+      toast.success("Rapor Edildi", { description: "İncelememiz için teşekkürler. Moderatör ekibimiz en kısa sürede kontrol edecektir." });
+    } catch (err) {
+      toast.error("Hata", { description: "Rapor gönderilirken bir hata oluştu." });
     }
   };
 
@@ -435,6 +472,28 @@ const IsletmeDetailPage = () => {
                           <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Doğrulanmış Müşteri</span>
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed italic">"{review.comment}"</p>
+                        
+                        <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-4">
+                          <button 
+                            onClick={() => handleHelpful(review.id)}
+                            disabled={markedHelpful.has(review.id)}
+                            className={cn(
+                              "flex items-center gap-1.5 text-xs font-medium transition-colors",
+                              markedHelpful.has(review.id) ? "text-primary" : "text-muted-foreground hover:text-primary"
+                            )}
+                          >
+                            <ThumbsUp className={cn("w-3.5 h-3.5", markedHelpful.has(review.id) && "fill-current")} />
+                            Faydalı ({review.helpful_count || 0})
+                          </button>
+                          
+                          <button 
+                            onClick={() => handleReport(review.id)}
+                            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-rose-500 transition-colors"
+                          >
+                            <Flag className="w-3.5 h-3.5" />
+                            Rapor Et
+                          </button>
+                        </div>
                         
                         {review.reply && (
                           <div className="mt-4 p-4 bg-primary/5 border-l-2 border-primary rounded-r-xl space-y-1">

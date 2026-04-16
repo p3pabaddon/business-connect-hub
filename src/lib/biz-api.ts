@@ -252,6 +252,38 @@ export const replyToReview = async (reviewId: string, reply: string) => {
   return data;
 };
 
+export const markReviewHelpful = async (reviewId: string) => {
+  const { error } = await supabase.rpc("increment_review_helpful", { target_review_id: reviewId });
+  if (error) throw error;
+  return true;
+};
+
+export const reportReview = async (reviewId: string, reason: string) => {
+  const { error } = await supabase.from("review_reports").insert({
+    review_id: reviewId,
+    reason
+  });
+  if (error) throw error;
+  return true;
+};
+
+export const getReportedReviews = async () => {
+  const { data, error } = await supabase
+    .from("review_reports")
+    .select("*, review:reviews(*)")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  
+  if (error) throw error;
+  return data || [];
+};
+
+export const resolveReviewReport = async (reportId: string, action: 'resolved' | 'dismissed') => {
+  const { error } = await supabase.from("review_reports").update({ status: action }).eq("id", reportId);
+  if (error) throw error;
+  return true;
+};
+
 // --- WAITLIST ---
 // Table schema: id, user_id, business_id, desired_date, desired_time, created_at
 export const getWaitlist = async (businessId: string) => {

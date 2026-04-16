@@ -102,35 +102,35 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         
         {/* Campaign Management */}
-        <div className="bg-card border border-border rounded-[2.5rem] p-8 lg:p-10 space-y-10 shadow-sm relative overflow-hidden">
+        <div className="bg-card border border-border rounded-[2.5rem] p-6 sm:p-8 lg:p-10 space-y-8 lg:space-y-10 shadow-sm relative overflow-hidden">
            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16" />
            <div className="flex items-center justify-between relative z-10">
               <div>
-                <h3 className="text-xl lg:text-2xl font-black text-foreground flex items-center gap-4 tracking-tight">
-                   <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
-                    <Ticket className="w-6 h-6 text-primary" />
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground flex items-center gap-3 sm:gap-4 tracking-tight">
+                   <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
+                    <Ticket className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                    </div>
                    Kampanya Sihirbazı
                 </h3>
-                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-2 ml-14 opacity-60">Kupon ve İndirim Yönetimi</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-2 ml-12 sm:ml-14 opacity-60">Kupon ve İndirim Yönetimi</p>
               </div>
               {!showAddForm && (
                 <Button 
                    onClick={() => setShowAddForm(true)}
-                   size="lg" 
-                   className="bg-primary hover:bg-primary/90 text-white text-[10px] font-black tracking-[0.2em] h-12 px-6 shadow-xl shadow-primary/20 rounded-2xl group transition-all"
+                   size="sm" 
+                   className="bg-primary hover:bg-primary/90 text-white text-[9px] sm:text-[10px] font-black tracking-[0.1em] sm:tracking-[0.2em] h-10 sm:h-12 px-4 sm:px-6 shadow-xl shadow-primary/20 rounded-xl sm:rounded-2xl group transition-all"
                  >
-                    <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" /> YENİ KUPON
+                    <Plus className="w-3.5 h-3.5 mr-1.5 sm:mr-2 group-hover:rotate-90 transition-transform" /> YENİ KUPON
                  </Button>
                )}
             </div>
  
             {showAddForm && (
-              <div className="p-8 bg-muted/30 border border-primary/20 rounded-[2rem] space-y-6 animate-in zoom-in-95 shadow-inner relative">
-                 <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-black text-primary uppercase tracking-widest">Kupon Konfigürasyonu</p>
-                    <button onClick={() => setShowAddForm(false)} className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
-                 </div>
+               <div className="p-5 sm:p-8 bg-muted/30 border border-primary/20 rounded-[2rem] space-y-5 sm:space-y-6 animate-in zoom-in-95 shadow-inner relative">
+                  <div className="flex items-center justify-between mb-2">
+                     <p className="text-[9px] sm:text-[10px] font-black text-primary uppercase tracking-widest">Kupon Konfigürasyonu</p>
+                     <button onClick={() => setShowAddForm(false)} className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-background transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
+                  </div>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Kampanya Başlığı</Label>
@@ -178,7 +178,7 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
                     <p className="text-[10px] font-black uppercase tracking-[0.3em]">Tarayıcılar Yükleniyor</p>
                   </div>
                ) : coupons.map((camp, i) => (
-                 <div key={camp.id || i} className="group p-6 bg-muted/30 border border-border rounded-3xl hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all flex items-center justify-between border-transparent hover:border-primary/10">
+                 <div key={camp.id || i} className="group p-5 sm:p-6 bg-muted/40 border border-border rounded-[2rem] hover:bg-primary/[0.03] hover:shadow-2xl hover:shadow-primary/10 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-transparent hover:border-primary/20">
                     <div className="flex items-center gap-6">
                        <div className="w-14 h-14 bg-primary/5 rounded-2xl flex items-center justify-center font-black text-primary border border-primary/10 shadow-inner text-base group-hover:scale-110 transition-transform">
                           {camp.discount_type === 'percentage' ? `%${camp.discount_value}` : `₺${camp.discount_value}`}
@@ -191,8 +191,8 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
                           </div>
                        </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                       <Badge className="bg-emerald-500/10 text-emerald-600 border-none font-black text-[10px] tracking-widest px-3 py-1">
+                    <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0">
+                       <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-black text-[9px] sm:text-[10px] tracking-widest px-2 sm:px-3 py-1">
                          AKTİF
                        </Badge>
                        <Button 
@@ -216,18 +216,18 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
          </div>
  
          {/* Waitlist Intelligence */}
-         <div className="bg-card border border-border rounded-[2.5rem] p-8 lg:p-10 space-y-10 shadow-sm relative overflow-hidden">
+         <div className="bg-card border border-border rounded-[2.5rem] p-6 sm:p-8 lg:p-10 space-y-8 lg:space-y-10 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-bl-full -mr-16 -mt-16" />
             <div className="flex items-center justify-between relative z-10">
-               <div>
-                <h3 className="text-xl lg:text-2xl font-black text-foreground flex items-center gap-4 tracking-tight">
-                   <div className="w-10 h-10 bg-violet-500/10 rounded-xl flex items-center justify-center border border-violet-500/20">
-                    <Users className="w-6 h-6 text-violet-500" />
-                   </div>
-                   Bekleme Listesi
-                </h3>
-                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-2 ml-14 opacity-60">AI Destekli Akıllı Sıra</p>
-               </div>
+                <div>
+                 <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground flex items-center gap-3 sm:gap-4 tracking-tight">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-violet-500/10 rounded-xl flex items-center justify-center border border-violet-500/20">
+                     <Users className="w-5 h-5 sm:w-6 sm:h-6 text-violet-500" />
+                    </div>
+                    Bekleme Listesi
+                 </h3>
+                 <p className="text-[9px] sm:text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-2 ml-12 sm:ml-14 opacity-60">AI Destekli Akıllı Sıra</p>
+                </div>
                <Badge variant="outline" className="border-border text-muted-foreground font-black text-xs px-4 py-1.5 rounded-full bg-muted/30">
                  {waitlist.length} BEKLEYEN
                </Badge>
@@ -240,9 +240,9 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
                     <p className="text-[10px] font-black uppercase tracking-[0.3em]">Müşteriler Sorgulanıyor</p>
                   </div>
                ) : waitlist.map((entry, i) => (
-                 <div key={entry.id || i} className="p-6 bg-muted/30 border border-border rounded-[2rem] flex items-center justify-between group shadow-sm transition-all hover:bg-white hover:shadow-xl hover:shadow-violet-500/5 border-transparent hover:border-violet-500/10">
-                    <div className="flex items-center gap-6">
-                       <div className="w-14 h-14 rounded-[1.25rem] bg-card border border-border flex items-center justify-center font-black text-violet-500 uppercase text-lg shadow-inner group-hover:scale-110 transition-transform">
+                 <div key={entry.id || i} className="p-5 sm:p-6 bg-muted/40 border border-border rounded-[2rem] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group shadow-sm transition-all hover:bg-violet-500/[0.02] hover:shadow-2xl hover:shadow-violet-500/10 border-transparent hover:border-violet-500/20">
+                    <div className="flex items-center gap-4 sm:gap-6">
+                       <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-card border border-border flex items-center justify-center font-black text-violet-500 uppercase text-base sm:text-lg shadow-inner group-hover:scale-110 transition-transform">
                          {(entry.user_id || "?").substring(0, 2)}
                        </div>
                        <div>
@@ -256,9 +256,9 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
                     <Button 
                       onClick={() => handleRemoveFromWaitlist(entry.id)}
                       disabled={removing === entry.id}
-                      size="lg" 
+                      size="sm" 
                       variant="outline"
-                      className="h-11 font-black text-[10px] tracking-widest rounded-xl transition-all active:scale-95 text-rose-500 border-rose-500/20 hover:bg-rose-50"
+                      className="h-10 w-full sm:w-auto font-black text-[10px] tracking-widest rounded-xl transition-all active:scale-95 text-rose-500 border-rose-500/20 hover:bg-rose-500/10 hover:border-rose-500/40"
                     >
                       {removing === entry.id ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
                       KALDIR
@@ -273,9 +273,9 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
                )}
             </div>
  
-            <div className="flex flex-col items-center justify-center p-10 bg-primary/5 border border-primary/10 rounded-[2.5rem] space-y-6 text-center group cursor-help transition-all hover:bg-primary/10">
-               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-primary/20 shadow-xl shadow-primary/5 group-hover:scale-110 transition-transform font-black text-primary">
-                  <Zap className="w-8 h-8 opacity-40" />
+            <div className="flex flex-col items-center justify-center p-8 sm:p-10 bg-primary/5 border border-primary/10 rounded-[2.5rem] space-y-6 text-center group cursor-help transition-all hover:bg-primary/10">
+               <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shadow-xl shadow-primary/10 group-hover:scale-110 transition-transform font-black text-primary">
+                  <Zap className="w-8 h-8 text-primary group-hover:fill-primary selection:fill-primary" />
                </div>
                <div className="max-w-[280px]">
                   <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-2 opacity-80">AKILLI ASİSTAN</p>
