@@ -107,7 +107,9 @@ export const ReviewReports = () => {
                   <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase opacity-60">
                     <span>Yazan: {report.review?.customer_name}</span>
                     <span>•</span>
-                    <span>İşletme ID: {report.review?.business_id.slice(0,8)}...</span>
+                    <span className="text-primary hover:underline cursor-pointer">
+                      İşletme: {report.review?.business?.name || "Bilinmiyor"}
+                    </span>
                   </div>
                 </div>
               </div>

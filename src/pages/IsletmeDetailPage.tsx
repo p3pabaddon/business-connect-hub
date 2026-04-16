@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BookingModal } from "@/components/BookingModal";
 import { ReviewModal } from "@/components/ReviewModal";
+import { ReportModal } from "@/components/ReportModal";
 import { ShareButtons } from "@/components/ShareButtons";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { useBusinessBySlug } from "@/hooks/useQueries";
@@ -28,6 +29,8 @@ const IsletmeDetailPage = () => {
   const { user } = useAuth();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
 
   const { data: biz, isLoading: bizLoading, refetch: reloadBusiness } = useBusinessBySlug(slug!);
@@ -120,21 +123,13 @@ const IsletmeDetailPage = () => {
     }
   };
 
-  const handleReport = async (reviewId: string) => {
+  const handleReport = (reviewId: string) => {
     if (!user) {
       toast.error("Giriş Yapın", { description: "Raporlamak için giriş yapmalısınız." });
       return;
     }
-
-    const reason = window.prompt("Lütfen raporlama nedeninizi belirtin (Örn: Hakaret, Yanıltıcı içerik vb.):");
-    if (!reason) return;
-
-    try {
-      await reportReview(reviewId, reason);
-      toast.success("Rapor Edildi", { description: "İncelememiz için teşekkürler. Moderatör ekibimiz en kısa sürede kontrol edecektir." });
-    } catch (err) {
-      toast.error("Hata", { description: "Rapor gönderilirken bir hata oluştu." });
-    }
+    setSelectedReviewId(reviewId);
+    setReportOpen(true);
   };
 
   const loading = bizLoading;
@@ -591,6 +586,12 @@ const IsletmeDetailPage = () => {
         businessId={biz.id}
         businessName={biz.name}
         onReviewSubmitted={reloadBusiness}
+      />
+
+      <ReportModal 
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        reviewId={selectedReviewId || ""}
       />
     </div>
   );

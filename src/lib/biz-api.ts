@@ -259,9 +259,12 @@ export const markReviewHelpful = async (reviewId: string) => {
 };
 
 export const reportReview = async (reviewId: string, reason: string) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
   const { error } = await supabase.from("review_reports").insert({
     review_id: reviewId,
-    reason
+    reason,
+    reporter_id: user?.id
   });
   if (error) throw error;
   return true;
@@ -270,7 +273,13 @@ export const reportReview = async (reviewId: string, reason: string) => {
 export const getReportedReviews = async () => {
   const { data, error } = await supabase
     .from("review_reports")
-    .select("*, review:reviews(*)")
+    .select(`
+      *,
+      review:reviews(
+        *,
+        business:businesses(name, slug)
+      )
+    `)
     .eq("status", "pending")
     .order("created_at", { ascending: false });
   
