@@ -65,8 +65,16 @@ export function PublicAiAdvisor() {
 
       setMessages(prev => [...prev, { role: "assistant", content: response }]);
     } catch (error: any) {
-      toast.error("Bağlantı Hatası", { description: "Şu an cevap veremiyorum, lütfen tekrar dene." });
-      console.error(error);
+      console.error("Public AI Advisor Error:", error);
+      const errorMessage = error.message || "Bilinmeyen bir hata.";
+      toast.error("Bağlantı Hatası", { 
+        description: `Hata: ${errorMessage.substring(0, 50)}... Lütfen tekrar dene.` 
+      });
+      
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: `Üzgünüm, şu an bağlantı kuramıyorum (${errorMessage.substring(0, 30)}). Lütfen OpenAI API anahtarınızın geçerli ve bakiyeli olduğunu kontrol edin.` 
+      }]);
     } finally {
       setLoading(false);
     }
