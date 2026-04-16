@@ -6,10 +6,10 @@ interface AiMessage {
 }
 
 /**
- * Resilient AI call handler: Tries Supabase first, falls back to direct OpenAI call.
+ * Resilient AI call handler: Tries Supabase (Secure) first, falls back to local env (Secure local).
  */
 async function executeAiAction(messages: AiMessage[], systemPrompt: string, temperature: number = 0.7) {
-  // Method 1: Try Supabase Edge Function
+  // Method 1: Try Supabase Edge Function (Recommended & Secure)
   try {
     const { data, error } = await supabase.functions.invoke("ai-advisor", {
       body: { messages, systemPrompt, temperature }
@@ -18,11 +18,15 @@ async function executeAiAction(messages: AiMessage[], systemPrompt: string, temp
       return data.choices[0].message.content;
     }
   } catch (err) {
-    console.warn("Supabase failed, falling back to direct call...", err);
+    console.warn("Supabase Edge Function call failed...", err);
   }
 
-  // Method 2: Direct Fallback (Uses your key directly)
-  const apiKey = "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";
+  // Method 2: Local Env Fallback (Only works in Dev mode with .env file)
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error("AI bağlantısı kurulamadı. Lütfen Supabase Secrets veya .env ayarlarını kontrol edin.");
+  }
   
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
