@@ -646,28 +646,20 @@ const IsletmeDetailPage = () => {
 
   if (bizLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 flex items-center justify-center bg-surface">
-          <p className="text-muted-foreground">Yükleniyor...</p>
-        </main>
-        <Footer />
-      </div>
+      <main className="flex-1 flex items-center justify-center bg-surface py-20">
+        <p className="text-muted-foreground">Yükleniyor...</p>
+      </main>
     );
   }
 
   if (!biz) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 flex items-center justify-center bg-surface">
-          <div className="text-center">
-            <h2 className="text-xl font-heading text-foreground mb-2">İşletme bulunamadı</h2>
-            <p className="text-muted-foreground">Bu işletme mevcut değil veya kaldırılmış olabilir.</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <main className="flex-1 flex items-center justify-center bg-surface py-20">
+        <div className="text-center">
+          <h2 className="text-xl font-heading text-foreground mb-2">İşletme bulunamadı</h2>
+          <p className="text-muted-foreground">Bu işletme mevcut değil veya kaldırılmış olabilir.</p>
+        </div>
+      </main>
     );
   }
 
@@ -675,7 +667,7 @@ const IsletmeDetailPage = () => {
   const seoDesc = biz.description;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       <SEOHead 
         title={seoTitle}
         description={seoDesc}
@@ -683,7 +675,6 @@ const IsletmeDetailPage = () => {
         image={biz.image_url || biz.logo || getCategoryPlaceholder(biz.category)}
       />
       
-      <Header />
       <IsletmeDetailContent 
         biz={biz}
         loyaltyProgram={loyaltyProgram}
@@ -694,8 +685,7 @@ const IsletmeDetailPage = () => {
         onHelpful={handleHelpful}
         reloadBusiness={reloadBusiness}
       />
-      <Footer />
-    </div>
+    </>
   );
 };
 
