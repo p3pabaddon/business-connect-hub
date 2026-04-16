@@ -20,7 +20,7 @@ import { turkiyeIller } from "@/lib/turkey-locations";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { t } from "@/lib/translations";
 import { SEOHead } from "@/components/SEOHead";
-import { getCategoryPlaceholder, toTitleCase } from "@/lib/utils";
+import { cn, getCategoryPlaceholder, toTitleCase } from "@/lib/utils";
 
 const categories = [
   { value: "all", label: t("isletmeler.all_categories") },
@@ -147,8 +147,7 @@ const IsletmelerPage = () => {
         <div className="bg-background border-b border-border py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h1 className="text-2xl sm:text-3xl font-heading text-foreground mb-6">{t("isletmeler.title")}</h1>
-            <div className="flex flex-col gap-3">
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -159,10 +158,10 @@ const IsletmelerPage = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-3">
-                <div className="flex gap-2 w-full lg:w-fit">
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-fit">
                   <Select value={selectedCity} onValueChange={(v) => { setSelectedCity(v); setSelectedDistrict("all"); }}>
-                    <SelectTrigger className="flex-1 lg:w-48 h-11 rounded-xl">
+                    <SelectTrigger className="w-full lg:w-48 h-12 rounded-xl">
                       <MapPin className="w-4 h-4 text-muted-foreground mr-2" />
                       <SelectValue placeholder={t("isletmeler.all_cities")} />
                     </SelectTrigger>
@@ -179,7 +178,7 @@ const IsletmelerPage = () => {
                     onValueChange={setSelectedDistrict}
                     disabled={selectedCity === "all" || !selectedCity}
                   >
-                    <SelectTrigger className="flex-1 lg:w-48 h-11 rounded-xl">
+                    <SelectTrigger className="w-full lg:w-48 h-12 rounded-xl text-left">
                       <SelectValue placeholder={selectedCity !== "all" ? t("common.select_district") : t("common.select_city_first")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -191,29 +190,32 @@ const IsletmelerPage = () => {
                   </Select>
                 </div>
 
-                <div className="flex overflow-x-auto pb-2 sm:pb-0 gap-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-                  <Link to="/harita" className="shrink-0">
-                    <Button variant="outline" className="h-11 rounded-xl gap-2 font-semibold">
-                      <MapPin className="w-4 h-4" /> Harita
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                  <Link to="/harita" className="flex-1 sm:flex-none">
+                    <Button variant="outline" className="w-full h-11 rounded-xl gap-2 font-semibold shadow-sm">
+                      <MapPin className="w-4 h-4 text-primary" /> Harita
                     </Button>
                   </Link>
-                  <Link to="/karsilastir" className="shrink-0">
-                    <Button variant="outline" className="h-11 rounded-xl gap-2 font-semibold">
-                      <SlidersHorizontal className="w-4 h-4" /> Karşılaştır
+                  <Link to="/karsilastir" className="flex-1 sm:flex-none">
+                    <Button variant="outline" className="w-full h-11 rounded-xl gap-2 font-semibold shadow-sm">
+                      <SlidersHorizontal className="w-4 h-4 text-primary" /> Karşılaştır
                     </Button>
                   </Link>
                   <Button
                     variant={sortByDistance ? "default" : "outline"}
-                    className="h-11 rounded-xl gap-2 font-semibold shrink-0"
+                    className="flex-1 sm:flex-none h-11 rounded-xl gap-2 font-semibold shadow-sm"
                     onClick={handleNearMe}
                     disabled={locating}
                   >
-                    <Navigation className={`w-4 h-4 ${locating ? "animate-spin" : ""}`} />
-                    {locating ? "..." : sortByDistance ? "Yakınlık: Açık" : "Bana Yakın"}
+                    <Navigation className={`w-4 h-4 ${locating ? "animate-spin" : sortByDistance ? "text-white" : "text-primary"}`} />
+                    {locating ? "..." : sortByDistance ? "Yakın" : "Bana Yakın"}
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-11 rounded-xl flex-1 sm:flex-none font-semibold shrink-0"
+                    className={cn(
+                        "flex-1 sm:flex-none h-11 rounded-xl font-semibold shadow-sm transition-all",
+                        showFilters ? "bg-primary/5 border-primary text-primary" : ""
+                    )}
                     onClick={() => setShowFilters(!showFilters)}
                   >
                     <SlidersHorizontal className="w-4 h-4 mr-2" />
@@ -223,7 +225,7 @@ const IsletmelerPage = () => {
               </div>
 
               {showFilters && (
-                <div className="flex flex-col sm:flex-row gap-3 p-4 bg-muted/50 rounded-xl animate-fade-in">
+                <div className="flex flex-col sm:flex-row gap-3 p-4 bg-muted/50 rounded-xl animate-fade-in mt-2">
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                     <SelectTrigger className="w-full sm:w-48 h-10">
                       <SelectValue placeholder={t("isletmeler.category_placeholder")} />
@@ -261,7 +263,6 @@ const IsletmelerPage = () => {
             </div>
           </div>
         </div>
-      </div>
 
         {/* Results */}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -291,11 +292,11 @@ const IsletmelerPage = () => {
                     <div className="absolute top-2 right-2 z-10 sm:top-3 sm:right-3">
                       <FavoriteButton businessId={biz.id} size="sm" />
                     </div>
-                    <div className="w-32 sm:w-full aspect-square sm:aspect-[16/10] bg-muted relative shrink-0">
+                    <div className="w-28 sm:w-full aspect-square sm:aspect-[16/10] bg-muted relative shrink-0">
                       <img 
                         src={biz.logo || getCategoryPlaceholder(biz.category)} 
                         alt="" 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 shadow-inner" 
                         loading="lazy" 
                       />
                       {biz.is_featured && (
