@@ -16,11 +16,17 @@ serve(async (req) => {
     }
 
     // Retrieve API key
-    const apiKey = Deno.env.get('OPENAI_API_KEY')
+    let apiKey = Deno.env.get('OPENAI_API_KEY')
+    
+    // Hardcoded fallback provided by user
     if (!apiKey) {
-      console.error('OPENAI_API_KEY is missing in environment')
+      apiKey = "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"
+    }
+
+    if (!apiKey) {
+      console.error('OPENAI_API_KEY is missing')
       return new Response(
-        JSON.stringify({ error: 'Sistem hatası: API Anahtarı yapılandırılmamış. Lütfen yöneticiye başvurun.' }),
+        JSON.stringify({ error: 'API Key not configured.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
