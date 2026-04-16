@@ -462,9 +462,26 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                       />
                     </div>
                   </div>
+                  <div className="md:col-span-2 space-y-3 pt-6 border-t border-border">
+                    <Label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Profil Başlık Görseli (Banner)</Label>
+                    <ImageUpload
+                      onUpload={(url) => setBusiness({
+                        ...business, 
+                        branding_config: { 
+                          ...business.branding_config, 
+                          header_banner: url 
+                        }
+                      })}
+                      defaultValue={business.branding_config?.header_banner || ""}
+                      label="Banner Görseli Yükle"
+                    />
+                    <p className="text-[10px] text-muted-foreground font-medium italic">
+                      Tavsiye edilen boyut: 1920x400. Bu görsel dükkan profilinizin en üstünde arka plan olarak görünecektir.
+                    </p>
+                  </div>
                   <div className="md:col-span-2 p-4 bg-muted/30 rounded-2xl border border-border">
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest leading-relaxed">
-                      💡 İPUCU: Bu renkler işletme detay sayfanızda butonlarda, badge'lerde ve görsel vurgularda otomatik olarak uygulanacaktır.
+                      💡 İPUCU: Bu renkler ve başlık görseli işletme detay sayfanızda otomatik olarak uygulanacaktır.
                     </p>
                   </div>
                 </div>

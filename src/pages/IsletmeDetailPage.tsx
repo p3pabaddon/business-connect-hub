@@ -3,8 +3,8 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/lib/translations";
-import { Star, MapPin, Clock, CheckCircle, Phone, Calendar, MessageSquare, Gift, ArrowRight, Reply, ThumbsUp, Flag, Briefcase } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { Star, MapPin, Clock, CheckCircle, Phone, Calendar, MessageSquare, Gift, ArrowRight, Reply, ThumbsUp, Flag, Briefcase, Edit } from "lucide-react";
+import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BookingModal } from "@/components/BookingModal";
@@ -219,60 +219,109 @@ const IsletmeDetailPage = () => {
       <Header />
       <main className="flex-1 bg-surface">
         {/* Hero */}
-        <div className="bg-gradient-to-br from-primary/10 to-accent/10 py-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 border-b border-border/10 pb-6 mb-6">
+        <div 
+          className={cn(
+            "relative py-12 transition-all duration-500",
+            biz.branding_config?.header_banner 
+              ? "min-h-[300px] flex items-end" 
+              : "bg-gradient-to-br from-primary/10 to-accent/10"
+          )}
+          style={biz.branding_config?.header_banner ? {
+            backgroundImage: `linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%), url(${biz.branding_config.header_banner})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          } : {}}
+        >
+          {biz.branding_config?.header_banner && (
+            <div className="absolute inset-0 bg-black/20" />
+          )}
+
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full relative z-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div className="flex-1">
+                <div className="flex flex-row items-center gap-4 sm:gap-6 border-b border-white/10 pb-6 mb-6">
                   {biz.logo ? (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden border-2 border-white shadow-xl bg-white shrink-0">
+                    <div className={cn(
+                      "w-20 h-20 sm:w-28 sm:h-28 rounded-3xl overflow-hidden border-4 shadow-2xl bg-white shrink-0 transition-transform hover:scale-105",
+                      biz.branding_config?.header_banner ? "border-white/20" : "border-white"
+                    )}>
                       <img src={biz.logo} alt={biz.name} className="w-full h-full object-contain p-2" />
                     </div>
                   ) : (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-primary/10 flex items-center justify-center shrink-0 border-2 border-white/50 shadow-lg">
+                    <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-3xl bg-primary/10 flex items-center justify-center shrink-0 border-4 border-white/50 shadow-lg">
                       <Briefcase className="w-10 h-10 text-primary opacity-40" />
                     </div>
                   )}
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary">{toTitleCase(biz.category)}</Badge>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <Badge variant="secondary" className="bg-white/10 text-white backdrop-blur-md border-white/20">
+                        {toTitleCase(biz.category)}
+                      </Badge>
                       {biz.is_verified && (
-                        <Badge className="bg-accent/10 text-accent border-accent/20">
+                        <Badge className="bg-accent text-white border-accent/20">
                           <CheckCircle className="w-3 h-3 mr-1" /> Onaylı
                         </Badge>
                       )}
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-heading text-foreground mb-1">{biz.name}</h1>
+                    <h1 className={cn(
+                      "text-3xl sm:text-5xl font-heading font-black mb-1 tracking-tight",
+                      biz.branding_config?.header_banner ? "text-white drop-shadow-lg" : "text-foreground"
+                    )}>
+                      {biz.name}
+                    </h1>
                     <div className="flex items-center gap-1.5">
                       <Star className="w-4 h-4 text-warning fill-warning" />
-                      <span className="font-bold text-foreground text-lg">{biz.rating}</span>
-                      <span className="text-muted-foreground text-sm">({biz.review_count} yorum)</span>
+                      <span className={cn(
+                        "font-bold text-lg",
+                        biz.branding_config?.header_banner ? "text-white" : "text-foreground"
+                      )}>{biz.rating}</span>
+                      <span className={cn(
+                        "text-sm font-medium",
+                        biz.branding_config?.header_banner ? "text-white/70" : "text-muted-foreground"
+                      )}>({biz.review_count} yorum)</span>
                     </div>
                   </div>
                 </div>
-                <p className="text-muted-foreground mb-3">{biz.description}</p>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-warning fill-warning" />
-                    <span className="font-medium text-foreground">{biz.rating}</span>
-                    <span>({biz.review_count} yorum)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
+                
+                <p className={cn(
+                  "max-w-2xl text-base leading-relaxed mb-6",
+                  biz.branding_config?.header_banner ? "text-white/80" : "text-muted-foreground"
+                )}>
+                  {biz.description}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                  <div className={cn(
+                    "flex items-center gap-1.5",
+                    biz.branding_config?.header_banner ? "text-white/70" : "text-muted-foreground"
+                  )}>
                     <MapPin className="w-4 h-4" />
                     <span>{biz.district}, {biz.city}</span>
                   </div>
                   {biz.phone && (
-                    <div className="flex items-center gap-1">
+                    <div className={cn(
+                      "flex items-center gap-1.5",
+                      biz.branding_config?.header_banner ? "text-white/70" : "text-muted-foreground"
+                    )}>
                       <Phone className="w-4 h-4" />
                       <span>{biz.phone}</span>
                     </div>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex flex-wrap items-center gap-3">
+                {user?.id === biz.owner_id && biz.branding_config?.custom_colors && (
+                  <Link to="/isletmem">
+                    <Button variant="outline" size="lg" className="rounded-2xl bg-white/10 text-white border-white/20 backdrop-blur-md hover:bg-white/20 border-white/30 transition-all font-bold group">
+                      <Edit className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
+                      Sayfayı Düzenle
+                    </Button>
+                  </Link>
+                )}
                 <FavoriteButton businessId={biz.id} size="sm" />
                 <ShareButtons title={biz.name} />
-                <Button size="lg" onClick={() => setBookingOpen(true)}>
+                <Button size="lg" className="rounded-2xl shadow-xl shadow-primary/20 h-12 px-8 font-bold text-base" onClick={() => setBookingOpen(true)}>
                   <Calendar className="w-4 h-4 mr-2" />
                   Randevu Al
                 </Button>
