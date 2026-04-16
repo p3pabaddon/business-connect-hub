@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { replyToReview } from "@/lib/biz-api";
+import { replyToReview, markReviewHelpful, reportReview } from "@/lib/biz-api";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -39,6 +40,28 @@ export function BizReviews({ reviews, onRefresh }: Props) {
       alert("Yorum gönderilirken hata oluştu: " + ((error as any)?.message || "Bilinmeyen hata"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleHelpful = async (reviewId: string) => {
+    try {
+      await markReviewHelpful(reviewId);
+      toast.success("Yorum yararlı olarak işaretlendi.");
+      onRefresh();
+    } catch (error) {
+      toast.error("İşlem başarısız.");
+    }
+  };
+
+  const handleReport = async (reviewId: string) => {
+    const reason = window.prompt("Rapor etme nedeniniz nedir? (Kötüye kullanım, spam, argo vb.)");
+    if (!reason) return;
+    
+    try {
+      await reportReview(reviewId, reason);
+      toast.success("Yorum başarıyla raporlandı. Yönetim ekibi inceleyecektir.");
+    } catch (error) {
+      toast.error("Rapor gönderilemedi.");
     }
   };
 
@@ -135,8 +158,18 @@ export function BizReviews({ reviews, onRefresh }: Props) {
 
                   <div className="flex items-center justify-between pt-4 border-t border-border/50">
                      <div className="flex gap-4">
-                        <button className="flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-all uppercase tracking-tight"><ThumbsUp className="w-4 h-4" /> YARARLI</button>
-                        <button className="flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-destructive transition-all uppercase tracking-tight"><ShieldAlert className="w-4 h-4" /> RAPOR ET</button>
+                        <button 
+                          onClick={() => handleHelpful(rev.id)}
+                          className="flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-all uppercase tracking-tight"
+                        >
+                          <ThumbsUp className="w-4 h-4" /> YARARLI {rev.helpful_count > 0 && `(${rev.helpful_count})`}
+                        </button>
+                        <button 
+                          onClick={() => handleReport(rev.id)}
+                          className="flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-destructive transition-all uppercase tracking-tight"
+                        >
+                          <ShieldAlert className="w-4 h-4" /> RAPOR ET
+                        </button>
                      </div>
                      
                      {replyId === (rev.id || i.toString()) ? (
