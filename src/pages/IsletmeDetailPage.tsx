@@ -120,9 +120,9 @@ export const IsletmeDetailContent = ({
       {/* Hero */}
       <div 
         className={cn(
-          "relative py-12 transition-all duration-500",
+          "relative py-8 sm:py-12 transition-all duration-500",
           branding.header_banner 
-            ? "min-h-[300px] flex items-end" 
+            ? "min-h-[250px] sm:min-h-[300px] flex items-end" 
             : "bg-gradient-to-br from-primary/10 to-accent/10"
         )}
         style={branding.header_banner ? {
@@ -138,7 +138,7 @@ export const IsletmeDetailContent = ({
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex-1">
-              <div className="flex flex-row items-center gap-4 sm:gap-6 border-b border-white/10 pb-6 mb-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 border-b border-white/10 pb-6 mb-6">
                 {biz.logo ? (
                   <div className={cn(
                     "w-20 h-20 sm:w-28 sm:h-28 rounded-3xl overflow-hidden border-4 shadow-2xl bg-white shrink-0 transition-transform hover:scale-105",
@@ -163,7 +163,7 @@ export const IsletmeDetailContent = ({
                     )}
                   </div>
                   <h1 className={cn(
-                    "text-3xl sm:text-5xl font-heading font-black mb-1 tracking-tight",
+                    "text-2xl sm:text-5xl font-heading font-black mb-1 tracking-tight",
                     branding.header_banner ? "text-white drop-shadow-lg" : "text-foreground"
                   )}>
                     {biz.name}
@@ -183,7 +183,7 @@ export const IsletmeDetailContent = ({
               </div>
               
               <p className={cn(
-                "max-w-2xl text-base leading-relaxed mb-6",
+                "max-w-2xl text-sm sm:text-base leading-relaxed mb-6",
                 branding.header_banner ? "text-white/80" : "text-muted-foreground"
               )}>
                 {biz.description}
@@ -209,22 +209,22 @@ export const IsletmeDetailContent = ({
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {!isPreview && user?.id === biz.owner_id && (
                 <Link to="/isletmem">
-                  <Button variant="outline" size="lg" className="rounded-2xl bg-white/10 text-white border-white/20 backdrop-blur-md hover:bg-white/20 border-white/30 transition-all font-bold group">
-                    <Edit className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
-                    Yönetim Paneli
+                  <Button variant="outline" size="sm" className="rounded-xl bg-white/10 text-white border-white/20 backdrop-blur-md hover:bg-white/20 border-white/30 transition-all font-bold group px-3">
+                    <Edit className="w-3 h-3 sm:mr-2 group-hover:rotate-12 transition-transform" />
+                    <span className="text-[10px] sm:text-sm">Yönetim Paneli</span>
                   </Button>
                 </Link>
               )}
               {!isPreview && (
-                <>
+                <div className="flex items-center gap-2">
                   <FavoriteButton businessId={biz.id} size="sm" />
                   <ShareButtons title={biz.name} />
-                </>
+                </div>
               )}
-              <Button size="lg" className="rounded-2xl shadow-xl shadow-primary/20 h-12 px-8 font-bold text-base" onClick={() => !isPreview && setBookingOpen(true)}>
+              <Button size="lg" className="flex-1 sm:flex-none rounded-xl sm:rounded-2xl shadow-xl shadow-primary/20 h-10 sm:h-12 px-4 sm:px-8 font-bold text-sm sm:text-base" onClick={() => !isPreview && setBookingOpen(true)}>
                 <Calendar className="w-4 h-4 mr-2" />
                 Randevu Al
               </Button>
@@ -235,23 +235,23 @@ export const IsletmeDetailContent = ({
 
       {/* Portfolio / Gallery */}
       {portfolio && portfolio.length > 0 && (
-        <div id="portfolio" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center justify-between mb-8">
+        <div id="portfolio" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
-              <h2 className="text-2xl font-black text-foreground uppercase tracking-tight italic flex items-center gap-2">
-                 <Sparkles className="w-6 h-6 text-accent" /> Çalışmalarımız
+              <h2 className="text-xl sm:text-2xl font-black text-foreground uppercase tracking-tight italic flex items-center gap-2">
+                 <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-accent" /> Çalışmalarımız
               </h2>
-              <p className="text-muted-foreground font-medium mt-1">
+              <p className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">
                 En iyi sonuçlarımızı ve referanslarımızı inceleyin
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {portfolio.slice(0, 8).map((item: any, i: number) => (
               <div 
                 key={item.id} 
                 className={cn(
-                  "group relative aspect-[4/5] rounded-[2rem] overflow-hidden border border-border bg-card shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500",
+                  "group relative aspect-[4/5] rounded-[1.2rem] sm:rounded-[2rem] overflow-hidden border border-border bg-card shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500",
                   i % 4 === 1 && "lg:mt-8",
                   i % 4 === 3 && "lg:mt-4"
                 )}
@@ -281,11 +281,11 @@ export const IsletmeDetailContent = ({
                       <Star className="w-4 h-4 text-accent fill-accent" />
                       <span className="text-xs font-bold text-accent uppercase tracking-widest">Müdavim Programı</span>
                    </div>
-                   <h2 className="text-3xl lg:text-5xl font-heading font-black text-white leading-tight">
+                   <h2 className="text-2xl sm:text-3xl lg:text-5xl font-heading font-black text-white leading-tight">
                       {biz.name} Müdavimi Olun, <br />
                       <span className="text-accent italic">{loyaltyProgram.reward_title}</span> Kazanın!
                    </h2>
-                   <p className="text-slate-400 text-lg leading-relaxed max-w-xl">
+                   <p className="text-slate-400 text-sm sm:text-lg leading-relaxed max-w-xl">
                       Sizi daha sık görmek istiyoruz! Bu işletmede her {loyaltyProgram.target_stamps} randevunuzda bir damga kazanırsınız. 
                    </p>
                    
@@ -327,7 +327,7 @@ export const IsletmeDetailContent = ({
                 {services.map((service: any) => (
                   <div
                     key={service.id}
-                    className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between hover:border-accent/30 transition-all hover:shadow-md"
+                    className="bg-card border border-border rounded-xl sm:rounded-2xl p-4 sm:p-5 flex items-center justify-between hover:border-accent/30 transition-all hover:shadow-md"
                   >
                     <div>
                       <h3 className="font-bold text-foreground">{service.name}</h3>
@@ -354,7 +354,7 @@ export const IsletmeDetailContent = ({
                 <h2 className="text-xl font-heading text-foreground mb-4 font-black uppercase tracking-tight">Ekibimiz</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {biz.staff.map((member: any) => (
-                    <div key={member.id} className="bg-card border border-border rounded-2xl p-6 text-center shadow-sm">
+                    <div key={member.id} className="bg-card border border-border rounded-xl sm:rounded-2xl p-5 sm:p-6 text-center shadow-sm">
                       <div className="w-20 h-20 bg-accent/10 rounded-[2rem] flex items-center justify-center mx-auto mb-4 border border-accent/20 shadow-inner">
                         <span className="text-accent font-heading text-2xl font-black">
                           {member.name.split(" ").map((n: string) => n[0]).join("")}
@@ -407,7 +407,7 @@ export const IsletmeDetailContent = ({
               {reviews.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {reviews.map((review: any) => (
-                    <div key={review.id} className="bg-card border border-border rounded-3xl p-6 hover:border-primary/30 transition-all shadow-sm">
+                    <div key={review.id} className="bg-card border border-border rounded-2xl sm:rounded-3xl p-5 sm:p-6 hover:border-primary/30 transition-all shadow-sm">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-primary/5 rounded-2xl flex items-center justify-center border border-primary/20">
@@ -480,7 +480,7 @@ export const IsletmeDetailContent = ({
           {/* Sidebar */}
           <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
 
-            <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
+            <div className="bg-card border border-border rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm">
               <h3 className="font-black text-foreground uppercase tracking-tight mb-6 flex items-center gap-2">
                 <Clock className="w-5 h-5 text-primary/60" /> Mesai Saatleri
               </h3>
@@ -521,7 +521,7 @@ export const IsletmeDetailContent = ({
               </Button>
             </div>
 
-            <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
+            <div className="bg-card border border-border rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm">
               <h3 className="font-black text-foreground uppercase tracking-tight mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-primary/60" /> Adres & Konum
               </h3>

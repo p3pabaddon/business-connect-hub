@@ -90,32 +90,34 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
   return (
     <div className="flex flex-col h-full bg-surface">
       {/* Top Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur-md px-8 py-4 flex items-center justify-between sticky top-0 z-20">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-            <Layout className="w-6 h-6 text-primary" />
+      <div className="border-b border-border bg-card/50 backdrop-blur-md px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between sticky top-0 z-20">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+            <Layout className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           </div>
-          <div>
-            <h1 className="text-xl font-heading font-black tracking-tight uppercase">Sayfa Tasarım Stüdyosu</h1>
-            <p className="text-xs text-muted-foreground font-medium italic">İşletmenizin dijital vitrinini özelleştirin</p>
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-xl font-heading font-black tracking-tight uppercase truncate">Stüdyo</h1>
+            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium italic truncate">Sayfayı Özelleştir</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button 
             variant="outline" 
-            className="rounded-xl font-bold border-border"
+            size="sm"
+            className="rounded-xl font-bold border-border h-9 sm:h-10 px-3 sm:px-4"
             onClick={() => setShowPreview(!showPreview)}
           >
-            {showPreview ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
-            {showPreview ? "Editör" : "Önizleme"} 
+            {showPreview ? <EyeOff className="w-4 h-4 sm:mr-2" /> : <Eye className="w-4 h-4 sm:mr-2" />}
+            <span className="hidden sm:inline">{showPreview ? "Editör" : "Önizleme"}</span>
           </Button>
           <Button 
-            className="rounded-xl font-black bg-primary px-8 shadow-xl shadow-primary/20"
+            size="sm"
+            className="rounded-xl font-black bg-primary px-4 sm:px-8 h-9 sm:h-10 shadow-xl shadow-primary/20"
             disabled={isSaving}
             onClick={handleSave}
           >
-            {isSaving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            YAYINLA
+            {isSaving ? <RefreshCw className="w-4 h-4 sm:mr-2 animate-spin" /> : <Save className="w-4 h-4 sm:mr-2" />}
+            <span>{isSaving ? "" : "YAYINLA"}</span>
           </Button>
         </div>
       </div>
@@ -123,26 +125,26 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Editor Panel */}
         <div className={cn(
-          "flex-1 overflow-y-auto p-8 custom-scrollbar transition-all duration-500",
+          "flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar transition-all duration-500",
           showPreview ? "max-w-0 p-0 opacity-0 overflow-hidden" : "max-w-full opacity-100"
         )}>
           <div className="max-w-3xl mx-auto space-y-12">
             
             {/* AI Branding Section */}
-            <div className="space-y-2 mb-8">
-              <h2 className="text-3xl font-heading font-black tracking-tight uppercase border-b-4 border-primary w-fit pb-1">Sayfa Tasarımı</h2>
-              <p className="text-muted-foreground font-medium italic">İşletmenizin karakterini yansıtan renkleri ve görselleri seçin.</p>
+            <div className="space-y-2 mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-heading font-black tracking-tight uppercase border-b-4 border-primary w-fit pb-1">Sayfa Tasarımı</h2>
+              <p className="text-sm sm:text-base text-muted-foreground font-medium italic">İşletmenizin karakterini yansıtan renkleri ve görselleri seçin.</p>
             </div>
 
             {/* Basic Info */}
             <div className="space-y-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
-                  <span className="font-black text-xs">01</span>
+              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-muted rounded-lg flex items-center justify-center">
+                  <span className="font-black text-[10px] sm:text-xs">01</span>
                 </div>
-                <h3 className="text-lg font-black uppercase tracking-tight">Temel Bilgiler</h3>
+                <h3 className="text-base sm:text-lg font-black uppercase tracking-tight">Temel Bilgiler</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 bg-card border border-border rounded-[2rem] shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 p-5 sm:p-8 bg-card border border-border rounded-[1.5rem] sm:rounded-[2rem] shadow-sm">
                 <div className="space-y-2">
                   <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground ml-1">İşletme Adı</Label>
                   <Input 
@@ -169,14 +171,14 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
 
             {/* Branding Colors */}
             <div className="space-y-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
-                  <span className="font-black text-xs">02</span>
+              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-muted rounded-lg flex items-center justify-center">
+                  <span className="font-black text-[10px] sm:text-xs">02</span>
                 </div>
-                <h3 className="text-lg font-black uppercase tracking-tight">Görsel Kimlik & Renkler</h3>
+                <h3 className="text-base sm:text-lg font-black uppercase tracking-tight">Görsel Kimlik & Renkler</h3>
               </div>
               
-              <div className="space-y-8 p-8 bg-card border border-border rounded-[2rem] shadow-sm">
+              <div className="space-y-6 sm:space-y-8 p-5 sm:p-8 bg-card border border-border rounded-[1.5rem] sm:rounded-[2rem] shadow-sm">
                 {/* Manual Pickers */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
@@ -261,13 +263,13 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
 
             {/* Visuals */}
             <div className="space-y-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
-                  <span className="font-black text-xs">03</span>
+              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-muted rounded-lg flex items-center justify-center">
+                  <span className="font-black text-[10px] sm:text-xs">03</span>
                 </div>
-                <h3 className="text-lg font-black uppercase tracking-tight">Görsel Varlıklar</h3>
+                <h3 className="text-base sm:text-lg font-black uppercase tracking-tight">Görsel Varlıklar</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 bg-card border border-border rounded-[2rem] shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 p-5 sm:p-8 bg-card border border-border rounded-[1.5rem] sm:rounded-[2rem] shadow-sm">
                 <div className="space-y-4">
                    <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground ml-1">Logo</Label>
                    <ImageUpload 
