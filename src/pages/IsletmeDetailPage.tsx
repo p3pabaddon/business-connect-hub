@@ -61,6 +61,20 @@ export const IsletmeDetailContent = ({
     ? JSON.parse(biz.working_hours) 
     : (biz.working_hours || {});
 
+  const mockServices = [
+    { id: "m1", name: "Örnek Hizmet 1", duration: 45, price: 250 },
+    { id: "m2", name: "Örnek Hizmet 2", duration: 60, price: 450 },
+    { id: "m3", name: "Örnek Hizmet 3", duration: 30, price: 150 },
+  ];
+
+  const mockReviews = [
+    { id: "r1", customer_name: "Mert A.", rating: 5, comment: "Harika bir deneyim! Atmosfer çok şık ve hizmet kalitesi üst düzey. Herkese tavsiye ederim.", helpful_count: 12 },
+    { id: "r2", customer_name: "Selin K.", rating: 5, comment: "İşini çok profesyonelce yapıyorlar. Beklediğimden çok daha iyi sonuç aldım.", helpful_count: 8 },
+  ];
+
+  const services = isPreview && (!biz.services || biz.services.length === 0) ? mockServices : (biz.services || []);
+  const reviews = isPreview && (!biz.reviews || biz.reviews.length === 0) ? mockReviews : (biz.reviews || []);
+
   const handleHelpfulClick = (id: string) => {
     if (markedHelpful.has(id)) return;
     setMarkedHelpful(prev => new Set([...prev, id]));
@@ -302,7 +316,7 @@ export const IsletmeDetailContent = ({
             <div>
               <h2 className="text-xl font-heading text-foreground mb-4 font-black uppercase tracking-tight">Hizmetler</h2>
               <div className="space-y-3">
-                {(biz.services || []).map((service: any) => (
+                {services.map((service: any) => (
                   <div
                     key={service.id}
                     className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between hover:border-accent/30 transition-all hover:shadow-md"
@@ -320,7 +334,7 @@ export const IsletmeDetailContent = ({
                     </div>
                   </div>
                 ))}
-                {(!biz.services || biz.services.length === 0) && (
+                {services.length === 0 && (
                   <p className="text-muted-foreground text-sm italic">Henüz hizmet eklenmemiş.</p>
                 )}
               </div>
@@ -378,13 +392,13 @@ export const IsletmeDetailContent = ({
                 )}
               </div>
 
-              {biz.reviews && biz.reviews.length > 0 && (
-                <ReviewAISummary reviews={biz.reviews} />
+              {reviews.length > 0 && (
+                <ReviewAISummary reviews={reviews} />
               )}
 
-              {biz.reviews && biz.reviews.length > 0 ? (
+              {reviews.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {biz.reviews.map((review: any) => (
+                  {reviews.map((review: any) => (
                     <div key={review.id} className="bg-card border border-border rounded-3xl p-6 hover:border-primary/30 transition-all shadow-sm">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
