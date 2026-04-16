@@ -456,10 +456,12 @@ const IsletmeDetailPage = () => {
                               <span className="font-semibold text-foreground block">{review.customer_name}</span>
                               <div className="flex items-center gap-0.5 mt-1">
                                 {Array.from({ length: 5 }).map((_, i) => (
-                                  <Star key={i} className={cn(
-                                    "w-3 h-3",
-                                    i < review.rating ? "text-warning fill-warning" : "text-muted/30"
-                                  )} />
+                                  <Star key={i} 
+                                    fill={i < review.rating ? "currentColor" : "none"}
+                                    className={cn(
+                                      "w-3 h-3",
+                                      i < review.rating ? "text-warning" : "text-muted/30"
+                                    )} />
                                 ))}
                               </div>
                             </div>

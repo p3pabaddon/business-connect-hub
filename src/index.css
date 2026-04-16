@@ -41,6 +41,9 @@
 
     --surface: 210 40% 98%;
     --surface-alt: 213 27% 95%;
+
+    --warning: 45 93% 47%; /* Yellow/Amber 500 equivalent */
+    --warning-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -65,6 +68,8 @@
     --ring: 184 100% 21%;
     --surface: 222 47% 4%;
     --surface-alt: 222 47% 6%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 100%;
   }
 }
 

@@ -94,10 +94,12 @@ export const ReviewReports = () => {
                     <span className="text-xs font-bold text-foreground uppercase tracking-tighter">Orijinal Yorum</span>
                     <div className="flex items-center gap-0.5 ml-2">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} className={cn(
-                            "w-2.5 h-2.5",
-                            i < report.review?.rating ? "text-warning fill-warning" : "text-muted/30"
-                          )} />
+                          <Star key={i} 
+                            fill={i < report.review?.rating ? "currentColor" : "none"}
+                            className={cn(
+                              "w-2.5 h-2.5",
+                              i < report.review?.rating ? "text-warning" : "text-muted/30"
+                            )} />
                         ))}
                     </div>
                   </div>

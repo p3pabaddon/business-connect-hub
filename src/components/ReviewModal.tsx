@@ -98,9 +98,10 @@ export function ReviewModal({ open, onOpenChange, businessId, businessName, appo
                   className="p-1 transition-transform hover:scale-110"
                 >
                   <Star
+                    fill={star <= (hoverRating || rating) ? "currentColor" : "none"}
                     className={`w-8 h-8 ${
                       star <= (hoverRating || rating)
-                        ? "text-warning fill-warning"
+                        ? "text-warning"
                         : "text-muted-foreground/30"
                     }`}
                   />
