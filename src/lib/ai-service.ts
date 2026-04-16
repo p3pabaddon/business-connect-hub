@@ -45,14 +45,23 @@ export async function askAiAdvisor(
 
   if (error) {
     console.error("AI Advisor Proxy Error:", error);
-    throw new Error(error.message || "Edge Function çağrısı başarısız oldu.");
+    // Try to get specific error from function body if available
+    let errorMessage = "Bağlantı hatası oluştu.";
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'object' && error !== null && 'message' in error) {
+      errorMessage = (error as any).message;
+    }
+
+    throw new Error(errorMessage);
   }
 
-  if (data.error) {
-    throw new Error(data.error);
+  if (!data || data.error) {
+    throw new Error(data?.error || "AI servisi yanıt vermedi.");
   }
 
-  return data.choices[0].message.content;
+  return data.choices?.[0]?.message?.content || "Üzgünüm, şu an yanıt oluşturamıyorum.";
 }
 
 export async function askPublicAiAdvisor(
@@ -89,12 +98,15 @@ export async function askPublicAiAdvisor(
 
   if (error) {
     console.error("Public AI Advisor Error:", error);
-    throw new Error(error.message || "Edge Function çağrısı başarısız oldu.");
+    let errorMessage = "Bağlantı hatası oluştu.";
+    if (error instanceof Error) errorMessage = error.message;
+    else if (typeof error === 'object' && error !== null && 'message' in error) errorMessage = (error as any).message;
+    throw new Error(errorMessage);
   }
 
-  if (data.error) throw new Error(data.error);
+  if (!data || data.error) throw new Error(data?.error || "AI servisi yanıt vermedi.");
 
-  return data.choices[0].message.content;
+  return data.choices?.[0]?.message?.content || "Üzgünüm, şu an yanıt oluşturamıyorum.";
 }
 
 export async function generateBusinessStrategy(context: string) {
@@ -110,10 +122,13 @@ export async function generateBusinessStrategy(context: string) {
 
   if (error) {
     console.error("Strategy Gen Error:", error);
-    throw new Error(error.message || "Edge Function çağrısı başarısız oldu.");
+    let errorMessage = "Bağlantı hatası oluştu.";
+    if (error instanceof Error) errorMessage = error.message;
+    else if (typeof error === 'object' && error !== null && 'message' in error) errorMessage = (error as any).message;
+    throw new Error(errorMessage);
   }
 
-  if (data.error) throw new Error(data.error);
+  if (!data || data.error) throw new Error(data?.error || "AI servisi yanıt vermedi.");
 
-  return data.choices[0].message.content;
+  return data.choices?.[0]?.message?.content || "Strateji oluşturulamadı.";
 }

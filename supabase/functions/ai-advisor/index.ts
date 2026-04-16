@@ -2,18 +2,30 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { corsHeaders } from '../_shared/cors.ts'
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { messages, systemPrompt, temperature } = await req.json()
+    const body = await req.json()
+    const { messages, systemPrompt, temperature } = body
 
-    // Retrieve API key securely from Supabase infrastructure
+    if (!messages || !Array.isArray(messages)) {
+      throw new Error('Geçersiz mesaj formatı')
+    }
+
+    // Retrieve API key
     const apiKey = Deno.env.get('OPENAI_API_KEY')
     if (!apiKey) {
-      throw new Error('Supabase vault üzerinde OPENAI_API_KEY bulunamadı!')
+      console.error('OPENAI_API_KEY is missing in environment')
+      return new Response(
+        JSON.stringify({ error: 'Sistem hatası: API Anahtarı yapılandırılmamış. Lütfen yöneticiye başvurun.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      )
     }
+
+    console.log(`Calling OpenAI for advisor... (${messages.length} messages)`)
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -28,13 +40,15 @@ serve(async (req) => {
           ...messages
         ],
         temperature: temperature || 0.7,
+        max_tokens: 1000,
       }),
     });
 
     const data = await response.json();
     
     if (!response.ok) {
-       throw new Error(data.error?.message || 'Error connecting to OpenAI')
+       console.error('OpenAI API Error:', data.error)
+       throw new Error(data.error?.message || 'OpenAI bağlantı hatası oluştu.')
     }
 
     return new Response(JSON.stringify(data), {
@@ -42,7 +56,11 @@ serve(async (req) => {
       status: 200,
     })
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Edge Function Error:', error.message)
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      details: 'Daha fazla bilgi için Edge Function loglarını kontrol edin.'
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
     })
