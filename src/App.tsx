@@ -16,6 +16,7 @@ import { QuickBookWidget } from "./components/QuickBookWidget";
 import { MobileNav } from "./components/layout/MobileNav";
 import CookieConsent from "./components/CookieConsent";
 import { PWAUpdateHandler } from "./components/PWAUpdateHandler";
+import { A2HSPrompt } from "./components/A2HSPrompt";
 
 // Lazy Pages
 const Index = lazy(() => import("./pages/Index"));
@@ -37,6 +38,11 @@ const HqLoginPage = lazy(() => import("./pages/HqLoginPage"));
 const GoogleOAuthCallback = lazy(() => import("./pages/GoogleOAuthCallback"));
 const KarsilastirmaPage = lazy(() => import("./pages/KarsilastirmaPage"));
 const HaritaPage = lazy(() => import("./pages/HaritaPage"));
+const Discover = lazy(() => import("./pages/Discover"));
+const BlogPage = lazy(() => import("./pages/BlogPage"));
+const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
+const StyleAdvisor = lazy(() => import("./pages/StyleAdvisor"));
+const CityGuide = lazy(() => import("./pages/CityGuide"));
 const KvkkPage = lazy(() => import("./pages/KvkkPage"));
 const KullanimKosullari = lazy(() => import("./pages/KullanimKosullari"));
 const GizlilikPolitikasi = lazy(() => import("./pages/GizlilikPolitikasi"));
@@ -60,6 +66,7 @@ const App = () => (
           <Sonner position="top-right" expand={true} richColors duration={2500} />
           <BrowserRouter>
             <PWAUpdateHandler />
+            <A2HSPrompt />
             <TrafficTracker />
             <QuickBookWidget />
             <div className="min-h-screen">
@@ -80,6 +87,11 @@ const App = () => (
                   <Route path="/hq-gate-auth-v2-j5l1z8y9w" element={<HqLoginPage />} />
                   <Route path="/karsilastir" element={<KarsilastirmaPage />} />
                   <Route path="/harita" element={<HaritaPage />} />
+                  <Route path="/kesfet" element={<Discover />} />
+                  <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:slug" element={<BlogPostPage />} />
+                  <Route path="/stil-danismani" element={<StyleAdvisor />} />
+                  <Route path="/sehir/:citySlug" element={<CityGuide />} />
                   <Route path="/oauth/google/callback" element={<GoogleOAuthCallback />} />
                   <Route path="/kvkk" element={<KvkkPage />} />
                   <Route path="/kullanim-kosullari" element={<KullanimKosullari />} />

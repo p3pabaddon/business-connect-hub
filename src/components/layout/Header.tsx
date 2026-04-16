@@ -27,6 +27,9 @@ export function Header() {
 
   const navLinks = [
     { href: "/", label: t("nav.home") },
+    { href: "/kesfet", label: "Keşfet" },
+    { href: "/stil-danismani", label: "Stil Danışmanı" },
+    { href: "/blog", label: "Blog" },
     { href: "/isletmeler", label: t("nav.businesses") },
     { href: "/hakkimizda", label: t("nav.about") },
     { href: "/iletisim", label: t("nav.contact") },
