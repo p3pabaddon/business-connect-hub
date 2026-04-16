@@ -76,18 +76,20 @@ export const IsletmeDetailContent = ({
   const wrapWithStyles = (content: React.ReactNode) => {
     if (!biz.branding_config?.custom_colors) return content;
     
+    const selector = isPreview ? '.preview-scoped' : ':root';
+    
     return (
-      <>
+      <div className={cn(isPreview && "preview-scoped h-full w-full")}>
         <style dangerouslySetInnerHTML={{ __html: `
-          :root {
+          ${selector} {
             --primary: ${hexToHsl(biz.branding_config.primary_color || "#7c3aed")};
-            --accent: ${hexToHsl(biz.branding_config.primary_color || "#7c3aed")};
+            --accent: ${hexToHsl(biz.branding_config.secondary_color || biz.branding_config.primary_color || "#7c3aed")};
             --secondary: ${hexToHsl(biz.branding_config.secondary_color || biz.branding_config.primary_color || "#7c3aed")};
             --ring: ${hexToHsl(biz.branding_config.primary_color || "#7c3aed")};
           }
         `}} />
         {content}
-      </>
+      </div>
     );
   };
 
@@ -104,7 +106,7 @@ export const IsletmeDetailContent = ({
         style={biz.branding_config?.header_banner ? {
           backgroundImage: `linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%), url(${biz.branding_config.header_banner})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundPosition: `center ${biz.branding_config.header_banner_position || 50}%`,
         } : {}}
       >
         {biz.branding_config?.header_banner && (
@@ -253,13 +255,13 @@ export const IsletmeDetailContent = ({
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div className="space-y-6">
-                   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                      <Star className="w-4 h-4 text-primary fill-primary" />
-                      <span className="text-xs font-bold text-primary uppercase tracking-widest">Müdavim Programı</span>
+                   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20">
+                      <Star className="w-4 h-4 text-accent fill-accent" />
+                      <span className="text-xs font-bold text-accent uppercase tracking-widest">Müdavim Programı</span>
                    </div>
                    <h2 className="text-3xl lg:text-5xl font-heading font-black text-white leading-tight">
                       {biz.name} Müdavimi Olun, <br />
-                      <span className="text-primary italic">{loyaltyProgram.reward_title}</span> Kazanın!
+                      <span className="text-accent italic">{loyaltyProgram.reward_title}</span> Kazanın!
                    </h2>
                    <p className="text-slate-400 text-lg leading-relaxed max-w-xl">
                       Sizi daha sık görmek istiyoruz! Bu işletmede her {loyaltyProgram.target_stamps} randevunuzda bir damga kazanırsınız. 
@@ -403,7 +405,7 @@ export const IsletmeDetailContent = ({
                             </div>
                           </div>
                         </div>
-                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-primary/20 text-primary bg-primary/5">Doğrulanmış</Badge>
+                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-accent/20 text-accent bg-accent/5">Doğrulanmış</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground leading-relaxed italic font-medium">"{review.comment}"</p>
                       
@@ -432,8 +434,8 @@ export const IsletmeDetailContent = ({
                       )}
                       
                       {review.reply && (
-                        <div className="mt-4 p-4 bg-muted/30 border-l-4 border-primary rounded-r-2xl">
-                          <p className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2 mb-1">
+                        <div className="mt-4 p-4 bg-muted/30 border-l-4 border-accent rounded-r-2xl">
+                          <p className="text-[10px] font-black text-accent uppercase tracking-widest flex items-center gap-2 mb-1">
                             <Reply className="w-3 h-3" /> İŞLETME YANITI
                           </p>
                           <p className="text-xs text-muted-foreground italic font-medium leading-relaxed">

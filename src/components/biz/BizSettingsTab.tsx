@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 
 const DAYS = [
   { key: "monday", label: "Pazartesi" },
@@ -99,7 +100,7 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between bg-card p-6 rounded-3xl border border-border shadow-sm sticky top-0 z-10">
+      <div className="flex items-center justify-between bg-card p-6 rounded-3xl border border-border shadow-sm sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shadow-inner">
             <Settings2 className="w-7 h-7 text-primary" />
@@ -475,6 +476,43 @@ export function BizSettingsTab({ businessId }: { businessId: string }) {
                       defaultValue={business.branding_config?.header_banner || ""}
                       label="Banner Görseli Yükle"
                     />
+                    
+                    {business.branding_config?.header_banner && (
+                      <div className="space-y-4 pt-4 animate-in fade-in duration-500">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Görsel Kaydırma (Dikey Hizalama)</Label>
+                          <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded">%{business.branding_config?.header_banner_position || 50}</span>
+                        </div>
+                        <Slider 
+                          defaultValue={[business.branding_config?.header_banner_position || 50]} 
+                          max={100} 
+                          step={1} 
+                          onValueChange={(vals) => setBusiness({
+                            ...business,
+                            branding_config: {
+                              ...business.branding_config,
+                              header_banner_position: vals[0]
+                            }
+                          })}
+                          className="py-4"
+                        />
+                        <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-border bg-muted/20">
+                           <img 
+                              src={business.branding_config.header_banner} 
+                              alt="Banner Preview" 
+                              className="w-full h-full object-cover" 
+                              style={{ objectPosition: `center ${business.branding_config.header_banner_position || 50}%` }}
+                           />
+                           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-y border-white/20 h-px pointer-events-none" />
+                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="bg-black/50 backdrop-blur-md px-3 py-1 rounded-full text-[9px] text-white font-black uppercase tracking-widest">
+                                Önizleme
+                              </div>
+                           </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <p className="text-[10px] text-muted-foreground font-medium italic">
                       Tavsiye edilen boyut: 1920x400. Bu görsel dükkan profilinizin en üstünde arka plan olarak görünecektir.
                     </p>

@@ -10,6 +10,7 @@ import { IsletmeDetailContent } from "@/pages/IsletmeDetailPage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { updateBusiness } from "@/lib/biz-api";
+import { Slider } from "@/components/ui/slider";
 
 interface BizPageEditorProps {
   business: any;
@@ -30,6 +31,7 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
     primary_color: "#7c3aed",
     secondary_color: "#7c3aed",
     header_banner: "",
+    header_banner_position: 50,
     custom_colors: true
   };
 
@@ -297,13 +299,33 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
                    </div>
                    <div className="mt-4 aspect-video bg-muted/20 border-2 border-dashed border-border rounded-2xl overflow-hidden relative">
                      {branding.header_banner ? (
-                       <img src={branding.header_banner} alt="Banner Preview" className="w-full h-full object-cover" />
+                       <img 
+                        src={branding.header_banner} 
+                        alt="Banner Preview" 
+                        className="w-full h-full object-cover" 
+                        style={{ objectPosition: `center ${branding.header_banner_position || 50}%` }}
+                       />
                      ) : (
                        <div className="absolute inset-0 flex items-center justify-center">
                           <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Banner Seçilmedi</p>
                        </div>
                      )}
                    </div>
+                   
+                   {branding.header_banner && (
+                     <div className="space-y-3 pt-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Dikey Hizalama</Label>
+                          <span className="text-[10px] font-bold text-primary">%{branding.header_banner_position || 50}</span>
+                        </div>
+                        <Slider 
+                          defaultValue={[branding.header_banner_position || 50]} 
+                          max={100} 
+                          step={1} 
+                          onValueChange={(vals) => handleUpdateBranding({ header_banner_position: vals[0] })}
+                        />
+                     </div>
+                   )}
                 </div>
               </div>
             </div>
@@ -329,20 +351,20 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
 
         {/* Desktop Mini Preview (Sidebar always visible on right if screen allows) */}
         {!showPreview && (
-          <div className="hidden xl:flex w-[400px] border-l border-border bg-card/10 flex-col">
+          <div className="hidden xl:flex w-[500px] border-l border-border bg-card/10 flex-col">
             <div className="p-6 border-b border-border bg-card/50">
                <h4 className="font-black uppercase tracking-tight text-xs flex items-center gap-2">
                  <Eye className="w-3.5 h-3.5" /> Canlı Hızlı Önizleme
                </h4>
             </div>
-            <div className="flex-1 overflow-hidden pointer-events-none opacity-80 hover:opacity-100 transition-opacity">
-               <div className="origin-top scale-[0.3] w-[1333px] px-20">
+            <div className="flex-1 overflow-y-auto scrollbar-none pointer-events-none p-4">
+               <div className="origin-top scale-[0.4] w-[1150px] bg-surface shadow-2xl rounded-[3rem] overflow-hidden border border-border">
                   <IsletmeDetailContent biz={localBusiness} isPreview={true} />
                </div>
             </div>
             <div className="p-6 border-t border-border bg-muted/30">
                <p className="text-[10px] text-muted-foreground italic leading-relaxed">
-                 * Bu alan sayfanızın hızlı özetidir. Tam önizleme için "Önizleme" butonunu kullanın.
+                 * Sayfanızın hızlı özetidir. Kaydırma çubuğu ile tüm sayfayı görebilirsiniz.
                </p>
             </div>
           </div>
