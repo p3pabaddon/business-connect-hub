@@ -357,8 +357,8 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
                  <Eye className="w-3.5 h-3.5" /> Canlı Hızlı Önizleme
                </h4>
             </div>
-            <div className="flex-1 overflow-y-auto scrollbar-none pointer-events-none p-4">
-               <div className="origin-top scale-[0.4] w-[1150px] bg-surface shadow-2xl rounded-[3rem] overflow-hidden border border-border">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-none pointer-events-none p-4">
+               <div className="origin-top-left scale-[0.38] w-[1200px] bg-surface shadow-2xl rounded-[3rem] overflow-hidden border border-border">
                   <IsletmeDetailContent biz={localBusiness} isPreview={true} />
                </div>
             </div>
