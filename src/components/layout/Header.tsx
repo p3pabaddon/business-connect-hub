@@ -40,13 +40,21 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-white/5 bg-white/80 dark:bg-background/80 backdrop-blur-xl transition-all duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="relative p-1.5 bg-white rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-300 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] group-hover:scale-105">
+          <Link to="/" className="flex items-center gap-3 group px-2 py-1 rounded-xl hover:bg-white/5 transition-all">
+            <div className="relative h-10 w-10 sm:h-12 sm:w-12 bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
               <img 
                 src="/logo.png" 
                 alt="Randevu Dünyası" 
-                className="h-10 sm:h-12 w-auto object-contain" 
+                className="max-h-full max-w-full object-contain" 
               />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-lg font-bold tracking-tight text-foreground leading-none">
+                Randevu <span className="text-accent">Dünyası</span>
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase hidden sm:block">
+                İşletme Rehberi
+              </span>
             </div>
           </Link>
 
