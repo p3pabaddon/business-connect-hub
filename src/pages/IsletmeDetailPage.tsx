@@ -456,11 +456,11 @@ export const IsletmeDetailContent = ({
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
 
-            <div className="bg-card border border-border rounded-3xl p-8 shadow-sm lg:sticky lg:top-24">
+            <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
               <h3 className="font-black text-foreground uppercase tracking-tight mb-6 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-primary/60" /> Mesaie Saatleri
+                <Clock className="w-5 h-5 text-primary/60" /> Mesai Saatleri
               </h3>
               <div className="space-y-3">
               {Object.entries(workingHours)
