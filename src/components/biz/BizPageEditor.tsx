@@ -29,12 +29,12 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
     setLocalBusiness(business);
   }, [business]);
 
-  const branding = localBusiness.branding_config || {
+  const branding = {
     primary_color: "#7c3aed",
     secondary_color: "#7c3aed",
     header_banner: "",
     header_banner_position: 50,
-    custom_colors: true
+    ...localBusiness.branding_config
   };
 
   const handleUpdateBranding = (updates: any) => {
@@ -305,7 +305,7 @@ export function BizPageEditor({ business, onUpdate }: BizPageEditorProps) {
                           <span className="text-[10px] font-bold text-primary">%{branding.header_banner_position || 50}</span>
                         </div>
                         <Slider 
-                          defaultValue={[branding.header_banner_position || 50]} 
+                          value={[branding.header_banner_position ?? 50]} 
                           max={100} 
                           step={1} 
                           onValueChange={(vals) => handleUpdateBranding({ header_banner_position: vals[0] })}

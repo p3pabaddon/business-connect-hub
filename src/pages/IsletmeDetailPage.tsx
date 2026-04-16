@@ -61,6 +61,14 @@ export const IsletmeDetailContent = ({
     ? JSON.parse(biz.working_hours) 
     : (biz.working_hours || {});
 
+  const branding = {
+    primary_color: "#7c3aed",
+    secondary_color: "#7c3aed",
+    header_banner: "",
+    header_banner_position: 50,
+    ...biz.branding_config
+  };
+
   const mockServices = [
     { id: "m1", name: "Örnek Hizmet 1", duration: 45, price: 250 },
     { id: "m2", name: "Örnek Hizmet 2", duration: 60, price: 450 },
@@ -96,10 +104,10 @@ export const IsletmeDetailContent = ({
       <div className={cn(isPreview && "preview-scoped h-full w-full")}>
         <style dangerouslySetInnerHTML={{ __html: `
           ${selector} {
-            --primary: ${hexToHsl(biz.branding_config.primary_color || "#7c3aed")};
-            --accent: ${hexToHsl(biz.branding_config.secondary_color || biz.branding_config.primary_color || "#7c3aed")};
-            --secondary: ${hexToHsl(biz.branding_config.secondary_color || biz.branding_config.primary_color || "#7c3aed")};
-            --ring: ${hexToHsl(biz.branding_config.primary_color || "#7c3aed")};
+            --primary: ${hexToHsl(branding.primary_color)};
+            --accent: ${hexToHsl(branding.secondary_color)};
+            --secondary: ${hexToHsl(branding.secondary_color)};
+            --ring: ${hexToHsl(branding.primary_color)};
           }
         `}} />
         {content}
@@ -113,17 +121,17 @@ export const IsletmeDetailContent = ({
       <div 
         className={cn(
           "relative py-12 transition-all duration-500",
-          biz.branding_config?.header_banner 
+          branding.header_banner 
             ? "min-h-[300px] flex items-end" 
             : "bg-gradient-to-br from-primary/10 to-accent/10"
         )}
-        style={biz.branding_config?.header_banner ? {
-          backgroundImage: `linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%), url(${biz.branding_config.header_banner})`,
+        style={branding.header_banner ? {
+          backgroundImage: `linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%), url(${branding.header_banner})`,
           backgroundSize: 'cover',
-          backgroundPosition: `center ${biz.branding_config.header_banner_position || 50}%`,
+          backgroundPosition: `center ${branding.header_banner_position ?? 50}%`,
         } : {}}
       >
-        {biz.branding_config?.header_banner && (
+        {branding.header_banner && (
           <div className="absolute inset-0 bg-black/20" />
         )}
 
@@ -134,7 +142,7 @@ export const IsletmeDetailContent = ({
                 {biz.logo ? (
                   <div className={cn(
                     "w-20 h-20 sm:w-28 sm:h-28 rounded-3xl overflow-hidden border-4 shadow-2xl bg-white shrink-0 transition-transform hover:scale-105",
-                    biz.branding_config?.header_banner ? "border-white/20" : "border-white"
+                    branding.header_banner ? "border-white/20" : "border-white"
                   )}>
                     <img src={biz.logo} alt={biz.name} className="w-full h-full object-contain p-2" />
                   </div>
@@ -156,7 +164,7 @@ export const IsletmeDetailContent = ({
                   </div>
                   <h1 className={cn(
                     "text-3xl sm:text-5xl font-heading font-black mb-1 tracking-tight",
-                    biz.branding_config?.header_banner ? "text-white drop-shadow-lg" : "text-foreground"
+                    branding.header_banner ? "text-white drop-shadow-lg" : "text-foreground"
                   )}>
                     {biz.name}
                   </h1>
@@ -164,11 +172,11 @@ export const IsletmeDetailContent = ({
                     <Star className="w-4 h-4 text-warning fill-warning" />
                     <span className={cn(
                       "font-bold text-lg",
-                      biz.branding_config?.header_banner ? "text-white" : "text-foreground"
+                      branding.header_banner ? "text-white" : "text-foreground"
                     )}>{biz.rating || "0.0"}</span>
                     <span className={cn(
                       "text-sm font-medium",
-                      biz.branding_config?.header_banner ? "text-white/70" : "text-muted-foreground"
+                      branding.header_banner ? "text-white/70" : "text-muted-foreground"
                     )}>({biz.review_count || 0} yorum)</span>
                   </div>
                 </div>
@@ -176,7 +184,7 @@ export const IsletmeDetailContent = ({
               
               <p className={cn(
                 "max-w-2xl text-base leading-relaxed mb-6",
-                biz.branding_config?.header_banner ? "text-white/80" : "text-muted-foreground"
+                branding.header_banner ? "text-white/80" : "text-muted-foreground"
               )}>
                 {biz.description}
               </p>
@@ -184,7 +192,7 @@ export const IsletmeDetailContent = ({
               <div className="flex flex-wrap items-center gap-4 text-sm">
                 <div className={cn(
                   "flex items-center gap-1.5",
-                  biz.branding_config?.header_banner ? "text-white/70" : "text-muted-foreground"
+                  branding.header_banner ? "text-white/70" : "text-muted-foreground"
                 )}>
                   <MapPin className="w-4 h-4" />
                   <span>{biz.district}, {biz.city}</span>
@@ -192,7 +200,7 @@ export const IsletmeDetailContent = ({
                 {biz.phone && (
                   <div className={cn(
                     "flex items-center gap-1.5",
-                    biz.branding_config?.header_banner ? "text-white/70" : "text-muted-foreground"
+                    branding.header_banner ? "text-white/70" : "text-muted-foreground"
                   )}>
                     <Phone className="w-4 h-4" />
                     <span>{biz.phone}</span>
