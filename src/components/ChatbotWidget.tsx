@@ -38,6 +38,7 @@ function findAnswer(input: string): string {
 }
 
 import { useLocation } from "react-router-dom";
+import { askPublicAiAdvisor } from "@/lib/ai-service";
 
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,19 +64,36 @@ export function ChatbotWidget() {
   if (isHiddenPage) return null;
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isTyping) return;
     
     const userMessage = input.trim();
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
     setIsTyping(true);
 
-    // Simulate thinking delay
-    await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 800));
-    
-    const answer = findAnswer(userMessage);
-    setMessages(prev => [...prev, { role: "assistant", content: answer }]);
-    setIsTyping(false);
+    try {
+      // Create message history for AI
+      const aiMessages = messages.map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+      aiMessages.push({ role: "user", content: userMessage });
+
+      // Call AI Service (which calls our new Supabase Edge Function)
+      const answer = await askPublicAiAdvisor(aiMessages, {
+        categories: ["Berber", "Güzellik Salonu", "Spa", "Diyetisyen", "Veteriner"]
+      });
+
+      setMessages(prev => [...prev, { role: "assistant", content: answer }]);
+    } catch (error) {
+      console.error("AI Error:", error);
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: "Üzgünüm, şu an bağlantı kuramıyorum. Lütfen daha sonra tekrar deneyin veya destek@randevudunyasi.com adresinden bize ulaşın." 
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
