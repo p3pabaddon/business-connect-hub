@@ -114,3 +114,62 @@ export async function generateBusinessStrategy(context: string) {
   const systemPrompt = "Sen 'Business Connect Hub' platformunun baş danışmanısın. Verilen işletme verilerini kullanarak 5-6 maddelik somut bir büyüme stratejisi oluştur. Markdown formatında cevap ver.";
   return executeAiAction([{ role: "user", content: context }], systemPrompt, 0.8);
 }
+
+/**
+ * NEW: Face Analysis & Style Advisor with Safety Checks
+ * Uses GPT-4o Vision to analyze face shapes and provide recommendations.
+ */
+export async function analyzeImageStyle(base64Image: string) {
+  const systemPrompt = `
+### ROLE: AI STYLE & FACE EXPERT (@RandevuDünyası) ###
+Sen dünyanın en iyi stilistisin. Görevin, yüklenen fotoğraftaki yüz tipini analiz etmek ve stil önerileri sunmaktır.
+
+### SAFETY PROTOCOL (CRITICAL): ###
+1. GERÇEK YÜZ KONTROLÜ: Eğer yüklenen görsel bir insan yüzü değilse (Örn: Logo, yazı, manzara, hayvan, cisim vb.) analizi DERHAL REDDET.
+2. UYGUNSUZ İÇERİK: Eğer görsel uygunsuz, müstehcen veya saldırgan ise (NSFW) analizi DERHAL REDDET.
+3. REDDETME CEVABI: Reddetmen gerekiyorsa sadece şu JSON formatını döndür: {"error": "Lütfen net bir insan yüzü fotoğrafı yükleyin. Logo veya uygunsuz içerikler analiz edilemez."}
+
+### ANALYSIS GUIDELINES: ###
+- Yüz tipini belirle: Oval, Kare, Yuvarlak, Kalp, Elmas.
+- Bu yüz tipine uygun 3 modern saç/sakal modeli öner.
+- Model uyum skorlarını (%80-%98 arası) belirle.
+- 2 adet profesyonel bakım ipucu ver.
+
+### OUTPUT FORMAT (ONLY JSON): ###
+{
+  "faceShape": "Oval",
+  "suggestions": [
+    {"title": "Model Adı", "description": "Kısa açıklama", "matchScore": 95}
+  ],
+  "tips": ["İpucu 1", "İpucu 2"]
+}
+  `;
+
+  try {
+    const { data, error } = await supabase.functions.invoke("ai-advisor", {
+      body: { 
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "Bu fotoğrafı analiz et." },
+              { type: "image_url", image_url: { url: base64Image } }
+            ]
+          }
+        ],
+        systemPrompt,
+        temperature: 0.3 // Analiz için daha düşük yaratıcılık, daha yüksek doğruluk.
+      }
+    });
+
+    if (error) throw error;
+    
+    // Parse result
+    const resultText = data.choices?.[0]?.message?.content || "{}";
+    const cleanedJson = resultText.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleanedJson);
+  } catch (err) {
+    console.error("Style analysis failed:", err);
+    throw new Error("Analiz sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+  }
+}

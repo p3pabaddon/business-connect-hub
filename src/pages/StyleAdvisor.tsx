@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Sparkles, Wand2, Info, CheckCircle2, Scissors, Camera, BrainCircuit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { analyzeImageStyle } from '@/lib/ai-service';
 
 const StyleAdvisor = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -21,38 +22,26 @@ const StyleAdvisor = () => {
   };
 
   const handleAnalyze = async () => {
-    if (!file) return;
+    if (!preview) return;
     setAnalyzing(true);
+    setResult(null); // Clear previous results
     
-    // Simulate AI analysis
-    setTimeout(() => {
-      setResult({
-        faceShape: 'Oval',
-        suggestions: [
-          {
-            title: 'Modern Pompadour',
-            description: 'Yüz hattınızı belirginleştiren, üstü hacimli yanları kısa kesim.',
-            matchScore: 95
-          },
-          {
-            title: 'Low Fade + Textured Top',
-            description: 'Sportif ve bakımı kolay, günlük kullanım için ideal.',
-            matchScore: 88
-          },
-          {
-            title: 'Klasik Yan Ayrım',
-            description: 'Resmi ortamlar ve profesyonel görünüm için vazgeçilmez.',
-            matchScore: 82
-          }
-        ],
-        tips: [
-          'Saçlarınızın üst kısmını hacimlendirmek için deniz tuzu spreyi kullanabilirsiniz.',
-          'Sakalınızı çene hattını takip edecek şekilde kısa tutmanız yüzünüzü daha keskin gösterir.'
-        ]
-      });
+    try {
+      const data = await analyzeImageStyle(preview);
+      
+      if (data.error) {
+        toast.error(data.error);
+        setResult(null);
+      } else {
+        setResult(data);
+        toast.success('Analiz başarıyla tamamlandı!');
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Analiz sırasında bir hata oluştu.');
+    } finally {
       setAnalyzing(false);
-      toast.success('Analiz tamamlandı!');
-    }, 3000);
+    }
   };
 
   return (
