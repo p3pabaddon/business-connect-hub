@@ -16,12 +16,16 @@ async function executeAiAction(messages: AiMessage[], systemPrompt: string, temp
     
     if (error) {
       console.error("Supabase Function Invoke Error:", error);
+      // provide more context for specific supabase errors
+      if (error.message?.includes("non-2xx")) {
+        throw new Error(`Edge Function Hatası: Fonksiyon (ai-advisor) bulunamadı veya Supabase tarafında bir hata oluştu. Lütfen fonksiyonun 'supabase functions deploy ai-advisor' komutuyla yüklendiğinden emin olun.`);
+      }
       throw new Error(error.message);
     }
 
     if (data?.error) {
       console.error("AI Function returned business error:", data.error);
-      throw new Error(data.error);
+      throw new Error(`AI Operasyon Hatası: ${data.error}`);
     }
 
     return data.choices?.[0]?.message?.content || "Yanıt oluşturulamadı.";

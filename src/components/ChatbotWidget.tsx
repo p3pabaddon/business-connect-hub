@@ -85,11 +85,17 @@ export function ChatbotWidget() {
       });
 
       setMessages(prev => [...prev, { role: "assistant", content: answer }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Error:", error);
+      let displayError = error.message || "Şu an bağlantı kuramıyorum.";
+      
+      if (displayError.includes("non-2xx")) {
+        displayError = "Edge Function (ai-advisor) bulunamadı. Lütfen Supabase'e deploy ettiğinizden emin olun.";
+      }
+
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: "Üzgünüm, şu an bağlantı kuramıyorum. Lütfen daha sonra tekrar deneyin veya destek@randevudunyasi.com adresinden bize ulaşın." 
+        content: `Üzgünüm, bir hata oluştu: ${displayError} \n\nLütfen OPENAI_API_KEY'in Supabase Secrets'a eklendiğini kontrol edin.` 
       }]);
     } finally {
       setIsTyping(false);

@@ -66,14 +66,24 @@ export function PublicAiAdvisor() {
       setMessages(prev => [...prev, { role: "assistant", content: response }]);
     } catch (error: any) {
       console.error("Public AI Advisor Error:", error);
-      const errorMessage = error.message || "Bilinmeyen bir hata.";
-      toast.error("Bağlantı Hatası", { 
-        description: `Hata: ${errorMessage.substring(0, 50)}... Lütfen tekrar dene.` 
+      
+      // Determine error message
+      let displayError = "Şu an bağlantı kuramıyorum.";
+      if (error.message?.includes("non-2xx")) {
+        displayError = "AI servisi (Edge Function) yanıt vermiyor. Lütfen fonksiyonun deployed olduğundan ve OPENAI_API_KEY'in Supabase Secrets'a eklendiğinden emin olun.";
+      } else if (error.message) {
+        displayError = error.message;
+      }
+
+      toast.error("AI Hatası", { 
+        description: displayError.substring(0, 100)
       });
       
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: `Üzgünüm, şu an bağlantı kuramıyorum (${errorMessage.substring(0, 30)}). Lütfen OpenAI API anahtarınızın geçerli ve bakiyeli olduğunu kontrol edin.` 
+        content: `Üzgünüm, bir hata oluştu: ${displayError} 
+        
+Lütfen sistem yöneticisinin Supabase Dashboard > Edge Functions > ai-advisor > Secrets kısmından OPENAI_API_KEY'i tanımladığından emin olun.` 
       }]);
     } finally {
       setLoading(false);

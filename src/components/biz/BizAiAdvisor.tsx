@@ -75,8 +75,18 @@ export function BizAiAdvisor({ businessName, stats, services, staff }: BizAiAdvi
 
       setMessages(prev => [...prev, { role: "assistant", content: response }]);
     } catch (error: any) {
-      toast.error("AI Bağlantı Hatası", { description: error.message });
-      console.error(error);
+      console.error("AI Advisor Error:", error);
+      let displayError = error.message || "Bilinmeyen bir hata.";
+      
+      if (displayError.includes("non-2xx")) {
+        displayError = "Edge Function (ai-advisor) bulunamadı veya çalışmıyor. Lütfen fonksiyonun Supabase'e yüklendiğinden emin olun.";
+      }
+
+      toast.error("AI Bağlantı Hatası", { description: displayError });
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: `Hata: ${displayError}\n\nLütfen Supabase Dashboard üzerinden OPENAI_API_KEY sırrının ekli olduğunu ve ai-advisor fonksiyonunun başarıyla yayınlandığını kontrol edin.` 
+      }]);
     } finally {
       setLoading(false);
     }
