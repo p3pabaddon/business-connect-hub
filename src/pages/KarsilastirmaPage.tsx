@@ -42,7 +42,6 @@ const KarsilastirmaPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEOHead title="İşletme Karşılaştır" description="İşletmeleri yan yana karşılaştırın. Fiyat, puan ve hizmetleri kolayca kıyaslayın." />
-      <Header />
       <main className="flex-1 bg-surface">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-3 mb-8">
@@ -227,7 +226,6 @@ const KarsilastirmaPage = () => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

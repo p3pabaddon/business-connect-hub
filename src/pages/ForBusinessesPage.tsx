@@ -20,7 +20,6 @@ export default function ForBusinessesPage() {
         title={t("nav.for_business")}
         description={t("business.landing_subtitle")}
       />
-      <Header />
       <main className="flex-1">
         {/* Business Hero */}
         <section className="bg-slate-950 pt-20 pb-32 text-white relative overflow-hidden">
@@ -179,7 +178,6 @@ export default function ForBusinessesPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

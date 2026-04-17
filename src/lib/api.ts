@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 export async function getBusinesses(filters?: { city?: string; district?: string; category?: string; search?: string }) {
   let query = supabase
     .from("businesses")
-    .select("id, name, slug, category, rating, review_count, city, district, logo, cover_image, is_verified, is_featured, is_active")
+    .select("id, name, slug, category, rating, review_count, city, district, logo, cover_image, image_url, is_verified, is_featured, is_active")
     .eq("is_active", true)
     .order("is_featured", { ascending: false })
     .order("rating", { ascending: false });

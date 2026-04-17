@@ -287,7 +287,7 @@ const IsletmelerPage = () => {
                     </div>
                     <div className="w-28 sm:w-full aspect-square sm:aspect-[16/10] bg-muted relative shrink-0">
                       <img 
-                        src={biz.logo || getCategoryPlaceholder(biz.category)} 
+                        src={biz.image_url || biz.cover_image || biz.logo || getCategoryPlaceholder(biz.category)} 
                         alt="" 
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 shadow-inner" 
                         loading="lazy" 

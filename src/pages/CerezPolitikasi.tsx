@@ -4,7 +4,6 @@ import { Footer } from "@/components/layout/Footer";
 const CerezPolitikasi = () => {
   return (
     <div className="min-h-screen flex flex-col bg-surface">
-      <Header />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-16">
         <div className="mb-12 border-b border-border pb-8">
           <h1 className="text-5xl font-black text-foreground mb-4 uppercase tracking-tighter">Çerez Politikası</h1>
@@ -79,7 +78,6 @@ const CerezPolitikasi = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
