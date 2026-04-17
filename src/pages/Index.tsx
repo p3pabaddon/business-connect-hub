@@ -31,7 +31,6 @@ const Index = () => {
           "keywords": "randevu al, online randevu, berber randevusu, güzellik salonu randevu, kuaför randevu al, randevu dünyası, ücretsiz randevu"
         }}
       />
-      <Header />
       <main className="flex-1">
         <HeroSection />
         <SectorsSection />
@@ -44,7 +43,6 @@ const Index = () => {
         <FeaturedCitiesSection />
       </main>
       <PublicAiAdvisor />
-      <Footer />
     </div>
   );
 };

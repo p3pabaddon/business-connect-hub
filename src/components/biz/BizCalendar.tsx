@@ -338,10 +338,13 @@ export function BizCalendar({ appointments, staff, onRefresh, initialDate, initi
                   <div className="w-12 lg:w-24 border-r border-border shrink-0 bg-muted/5 flex items-center justify-center">
                      <Clock className="w-4 h-4 text-muted-foreground/30" />
                   </div>
-                  <div className={cn(
-                     "flex-1 grid transition-all duration-500 overflow-x-auto no-scrollbar",
-                     (viewMode === 'weekly' || focusedStaffId) ? "lg:grid-cols-7 grid-cols-1" : `grid-cols-${staff.length || 1} min-w-[${(staff.length || 1) * 150}px]`
-                  )}>
+                  <div 
+                    className={cn(
+                      "flex-1 grid transition-all duration-500 overflow-x-auto no-scrollbar",
+                      (viewMode === 'weekly' || focusedStaffId) ? "lg:grid-cols-7 grid-cols-1" : `grid-cols-${staff.length || 1}`
+                    )}
+                    style={!(viewMode === 'weekly' || focusedStaffId) ? { minWidth: `${(staff.length || 1) * 150}px` } : {}}
+                  >
                      {(viewMode === 'weekly' || focusedStaffId) ? weekDays.map((day, i) => (
                         <div key={i} className={cn(
                            "py-3 lg:py-6 text-center border-r border-border/50 last:border-0 transition-all duration-300",
@@ -399,10 +402,13 @@ export function BizCalendar({ appointments, staff, onRefresh, initialDate, initi
 
             {/* Scrollable Grid Body */}
             <div className="flex-1 overflow-auto custom-scrollbar relative bg-grid-slate-900/[0.05] dark:bg-grid-white/[0.02]">
-               <div className={cn(
-                 "flex h-[1400px]",
-                 viewMode === 'staff' && !focusedStaffId ? `min-w-[${(staff.length || 1) * 150 + 96}px]` : "lg:min-w-[1000px] w-full"
-               )}>
+                <div 
+                  className={cn(
+                    "flex h-[1400px]",
+                    (viewMode === 'staff' && !focusedStaffId) ? "" : "lg:min-w-[1000px] w-full"
+                  )}
+                  style={(viewMode === 'staff' && !focusedStaffId) ? { minWidth: `${(staff.length || 1) * 150 + 96}px` } : {}}
+                >
                   {/* Time Column */}
                   <div className="w-12 lg:w-24 shrink-0 bg-muted/5 border-r border-border backdrop-blur-sm sticky left-0 z-20">
                      {HOURS.map((hour) => (

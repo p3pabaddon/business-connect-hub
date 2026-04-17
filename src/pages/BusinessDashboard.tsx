@@ -24,6 +24,7 @@ import { BizCoupons } from "@/components/biz/BizCoupons";
 import { SEOHead } from "@/components/SEOHead";
 import { BizAiAdvisor } from "@/components/biz/BizAiAdvisor";
 import { BizNotifications } from "@/components/biz/BizNotifications";
+import { BizPageEditor } from "@/components/biz/BizPageEditor";
 import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2, LayoutDashboard, LogOut, ExternalLink, MessageSquare, Calendar, ShoppingBag, Users, LifeBuoy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ const playNotificationSound = () => {
     audio.play().catch(() => {});
 };
 
-type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" | "staff-performance" | "analytics" | "portfolio" | "support" | "coupons" | "notifications";
+type BizTab = "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" | "staff-performance" | "analytics" | "portfolio" | "support" | "coupons" | "notifications" | "page-editor";
 
 export default function BusinessDashboard() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -390,6 +391,9 @@ export default function BusinessDashboard() {
               )}
               {activeTab === "coupons" && business && (
                  <BizCoupons businessId={business.id} />
+              )}
+              {activeTab === "page-editor" && business && (
+                 <BizPageEditor business={business} onUpdate={loadData} />
               )}
               </VerificationGuard>
            </div>

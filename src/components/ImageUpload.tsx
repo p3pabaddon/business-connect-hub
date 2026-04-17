@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, X, UploadCloud, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -9,12 +9,17 @@ interface ImageUploadProps {
   onUpload: (url: string) => void;
   defaultValue?: string;
   bucket?: string;
+  path?: string;
   label?: string;
 }
 
-export function ImageUpload({ onUpload, defaultValue, bucket = "business-assets", label = "Görsel Yükle" }: ImageUploadProps) {
+export function ImageUpload({ onUpload, defaultValue, bucket = "business-assets", path = "uploads", label = "Görsel Yükle" }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(defaultValue || "");
+
+  useEffect(() => {
+    setPreview(defaultValue || "");
+  }, [defaultValue]);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -28,7 +33,7 @@ export function ImageUpload({ onUpload, defaultValue, bucket = "business-assets"
 
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-      const filePath = `uploads/${fileName}`;
+      const filePath = `${path}/${fileName}`;
 
       const publicUrl = await uploadFile(bucket, filePath, file);
 

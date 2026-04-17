@@ -3,7 +3,7 @@ import {
   BarChart3, Settings, LogOut, 
   ShoppingBag, Star, Megaphone, 
   Menu, X, ShieldCheck, UserCircle, Bell,
-  Target, Gift, MessageSquare, Package, Crown, PieChart, Image as ImageIcon, LifeBuoy, Sparkles, Ticket, Heart
+  Target, Gift, MessageSquare, Package, Crown, PieChart, Image as ImageIcon, LifeBuoy, Sparkles, Ticket, Heart, Palette
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,7 +13,7 @@ export type BizTab =
   | "overview" | "calendar" | "crm" | "marketing" | "performance" | "catalog" 
   | "reviews" | "settings" | "waitlist" | "loyalty" | "inventory" | "premium" 
   | "staff-performance" | "analytics" | "portfolio" | "support" | "appointments" 
-  | "services" | "staff" | "gallery" | "coupons" | "security" | "finance" | "notifications";
+  | "services" | "staff" | "gallery" | "coupons" | "security" | "finance" | "notifications" | "page-editor";
 
 interface Props {
   activeTab: BizTab;
@@ -62,6 +62,7 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
          { id: "notifications", label: "Bildirimler", icon: Bell },
          { id: "marketing", label: "Pazarlama Araçları", icon: Target },
          { id: "portfolio", label: "Çalışmalarımız", icon: ImageIcon },
+         { id: "page-editor", label: "İşletme Sayfası", icon: Palette },
          { id: "reviews", label: "Müşteri Yorumları", icon: MessageSquare },
          { id: "support", label: "Destek Merkezi", icon: LifeBuoy },
          { id: "settings", label: "İşletme Ayarı", icon: Settings },

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   Ticket, Users, Plus, Zap, 
-  Clock, Trash2, Loader2, X, BellRing
+  Clock, Trash2, Loader2, X, BellRing, TrendingUp, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -285,6 +285,111 @@ export function BizMarketing({ businessId, onRefresh }: Props) {
                </div>
             </div>
          </div>
+
+        {/* Landing Page Optimizer (A/B Test) */}
+        <div className="bg-card border border-border rounded-[2.5rem] p-6 sm:p-8 lg:p-10 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full -ml-32 -mt-32 blur-3xl" />
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 mb-10">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-foreground flex items-center gap-4 tracking-tight">
+                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
+                    <TrendingUp className="w-6 h-6 text-emerald-600" />
+                   </div>
+                   Sayfa Optimizasyonu (A/B Test)
+                </h3>
+                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-2 ml-14 sm:ml-16 opacity-60">Dönüşüm Oranlarını Yapay Zeka ile Artırın</p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="text-right hidden sm:block">
+                  <p className="text-[10px] font-black text-foreground uppercase tracking-wider">Mevcut Durum</p>
+                  <p className="text-xs font-bold text-emerald-600">%8.4 Dönüşüm Artışı</p>
+                </div>
+                <div className="h-10 w-px bg-border mx-2 hidden sm:block" />
+                <Button className="bg-foreground text-background hover:bg-foreground/90 font-black text-[10px] tracking-widest px-6 h-12 rounded-2xl shadow-xl">
+                  YENİ TEST BAŞLAT
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+              {/* Variant A */}
+              <div className="p-6 bg-muted/30 border border-border/50 rounded-[2rem] space-y-4">
+                <div className="flex items-center justify-between">
+                  <Badge className="bg-blue-500 text-white font-black text-[9px] px-3 py-1 rounded-lg">VARYASYON A (KONTROL)</Badge>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40">%50 TRAFİK</span>
+                </div>
+                <div className="space-y-4">
+                  <div className="h-32 bg-background rounded-2xl border border-border/50 overflow-hidden relative group cursor-zoom-in">
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/5" />
+                    <div className="p-3">
+                      <div className="h-3 w-1/2 bg-muted rounded-full mb-2" />
+                      <div className="h-2 w-3/4 bg-muted/50 rounded-full" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-white/50 rounded-xl border border-border/50">
+                      <p className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">GÖSTERİM</p>
+                      <p className="text-sm font-black text-foreground">1,240</p>
+                    </div>
+                    <div className="p-3 bg-white/50 rounded-xl border border-border/50">
+                      <p className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">DÖNÜŞÜM</p>
+                      <p className="text-sm font-black text-foreground">%12.4</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Variant B */}
+              <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[2rem] space-y-4 relative">
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20 animate-pulse border-4 border-background">
+                  <Zap className="w-4 h-4 fill-white" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Badge className="bg-emerald-500 text-white font-black text-[9px] px-3 py-1 rounded-lg">VARYASYON B (ADAY)</Badge>
+                  <span className="text-[10px] font-black text-emerald-600 uppercase opacity-60 font-black uppercase tracking-widest">%50 TRAFİK</span>
+                </div>
+                <div className="space-y-4">
+                  <div className="h-32 bg-background rounded-2xl border border-emerald-500/20 overflow-hidden relative group cursor-zoom-in">
+                    <div className="absolute inset-0 bg-emerald-500/5" />
+                    <div className="p-3">
+                      <div className="h-3 w-1/2 bg-emerald-500/20 rounded-full mb-2" />
+                      <div className="h-2 w-3/4 bg-emerald-500/10 rounded-full" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-white/80 rounded-xl border border-emerald-500/10">
+                      <p className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">GÖSTERİM</p>
+                      <p className="text-sm font-black text-foreground">1,232</p>
+                    </div>
+                    <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                      <p className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">DÖNÜŞÜM</p>
+                      <p className="text-sm font-black text-emerald-600 uppercase font-black tracking-widest">%20.8 🚀</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Insights */}
+              <div className="p-8 bg-foreground text-background rounded-[2rem] space-y-6 flex flex-col justify-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full -mr-16 -mt-16" />
+                <div className="space-y-4 relative z-10">
+                  <div className="flex items-center gap-3">
+                    <Sparkles className="w-5 h-5 text-emerald-400" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Yapay Zeka Kararı</p>
+                  </div>
+                  <h4 className="text-lg font-black leading-tight">Varyasyon B istatistiksel olarak daha başarılı görünüyor.</h4>
+                  <p className="text-xs text-background/60 font-medium leading-relaxed">
+                    "B varyasyonunda kullanılan 'Hemen Randevu Al' butonu ve koyu tema vurgusu, akşam saatlerinde gelen trafik için %35 daha fazla etkileşim yarattı."
+                  </p>
+                  <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] tracking-widest h-12 rounded-xl mt-4 border-none shadow-xl shadow-emerald-500/20">
+                     SÜREKLİ UYGULA
+                  </Button>
+                </div>
+              </div>
+            </div>
+        </div>
       </div>
     </div>
   );
