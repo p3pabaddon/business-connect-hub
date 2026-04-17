@@ -115,34 +115,27 @@ export async function generateBusinessStrategy(context: string) {
   return executeAiAction([{ role: "user", content: context }], systemPrompt, 0.8);
 }
 
-/**
- * NEW: Face Analysis & Style Advisor with Safety Checks
- * Uses GPT-4o Vision to analyze face shapes and provide recommendations.
- */
 export async function analyzeImageStyle(base64Image: string) {
   const systemPrompt = `
-### ROLE: AI STYLE & FACE EXPERT (@RandevuDünyası) ###
-Sen dünyanın en iyi stilistisin. Görevin, yüklenen fotoğraftaki yüz tipini analiz etmek ve stil önerileri sunmaktır.
-
-### SAFETY PROTOCOL (CRITICAL): ###
-1. GERÇEK YÜZ KONTROLÜ: Eğer yüklenen görsel bir insan yüzü değilse (Örn: Logo, yazı, manzara, hayvan, cisim vb.) analizi DERHAL REDDET.
-2. UYGUNSUZ İÇERİK: Eğer görsel uygunsuz, müstehcen veya saldırgan ise (NSFW) analizi DERHAL REDDET.
-3. REDDETME CEVABI: Reddetmen gerekiyorsa sadece şu JSON formatını döndür: {"error": "Lütfen net bir insan yüzü fotoğrafı yükleyin. Logo veya uygunsuz içerikler analiz edilemez."}
-
-### ANALYSIS GUIDELINES: ###
-- Yüz tipini belirle: Oval, Kare, Yuvarlak, Kalp, Elmas.
-- Bu yüz tipine uygun 3 modern saç/sakal modeli öner.
-- Model uyum skorlarını (%80-%98 arası) belirle.
-- 2 adet profesyonel bakım ipucu ver.
-
-### OUTPUT FORMAT (ONLY JSON): ###
-{
-  "faceShape": "Oval",
-  "suggestions": [
-    {"title": "Model Adı", "description": "Kısa açıklama", "matchScore": 95}
-  ],
-  "tips": ["İpucu 1", "İpucu 2"]
-}
+    ROLE: Professional Male Grooming & AI Style Advisor.
+    TASK: Analyze the uploaded face image and provide style recommendations.
+    
+    IMPORTANT RULES:
+    1. ALWAYS return a valid JSON object. NEVER include plain text outside the JSON.
+    2. LANGUAGE: All output text (descriptions, tips) must be in TURKISH.
+    3. REJECTION: Only reject if the image is explicitly NSFW. For all others, try your best to provide a professional analysis.
+    
+    If you absolutely cannot provide an analysis, return ONLY this JSON:
+    {"error": "Görsel net bir analiz için uygun değil. Lütfen daha aydınlık bir selfie yükleyin."}
+    
+    SUCCESS JSON SCHEMA:
+    {
+      "faceShape": "Oval/Yuvarlak/Kare/Kalp/Elmas/Dikdörtgen",
+      "suggestions": [
+        {"title": "Öneri Başlığı", "description": "Detaylı Türkçe açıklama", "matchScore": 95}
+      ],
+      "tips": ["Bakım ipucu 1", "Bakım ipucu 2"]
+    }
   `;
 
   try {
@@ -152,13 +145,13 @@ Sen dünyanın en iyi stilistisin. Görevin, yüklenen fotoğraftaki yüz tipini
           {
             role: "user",
             content: [
-              { type: "text", text: "Bu fotoğrafı analiz et." },
+              { type: "text", text: "Lütfen bu fotoğrafı analiz et ve saç/sakal önerilerini sun." },
               { type: "image_url", image_url: { url: base64Image } }
             ]
           }
         ],
         systemPrompt,
-        temperature: 0.3 // Analiz için daha düşük yaratıcılık, daha yüksek doğruluk.
+        temperature: 0.3
       }
     });
 
@@ -167,7 +160,6 @@ Sen dünyanın en iyi stilistisin. Görevin, yüklenen fotoğraftaki yüz tipini
       throw new Error(`Bağlantı Hatası: ${error.message || 'Fonksiyon çağıralamadı'}`);
     }
     
-    // Ensure we are getting choices from the data object
     const choices = data?.choices || (data?.data?.choices);
     const resultText = choices?.[0]?.message?.content || "";
     
@@ -185,12 +177,10 @@ Sen dünyanın en iyi stilistisin. Görevin, yüklenen fotoğraftaki yüz tipini
       }
       return parsed;
     } catch (parseErr) {
-      // Eğer JSON değilse ama düz metinse (Örn: "Üzgünüm, bu görseli analiz edemem...")
-      // Bu metni kullanıcıya hata olarak göster.
       if (resultText && resultText.length > 5) {
         throw new Error(resultText);
       }
-      throw new Error("Yapay zeka anlaşılmaz bir yanıt verdi. Lütfen tekrar deneyin.");
+      throw new Error("Yapay zeka anlaşılmaz bir yanıt verdi.");
     }
   } catch (err: any) {
     console.error("Style analysis failed:", err);
