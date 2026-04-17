@@ -58,6 +58,8 @@ const queryClient = new QueryClient({
   },
 });
 
+import { SEOHead } from "@/components/SEOHead";
+
 const AppContent = () => {
   const { pathname } = useLocation();
   
@@ -66,10 +68,12 @@ const AppContent = () => {
     pathname.startsWith("/admin-secure") || 
     pathname.startsWith("/hq-dashboard") ||
     pathname.startsWith("/hq-intelligence") ||
-    pathname.startsWith("/personel-paneli");
+    pathname.startsWith("/personel-paneli") ||
+    pathname.startsWith("/profil");
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead noindex={isDashboardRoute} />
       <TrafficTracker />
       {!isDashboardRoute && <Header />}
       <main className="flex-1">
@@ -139,25 +143,29 @@ const AppContent = () => {
   );
 };
 
+import { HelmetProvider } from "react-helmet-async";
+
 const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <Sonner position="top-right" expand={true} richColors duration={2500} />
-            <BrowserRouter>
-              <ScrollToTop />
-              <PWAUpdateHandler />
-              <A2HSPrompt />
-              <AppContent />
-            </BrowserRouter>
-            <Toaster />
-          </TooltipProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
+  <HelmetProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Sonner position="top-right" expand={true} richColors duration={2500} />
+              <BrowserRouter>
+                <ScrollToTop />
+                <PWAUpdateHandler />
+                <A2HSPrompt />
+                <AppContent />
+              </BrowserRouter>
+              <Toaster />
+            </TooltipProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  </HelmetProvider>
 );
 
 export default App;

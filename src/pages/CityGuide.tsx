@@ -2,17 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
-import { MapPin, Star, Award, TrendingUp, Calendar, Scissors, Sparkles } from 'lucide-react';
+import { MapPin, Star, Award, TrendingUp, Calendar, Scissors, Sparkles, ChevronRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Helmet } from 'react-helmet-async';
+import { SEOHead } from '@/components/SEOHead';
+import { turkiyeIller } from '@/lib/turkey-locations';
 
 const CityGuide = () => {
   const { citySlug } = useParams();
   const [salons, setSalons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Convert slug back to readable city name (simple version)
-  const cityName = citySlug ? citySlug.charAt(0).toUpperCase() + citySlug.slice(1) : '';
+  // Find the actual city object from turkiyeIller
+  const cityObj = turkiyeIller.find(c => c.il.toLowerCase() === citySlug?.toLowerCase()) || 
+                  turkiyeIller.find(c => c.il.toLowerCase().replace('ı','i').replace('ü','u').replace('ö','o').replace('ş','s').replace('ç','c').replace('ğ','g') === citySlug?.toLowerCase());
+  
+  const cityName = cityObj?.il || (citySlug ? citySlug.charAt(0).toUpperCase() + citySlug.slice(1) : '');
 
   useEffect(() => {
     const fetchCitySalons = async () => {
@@ -21,178 +25,231 @@ const CityGuide = () => {
         .from('businesses')
         .select('*')
         .ilike('city', `%${cityName}%`)
-        .order('rating', { ascending: false });
+        .order('rating', { ascending: false })
+        .limit(10);
 
       if (error) console.error(error);
       else setSalons(data || []);
       setLoading(false);
     };
 
-    fetchCitySalons();
+    if (cityName) {
+      fetchCitySalons();
+    }
   }, [cityName]);
 
-  return (
-    <div className="min-h-screen bg-background pb-20">
-      <Helmet>
-        <title>{cityName} En İyi Güzellik Salonları ve Berberler | Randevu Dünyası</title>
-        <meta name="description" content={`${cityName} şehrindeki en yüksek puanlı güzellik salonları, berberler ve spa merkezlerini keşfedin. Güncel fiyatlar ve online randevu için hemen tıklayın.`} />
-      </Helmet>
+  const stats = [
+    { label: "Onaylı İşletme", value: salons.length > 0 ? `${salons.length}+` : "10+" },
+    { label: "Aktif Kullanıcı", value: "500+" },
+    { label: "Başarılı Randevu", value: "2000+" },
+    { label: "Müşteri Puanı", value: "4.8" }
+  ];
 
-      {/* SEO Hero */}
-      <section className="relative py-24 bg-[#0a0a0f] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/5" />
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl"
-          >
-            <div className="flex items-center gap-2 text-primary font-bold mb-4">
-              <MapPin className="w-5 h-5" />
-              <span>Yerel Rehber</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black text-white mb-6 font-heading leading-tight">
-              {cityName}'nın <span className="text-gradient">En İyi</span> Güzellik Salonları & Berberleri
-            </h1>
-            <p className="text-xl text-gray-400 mb-8 max-w-2xl">
-              Uzman kadromuz tarafından incelenmiş, {cityName} genelindeki en yüksek puanlı {salons.length} salonu aşağıda bulabilirsiniz.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-full border border-white/10">
-                <Calendar className="w-4 h-4" />
-                Güncelleme: Mart 2024
+  return (
+    <div className="min-h-screen bg-background pb-20 selection:bg-primary/30">
+      <SEOHead 
+        title={`${cityName} En İyi Güzellik Salonları, Berberler ve Spa Merkezleri`}
+        description={`${cityName} şehrinde en yüksek puan alan salonları keşfedin. ${salons.length > 0 ? salons[0].name + ' gibi ' : ''}seçkin işletmelerden anında ücretsiz randevu alın.`}
+        type="website"
+      />
+
+      {/* Hero Section */}
+      <section className="relative py-20 lg:py-32 bg-[#050505] overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.1),transparent_50%)]" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
+        
+        <div className="container mx-auto px-4 relative z-10 text-center lg:text-left">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-8">
+                <MapPin className="w-4 h-4" />
+                <span>Şehir Rehberi: {cityName}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-full border border-white/10">
-                <TrendingUp className="w-4 h-4" />
-                Popülariteye göre sıralandı
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-8 font-heading leading-tight tracking-tighter">
+                {cityName}'nın <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent italic">Zirvesindeki</span> Salonlar
+              </h1>
+              <p className="text-xl text-gray-400 mb-10 max-w-xl leading-relaxed">
+                {cityName} sokaklarında stilinizi parlatacak en iyi ismi mi arıyorsunuz? Uzmanlarımızın seçtiği en seçkin işletmeleri keşfedin.
+              </p>
+              
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                <Button size="lg" className="rounded-2xl h-14 px-8 font-bold shadow-xl shadow-primary/20 group">
+                  Hemen Keşfet 
+                  <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <div className="flex -space-x-4 items-center">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[#050505] bg-gray-800 overflow-hidden">
+                      <img src={`https://i.pravatar.cc/100?u=${i + 10}`} alt="User" />
+                    </div>
+                  ))}
+                  <div className="pl-6 text-sm text-gray-500 font-medium">+1200 {cityName}'lı burada</div>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="grid grid-cols-2 gap-4"
+            >
+              {stats.map((stat, i) => (
+                <div key={i} className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-sm text-center transform hover:-translate-y-2 transition-transform duration-500">
+                  <div className="text-3xl font-black text-primary mb-2 tracking-tighter">{stat.value}</div>
+                  <div className="text-xs text-gray-500 font-bold uppercase tracking-widest">{stat.label}</div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Comparison/Guide Content */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Main List */}
-          <div className="lg:col-span-8 space-y-12">
-            <div className="prose prose-lg dark:prose-invert max-w-none mb-12">
-              <h2>Neden {cityName} Salonlarını Tercih Etmelisiniz?</h2>
-              <p>
-                {cityName}, Türkiye'nin en köklü bakım ve güzellik kültürüne sahip şehirlerinden biridir. 
-                İster ata yadigarı bir berber deneyimi, ister modern bir güzellik merkezi arayışında olun, 
-                bu listede size en uygun seçeneği bulacağınıza eminiz.
-              </p>
+      {/* Main Content */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="flex flex-col lg:flex-row gap-16">
+          {/* Detailed Guide & List */}
+          <div className="lg:col-span-8 flex-1">
+            <div className="mb-16">
+              <h2 className="text-3xl font-black mb-6 uppercase tracking-tight">Neden {cityName} Salonları?</h2>
+              <div className="grid sm:grid-cols-2 gap-8 text-gray-400 leading-relaxed text-sm">
+                <div className="space-y-4">
+                  <p className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>{cityName}'nın en köklü ve güvenilir işletmeleri titizlikle seçildi.</span>
+                  </p>
+                  <p className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>Gerçek kullanıcı yorumları ve şeffaf puanlama sistemi.</span>
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <p className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>Sıra beklemeden, mobil cihazınızdan 7/24 randevu imkanı.</span>
+                  </p>
+                  <p className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>Özel kampanyalar ve müdavim programları ile daha karlı hizmet.</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mb-12">
+              <h3 className="text-2xl font-black uppercase tracking-tight border-b-4 border-primary pb-2">{cityName} Top 10 Listesi</h3>
             </div>
 
             {loading ? (
-              <div className="space-y-8">
-                {[1, 2, 3].map(i => <div key={i} className="h-64 rounded-3xl bg-secondary animate-pulse" />)}
+              <div className="space-y-12">
+                {[1, 2, 3].map(i => (
+                   <div key={i} className="h-80 rounded-[2.5rem] bg-white/5 animate-pulse border border-white/10" />
+                ))}
               </div>
             ) : salons.length > 0 ? (
-              <div className="space-y-8">
+              <div className="space-y-12">
                 {salons.map((salon, index) => (
                   <motion.div
                     key={salon.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className="group relative bg-card rounded-[2.5rem] p-6 border border-border hover:border-primary/50 transition-all duration-500 overflow-hidden shadow-sm"
+                    className="group relative bg-[#fafafa] dark:bg-white/5 rounded-[2.5rem] p-4 sm:p-8 border border-border dark:border-white/10 hover:shadow-2xl transition-all duration-500"
                   >
                     <div className="flex flex-col md:flex-row gap-8">
-                      {/* Ranking Badge */}
-                      <div className="absolute top-0 left-0 w-16 h-16 bg-primary text-white flex items-center justify-center font-black text-2xl rounded-br-[2rem] z-10 shadow-lg">
-                        #{index + 1}
-                      </div>
-
-                      <div className="w-full md:w-64 h-64 shrink-0 rounded-[2rem] overflow-hidden">
-                        <img 
-                          src={salon.main_image || '/placeholder.svg'} 
-                          alt={salon.name} 
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                      </div>
-                      
-                      <div className="flex-1 space-y-4">
-                        <div className="flex justify-between items-start">
+                       <div className="relative w-full md:w-80 h-64 sm:h-80 shrink-0 rounded-[2rem] overflow-hidden shadow-2xl">
+                          <img 
+                            src={salon.logo || `/placeholder.svg`} 
+                            alt={salon.name} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                          />
+                          <div className="absolute top-4 left-4 bg-primary text-white font-black px-4 py-2 rounded-xl text-lg shadow-lg">
+                            #{index + 1}
+                          </div>
+                       </div>
+                       
+                       <div className="flex-1 flex flex-col justify-between py-2">
                           <div>
-                            <h3 className="text-2xl font-bold font-heading group-hover:text-primary transition-colors">
-                              {salon.name}
-                            </h3>
-                            <div className="flex items-center gap-1 text-primary text-sm font-semibold mt-1">
-                              <Star className="w-4 h-4 fill-current" />
-                              {salon.rating || '4.8'} / 5 (120+ Değerlendirme)
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <h4 className="text-2xl sm:text-3xl font-black mb-1 group-hover:text-primary transition-colors">{salon.name}</h4>
+                                <div className="flex items-center gap-2 text-sm text-gray-500 font-bold uppercase tracking-widest italic">
+                                  {salon.category} • {salon.district}
+                                </div>
+                              </div>
+                              <Award className="w-10 h-10 text-amber-500 opacity-20 group-hover:opacity-100 transition-opacity hidden sm:block" />
+                            </div>
+                            
+                            <p className="text-gray-500 text-sm sm:text-base leading-relaxed mb-6 line-clamp-3 italic">
+                              "{salon.description || `${cityName} bölgesinde kalitenin yeni adresi.`}"
+                            </p>
+
+                            <div className="flex flex-wrap gap-2 mb-8">
+                              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-xl text-xs font-bold uppercase transition-all hover:bg-primary/20 cursor-default">
+                                <Star className="w-3.5 h-3.5 fill-current" />
+                                {salon.rating || '4.9'}
+                              </div>
+                              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent rounded-xl text-xs font-bold uppercase transition-all hover:bg-accent/20 cursor-default">
+                                <TrendingUp className="w-3.5 h-3.5" />
+                                Popüler
+                              </div>
                             </div>
                           </div>
-                          <div className="hidden sm:block">
-                            <Award className="w-8 h-8 text-amber-500 opacity-20 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                        </div>
 
-                        <p className="text-muted-foreground line-clamp-2 italic">
-                          "{salon.description || `${cityName} bölgesinde kaliteli hizmet veren öncü salonlardan biri.`}"
-                        </p>
-
-                        <div className="flex flex-wrap gap-2">
-                          {['Modern Kesim', 'Cilt Bakımı', 'Ücretsiz İkram'].map(tag => (
-                            <span key={tag} className="text-[10px] uppercase tracking-wider font-bold px-3 py-1 bg-secondary rounded-full">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="pt-4 flex gap-4">
-                          <Button asChild className="rounded-xl px-8 font-bold">
-                            <Link to={`/isletme/${salon.slug}`}>Online Randevu Al</Link>
+                          <Button asChild size="lg" className="rounded-2xl h-14 font-black text-sm uppercase tracking-widest group shadow-lg">
+                            <Link to={`/isletme/${salon.slug}`}>
+                              Online Randevu Al
+                              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                            </Link>
                           </Button>
-                        </div>
-                      </div>
+                       </div>
                     </div>
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 bg-secondary/20 rounded-3xl">
-                <Scissors className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                <h3 className="text-xl font-bold">Bu Şehirde Henüz Kayıt Bulunmuyor</h3>
-                <p className="text-muted-foreground">İşletme sahibiyseniz hemen başvurabilirsiniz.</p>
+              <div className="text-center py-24 bg-white/5 rounded-[3rem] border-2 border-dashed border-white/10">
+                <Scissors className="w-16 h-16 text-gray-700 mx-auto mb-6 opacity-30" />
+                <h3 className="text-2xl font-bold mb-2">Şu An Kimseyi Bulamadık</h3>
+                <p className="text-gray-500 max-w-sm mx-auto">Bu şehirde henüz listelenen işletme bulunmuyor. Yakında burada olacağız!</p>
               </div>
             )}
           </div>
 
           {/* Sidebar */}
-          <aside className="lg:col-span-4 space-y-8">
-            <div className="sticky top-24 space-y-8">
-              <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-[#0a0a0f] to-[#1a1a25] text-white border border-white/5">
-                <Sparkles className="w-10 h-10 text-primary mb-6" />
-                <h3 className="text-2xl font-bold mb-4 font-heading">Hala Karar Vermedin mi?</h3>
-                <p className="text-gray-400 text-sm mb-8 leading-relaxed">
-                  Size en yakın ve en uygun salonu bulmanız için akıllı algoritmalarımız hazır.
-                </p>
-                <Button variant="outline" asChild className="w-full border-white/20 text-white hover:bg-white/10 rounded-xl">
-                  <Link to="/kesfet">Keşfetmeye Başla</Link>
-                </Button>
-              </div>
+          <aside className="lg:w-96 space-y-12">
+            <div className="sticky top-24 space-y-12">
+               <div className="p-10 rounded-[2.5rem] bg-gradient-to-br from-primary/20 to-accent/10 border border-white/10 shadow-2xl relative overflow-hidden group">
+                  <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
+                  <Sparkles className="w-12 h-12 text-primary mb-8 animate-bounce" />
+                  <h4 className="text-3xl font-black mb-4 leading-tight">Yerinizi Alın!</h4>
+                  <p className="text-gray-400 text-sm mb-10 leading-relaxed font-medium">
+                    İşletme sahibi misiniz? {cityName}'lı müşterilere ulaşmanın en şovalyece yoluna katılın.
+                  </p>
+                  <Button asChild size="lg" variant="secondary" className="w-full h-14 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">
+                    <Link to="/isletme-basvuru">BAŞVURU YAP</Link>
+                  </Button>
+               </div>
 
-              <div className="p-8 rounded-[2.5rem] border border-border bg-card">
-                <h4 className="font-black mb-6 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                  Diğer Şehir Rehberleri
-                </h4>
-                <div className="grid grid-cols-1 gap-2">
-                  {['Istanbul', 'Ankara', 'Izmir', 'Antalya'].map(city => (
-                    <Link 
-                      key={city}
-                      to={`/sehir/${city.toLowerCase()}`}
-                      className="px-4 py-3 rounded-xl hover:bg-secondary transition-colors text-sm font-semibold flex justify-between items-center"
-                    >
-                      {city} En İyi Salonlar
-                      <span className="text-muted-foreground">→</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+               <div className="p-10 rounded-[2.5rem] bg-white/5 border border-white/10">
+                  <h4 className="text-xl font-black mb-8 uppercase tracking-widest border-b border-white/10 pb-4">Diğer Şehirler</h4>
+                  <div className="space-y-4">
+                    {['İstanbul', 'Ankara', 'İzmir', 'Antalya', 'Bursa', 'Eskişehir'].map(city => (
+                      <Link 
+                        key={city}
+                        to={`/sehir/${city.toLowerCase().replace('ı','i').replace('ş','s').replace('ü','u').replace('ö','o').replace('ç','c').replace('ğ','g')}`}
+                        className="flex items-center justify-between text-sm font-bold text-gray-500 hover:text-white transition-all group py-2"
+                      >
+                        {city} Rehberi
+                        <ChevronRight className="w-4 h-4 text-gray-700 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                      </Link>
+                    ))}
+                  </div>
+               </div>
             </div>
           </aside>
         </div>
@@ -200,5 +257,12 @@ const CityGuide = () => {
     </div>
   );
 };
+
+// Simple ArrowRight component if lucide one fails for some reason or as a fallback
+const ArrowRight = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+  </svg>
+);
 
 export default CityGuide;

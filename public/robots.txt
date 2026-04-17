@@ -1,28 +1,19 @@
-User-agent: Googlebot
-Disallow: /admin
-Disallow: /dashboard
-Disallow: /hq
-Disallow: /profil
-Allow: /
-
-User-agent: Bingbot
-Disallow: /admin
-Disallow: /dashboard
-Disallow: /hq
-Disallow: /profil
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
-Disallow: /admin
-Disallow: /dashboard
-Disallow: /hq
-Disallow: /profil
 Allow: /
+Allow: /blog/
+Allow: /isletmeler/
+Allow: /isletme/
+Allow: /kesfet/
+Allow: /sehir/
 
+# Panel ve Güvenli Alanları Engelle
+Disallow: /admin-secure-panel-v5-x89j2k1m4n5/
+Disallow: /biz-dashboard-secure-x31p9q8w2/
+Disallow: /hq-gate-auth-v2-j5l1z8y9w/
+Disallow: /hq-intelligence-vault-v8-m2n5b4v1/
+Disallow: /personel-paneli/
+Disallow: /profil/
+Disallow: /oauth/
+
+# Sitemap
 Sitemap: https://randevudunyasi.com/sitemap.xml

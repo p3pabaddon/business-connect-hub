@@ -6,6 +6,7 @@ import { Calendar, User, ChevronLeft, Share2, Bookmark, Clock } from 'lucide-rea
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { SEOHead } from '@/components/SEOHead';
 
 const BlogPostPage = () => {
   const { slug } = useParams();
@@ -83,6 +84,13 @@ const BlogPostPage = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-primary selection:text-white">
+      <SEOHead 
+        title={post.title}
+        description={post.excerpt}
+        image={post.main_image}
+        type="article"
+      />
+      
       {/* Scroll Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-1.5 z-[100] bg-white/5">
         <motion.div 

@@ -219,7 +219,7 @@ export const IsletmeDetailContent = ({
               {!isPreview && (
                 <div className="flex items-center gap-2">
                   <FavoriteButton businessId={biz.id} size="sm" />
-                  <ShareButtons title={biz.name} />
+                  <ShareButtons title={biz.name} url={window.location.href} />
                 </div>
               )}
               <Button size="lg" className="flex-1 sm:flex-none rounded-xl sm:rounded-2xl shadow-xl shadow-primary/20 h-10 sm:h-12 px-4 sm:px-8 font-bold text-sm sm:text-base" onClick={() => !isPreview && setBookingOpen(true)}>
@@ -671,6 +671,32 @@ const IsletmeDetailPage = () => {
         description={seoDesc}
         url={window.location.href}
         image={biz.image_url || biz.logo || getCategoryPlaceholder(biz.category)}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": biz.name,
+          "image": biz.image_url || biz.logo,
+          "description": biz.description,
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": biz.address,
+            "addressLocality": biz.district,
+            "addressRegion": biz.city,
+            "addressCountry": "TR"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": biz.latitude,
+            "longitude": biz.longitude
+          },
+          "url": window.location.href,
+          "telephone": biz.phone,
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": biz.rating || "5",
+            "reviewCount": biz.review_count || "1"
+          }
+        }}
       />
       
       <IsletmeDetailContent 

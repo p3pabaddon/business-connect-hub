@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { SalonCard } from '@/components/Discover/SalonCard';
 import { Loader2, MapPin, Sparkles, RefreshCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import { SEOHead } from '@/components/SEOHead';
 
 const Discover = () => {
   const { coords, loading: geoLoading, error: geoError, getPosition } = useGeolocation();
@@ -83,6 +84,10 @@ const Discover = () => {
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-background flex flex-col items-center p-4 md:p-8 relative overflow-hidden">
+      <SEOHead 
+        title="Yeni İşletmeler Keşfet | Yakınındaki En İyi Salonlar"
+        description="Sana en yakın berber, kuaför ve güzellik salonlarını keşfetmenin en eğlenceli yolu. Sağa kaydır ve favorini bul!"
+      />
       {/* Background elements */}
       <div className="absolute top-1/4 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse" />

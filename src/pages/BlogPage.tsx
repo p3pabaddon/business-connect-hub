@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight, Search, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { SEOHead } from '@/components/SEOHead';
 
 const BlogPage = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -42,6 +43,11 @@ const BlogPage = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
+      <SEOHead 
+        title="Yaşam & Stil Dergisi | Güzellik ve Bakım Üzerine Profesyonel Tavsiyeler"
+        description="Berber bakımı, stil tüyoları ve güzellik sektörü hakkında en güncel yazılar. Randevu Dünyası Blog ile tarzını bir adım öne taşı."
+        type="website"
+      />
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-transparent opacity-50" />
