@@ -1,5 +1,3 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -118,7 +116,6 @@ const IsletmeBasvuruPage = () => {
   if (isSubmitted) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-1 bg-background relative flex items-center justify-center p-4 overflow-hidden">
           {/* Background Decorative Elements */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -150,7 +147,6 @@ const IsletmeBasvuruPage = () => {
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -159,7 +155,7 @@ const IsletmeBasvuruPage = () => {
     <div className="min-h-screen flex flex-col">
       <SEOHead 
         title="İşletmeni Ekle | Ücretsiz Randevu Sistemi ve Takip Programı" 
-        description="Berber, kuaför veya güzellik salonunuz için ücretsiz randevu sistemi kurun. Randevularınızı kolayca yönetin, müşteri sadakatini artırın ve gelirinizi katlayın." 
+        description="Berber, kuaför veya güzellik salonunuz için ücretsiz randevu sistemi kurun. Randevunurunuzu kolayca yönetin, müşteri sadakatini artırın ve gelirinizi katlayın." 
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebPage",
@@ -168,7 +164,6 @@ const IsletmeBasvuruPage = () => {
           "keywords": "randevu programı, berber randevu sistemi, güzellik salonu randevu programı, kuaför randevu sistemi, ücretsiz randevu sistemi kur, işletme ekle"
         }}
       />
-      <Header />
       <main className="flex-1 bg-background relative overflow-hidden">
         {/* Background Decorative Elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -334,9 +329,7 @@ const IsletmeBasvuruPage = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
-
   );
 };
 

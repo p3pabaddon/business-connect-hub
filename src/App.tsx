@@ -47,6 +47,7 @@ const KvkkPage = lazy(() => import("./pages/KvkkPage"));
 const KullanimKosullari = lazy(() => import("./pages/KullanimKosullari"));
 const GizlilikPolitikasi = lazy(() => import("./pages/GizlilikPolitikasi"));
 const CerezPolitikasi = lazy(() => import("./pages/CerezPolitikasi"));
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,6 +81,7 @@ const AppContent = () => {
             <Route path="/giris" element={<GirisPage />} />
             <Route path="/register" element={<KayitPage />} />
             <Route path="/kayit" element={<KayitPage />} />
+            <Route path="/nasil-calisir" element={<HowItWorks />} />
             <Route path="/hakkimizda" element={<HakkimizdaPage />} />
             <Route path="/iletisim" element={<IletisimPage />} />
             <Route path="/sss" element={<SSSPage />} />

@@ -1,5 +1,3 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +12,6 @@ const IletisimPage = () => {
       <SEOHead 
         title={t("nav.contact")}
       />
-      <Header />
       <main className="flex-1 bg-surface">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
           <h1 className="text-3xl sm:text-4xl font-heading text-foreground text-center mb-12">{t("nav.contact")}</h1>
@@ -63,7 +60,6 @@ const IletisimPage = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

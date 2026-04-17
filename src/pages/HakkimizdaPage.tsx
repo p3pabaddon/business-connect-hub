@@ -1,5 +1,3 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Users, Shield, Globe, Award } from "lucide-react";
 import { t } from "@/lib/translations";
 import { SEOHead } from "@/components/SEOHead";
@@ -10,7 +8,6 @@ const HakkimizdaPage = () => {
       <SEOHead 
         title={t("about.title")}
       />
-      <Header />
       <main className="flex-1">
         <section className="py-16 sm:py-24 bg-background">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -49,7 +46,6 @@ const HakkimizdaPage = () => {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 };
