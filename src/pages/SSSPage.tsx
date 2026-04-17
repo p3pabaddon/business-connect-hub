@@ -23,6 +23,19 @@ const SSSPage = () => {
     <div className="min-h-screen flex flex-col">
       <SEOHead 
         title={t("nav.faq")}
+        description="Randevu Dünyası hakkında en çok sorulan sorular: Nasıl randevu alırım? İşletmemi nasıl kaydederim? Hizmetler ücretli mi? Tüm cevaplar burada."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": faqs.map(faq => ({
+            "@type": "Question",
+            "name": faq.q,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": faq.a
+            }
+          }))
+        }}
       />
       <main className="flex-1 bg-surface">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
