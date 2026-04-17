@@ -48,7 +48,7 @@ export async function askAiAdvisor(
     throw new Error(error.message || "Edge Function çağrısı başarısız oldu.");
   }
 
-  if (data.error) {
+  if (data?.error) {
     throw new Error(data.error);
   }
 
@@ -92,7 +92,7 @@ export async function askPublicAiAdvisor(
     throw new Error(error.message || "Edge Function çağrısı başarısız oldu.");
   }
 
-  if (data.error) throw new Error(data.error);
+  if (data?.error) throw new Error(data.error);
 
   return data.choices[0].message.content;
 }
@@ -113,7 +113,7 @@ export async function generateBusinessStrategy(context: string) {
     throw new Error(error.message || "Edge Function çağrısı başarısız oldu.");
   }
 
-  if (data.error) throw new Error(data.error);
+  if (data?.error) throw new Error(data.error);
 
   return data.choices[0].message.content;
 }
