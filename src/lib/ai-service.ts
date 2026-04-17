@@ -162,14 +162,30 @@ Sen dünyanın en iyi stilistisin. Görevin, yüklenen fotoğraftaki yüz tipini
       }
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase Invoke Error:", error);
+      throw new Error(`Bağlantı Hatası: ${error.message || 'Fonksiyon çağıralamadı'}`);
+    }
     
-    // Parse result
-    const resultText = data.choices?.[0]?.message?.content || "{}";
+    // Ensure we are getting choices from the data object
+    const choices = data?.choices || (data?.data?.choices);
+    const resultText = choices?.[0]?.message?.content || "";
+    
+    if (!resultText) {
+      console.error("AI response body was empty or malformed:", data);
+      throw new Error("Yapay zeka yanıt oluşturamadı. Lütfen tekrar deneyin.");
+    }
+
     const cleanedJson = resultText.replace(/```json|```/g, "").trim();
-    return JSON.parse(cleanedJson);
-  } catch (err) {
+    const parsed = JSON.parse(cleanedJson);
+    
+    if (parsed.error) {
+      throw new Error(parsed.error);
+    }
+    
+    return parsed;
+  } catch (err: any) {
     console.error("Style analysis failed:", err);
-    throw new Error("Analiz sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+    throw new Error(err.message || "Analiz sırasında bir teknik hata oluştu.");
   }
 }
