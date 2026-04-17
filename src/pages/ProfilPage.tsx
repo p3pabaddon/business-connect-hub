@@ -146,12 +146,20 @@ const ProfilPage = () => {
   const silentReload = async () => {
     if (!user) return;
     try {
-      const { data: aptsRes } = await supabase
-        .from("appointments")
-        .select("*, businesses(name, slug, city)")
-        .eq("customer_id", user.id)
-        .order("appointment_date", { ascending: false });
-      setAppointments(aptsRes || []);
+      const [aptsRes, favsRes] = await Promise.all([
+        supabase
+          .from("appointments")
+          .select("*, businesses(name, slug, city)")
+          .eq("customer_id", user.id)
+          .order("appointment_date", { ascending: false }),
+        supabase
+          .from("favorites")
+          .select("*, businesses(id, name, slug, city, category, rating, review_count, image_url)")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+      ]);
+      setAppointments(aptsRes.data || []);
+      setFavorites(favsRes.data || []);
     } catch (e) { console.error(e); }
   };
 

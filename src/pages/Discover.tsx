@@ -88,25 +88,35 @@ const Discover = () => {
     
     if (direction === 'right' && user && currentSalon) {
       try {
-        console.log('Adding to favorites:', { userId: user.id, businessId: currentSalon.id });
-        const { error } = await supabase
+        console.log('Favori ekleme işlemi başlıyor:', { userId: user.id, businessId: currentSalon.id });
+        
+        // Önce var olup olmadığını kontrol edelim (Upsert kısıtlama hatası verirse diye)
+        const { data: existing } = await supabase
           .from('favorites')
-          .upsert({
-            user_id: user.id,
-            business_id: currentSalon.id
-          }, { onConflict: 'user_id,business_id' });
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('business_id', currentSalon.id)
+          .maybeSingle();
 
-        if (error) {
-          console.error('Supabase error adding favorite:', error);
-          throw error;
+        if (!existing) {
+          const { error: insError } = await supabase
+            .from('favorites')
+            .insert({
+              user_id: user.id,
+              business_id: currentSalon.id
+            });
+
+          if (insError) throw insError;
+          
+          toast.success(`${currentSalon.name} favorilere eklendi!`, {
+            icon: '💖'
+          });
+        } else {
+          toast.info(`${currentSalon.name} zaten favorilerinde.`);
         }
-
-        toast.success(`${currentSalon.name} favorilere eklendi!`, {
-          icon: '💖'
-        });
       } catch (err) {
-        console.error('Error adding to favorites:', err);
-        toast.error('Favorilere eklenirken bir sorun oluştu.');
+        console.error('Favori ekleme hatası:', err);
+        toast.error('Favorilere eklenirken bir teknik sorun oluştu.');
       }
     } else if (direction === 'right' && !user) {
       toast.error('Favorilere eklemek için giriş yapmalısınız.');
