@@ -117,22 +117,32 @@ export async function generateBusinessStrategy(context: string) {
 
 export async function analyzeImageStyle(base64Image: string) {
   const systemPrompt = `
-    TASK: GEOMETRIC FACE SHAPE CATEGORIZATION
-    MANDATORY: DO NOT ATTEMPT TO IDENTIFY THE PERSON. IDENTIFICATION IS FORBIDDEN.
+    ROLE: WORLD-CLASS MASTER STYLIST & IMAGE CONSULTANT.
+    TASK: Detailed visual analysis and personalized grooming/styling advice.
     
-    OBJECTIVE: Only analyze the structural geometry of the head (jawline, forehead, chin) to determine if it belongs to one of these categories: Oval, Square, Round, Heart, Diamond.
+    ANALYSIS STEPS:
+    1. SUBJECT IDENTIFICATION: Determine Gender, Age Group (Child/Teen/Young Adult/Mature/Senior), and Facial Fullness (Thin/Average/Full).
+    2. GEOMETRIC ANALYSIS: Identify precise face shape (Oval, Square, Round, Heart, Diamond, Oblong).
+    3. TAILORED STRATEGY: Create a styling plan that balances the subject's specific features (e.g., if full face, use thinning cuts; if mature, use rejuvenating styles).
     
-    INSTRUCTIONS:
-    1. Focus ONLY on geometric shapes.
-    2. Provide 3 barber-style recommendations based strictly on the shape.
-    3. LANGUAGE: TURKISH.
-    4. OUTPUT: STRICT JSON.
+    RULES:
+    - MANDATORY: DO NOT attempt to name the person. Focus ONLY on professional styling characteristics.
+    - NO GENERIC TIPS: Avoid "wash your hair". Use technical advice like "add volume at the crown to elongate the face" or "tapered sides to define the jawline".
+    - LANGUAGE: TURKISH.
+    - OUTPUT: STRICT JSON.
     
-    SCHEMA:
+    JSON SCHEMA:
     {
-      "faceShape": "Oval/Yuvarlak/Kare/Kalp/Elmas/Dikdörtgen",
-      "suggestions": [{"title": "Stil Adı", "description": "Neden?", "matchScore": 95}],
-      "tips": ["Bakım ipucu"]
+      "faceShape": "Belirlenen Yüz Şekli",
+      "subjectProfile": "Örn: Genç, dolgun yüzlü kadın",
+      "suggestions": [
+        {
+          "title": "Teknik Model Adı",
+          "description": "Neden bu kişiye özel olarak yakışacağı (teknik detaylarla)",
+          "matchScore": 98
+        }
+      ],
+      "tips": ["Profesyonel teknik bakım/stil sırrı 1", "Profesyonel teknik bakım/stil sırrı 2"]
     }
   `;
 
