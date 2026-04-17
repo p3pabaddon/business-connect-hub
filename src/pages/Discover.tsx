@@ -21,45 +21,66 @@ const Discover = () => {
     const fetchSalons = async () => {
       setLoading(true);
       try {
-        let query = supabase.from('businesses').select('*');
-        
-        // If we have geolocation, use the RPC 
+        // Check if we have geolocation
         if (coords) {
           const { data, error } = await supabase.rpc('find_businesses_near', {
             lat: coords.latitude,
             lng: coords.longitude,
-            radius_meters: 50000 // 50km
+            radius_meters: 100000 // Increased to 100km for better initial results
           });
-          if (error) throw error;
           
-          // Get full data for these businesses
-          const ids = data.map((d: any) => d.id);
-          const { data: businessData, error: bError } = await supabase
-            .from('businesses')
-            .select('*')
-            .in('id', ids);
-          
-          if (bError) throw bError;
-          
-          // Merge with distance info
-          const merged = businessData.map(b => ({
-            ...b,
-            distance: data.find((d: any) => d.id === b.id)?.dist_meters
-          })).sort((a, b) => a.distance - b.distance);
-          
-          setSalons(merged);
+          if (error) {
+            console.error('RPC Error:', error);
+            // Fallback to regular fetch if RPC fails
+            throw new Error('RPC_FAILED');
+          }
+
+          if (data && data.length > 0) {
+            const ids = data.map((d: any) => d.id);
+            const { data: businessData, error: bError } = await supabase
+              .from('businesses')
+              .select('*')
+              .in('id', ids);
+            
+            if (bError) throw bError;
+            
+            if (businessData) {
+              const merged = businessData.map(b => ({
+                ...b,
+                distance: data.find((d: any) => d.id === b.id)?.dist_meters
+              })).sort((a, b) => (a.distance || 0) - (b.distance || 0));
+              
+              setSalons(merged);
+              return;
+            }
+          }
+        }
+
+        // Default or Fallback: general fetch
+        const { data, error } = await supabase
+          .from('businesses')
+          .select('*')
+          .is('is_active', true)
+          .limit(20);
+
+        if (error) throw error;
+        setSalons(data || []);
+      } catch (error: any) {
+        console.error('Error fetching salons:', error);
+        
+        // If RPC failed, we already tried fallback above or entered catch.
+        // Only show toast if it's a real unexpected error.
+        if (error.message !== 'RPC_FAILED') {
+          toast.error('Salonlar yüklenirken bir hata oluştu. Sayfayı yenilemeyi deneyebilirsiniz.');
         } else {
-          // Fallback to general fetch
-          const { data, error } = await supabase
+          // If RPC failed but fallback succeeded, we don't need a toast
+          // This part handles the case where catch is hit from throw new Error('RPC_FAILED')
+          const { data, error: fbError } = await supabase
             .from('businesses')
             .select('*')
             .limit(20);
-          if (error) throw error;
-          setSalons(data || []);
+          if (!fbError) setSalons(data || []);
         }
-      } catch (error) {
-        console.error('Error fetching salons:', error);
-        toast.error('Salonlar yüklenirken bir hata oluştu');
       } finally {
         setLoading(false);
       }

@@ -52,14 +52,14 @@ export function Header() {
             <Link to="/nasil-calisir" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg">
               Nasıl Çalışır?
             </Link>
-            <Link to="/kesfet" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg">
-              Keşfet
+            <Link to="/kesfet" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg flex items-center gap-1">
+              Keşfet <span className="bg-amber-500 text-white text-[8px] px-1 rounded-sm font-bold animate-pulse">YENİ</span>
             </Link>
-            <Link to="/isletmeler" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg">
-              İşletmeler
+            <Link to="/isletmeler" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg flex items-center gap-1">
+              İşletmeler <span className="bg-primary text-white text-[8px] px-1 rounded-sm font-bold">YENİ</span>
             </Link>
-            <Link to="/stil-danismani" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg">
-              Stil Danışmanı
+            <Link to="/stil-danismani" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg flex items-center gap-1">
+              Stil Danışmanı <span className="bg-accent text-white text-[8px] px-1 rounded-sm font-bold">AI</span>
             </Link>
 
             {/* Dropdown for secondary links - Blog & Contact */}

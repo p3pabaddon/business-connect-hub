@@ -76,6 +76,36 @@ const BlogPage = () => {
       main_image: "https://images.unsplash.com/photo-1541604193435-22287d32c2c2?auto=format&fit=crop&q=80&w=1200",
       published_at: new Date().toISOString(),
       read_time: '5 dk'
+    },
+    {
+      id: 'f7',
+      title: "Gelin Makyajında 2026 Trendi: 'Glazed Skin'",
+      slug: "gelin-makyaji-2026-trendleri",
+      category: "Güzellik",
+      excerpt: "En özel gününüzde doğal ama çarpıcı bir görünüm. Pürüzsüz ve cam gibi parlayan bir cilt için makyaj artistlerinin sırları.",
+      main_image: "https://images.unsplash.com/photo-1482555662440-3e157a20cc1e?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString(),
+      read_time: '7 dk'
+    },
+    {
+      id: 'f8',
+      title: "Diş Estetiğinde Gülüş Tasarımı: Hollywood Smile Nedir?",
+      slug: "dis-estetigi-gulus-tasarimi",
+      category: "Bakım",
+      excerpt: "Sadece beyaz dişler değil, yüz hattınıza uygun bir gülüş. Modern diş hekimliğinde dijital tasarımın gücü.",
+      main_image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString(),
+      read_time: '5 dk'
+    },
+    {
+      id: 'f9',
+      title: "Evde Profesyonel Saç Bakımı İçin 5 Altın İpucu",
+      slug: "evde-profesyonel-sac-bakimi",
+      category: "Stil",
+      excerpt: "Salon kalitesinde bakımı eve taşıyın. Saç tipinize uygun maskeler ve doğru kurutma teknikleriyle saçlarınızı canlandırın.",
+      main_image: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString(),
+      read_time: '4 dk'
     }
   ];
 

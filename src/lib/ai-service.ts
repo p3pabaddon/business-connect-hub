@@ -117,32 +117,44 @@ export async function generateBusinessStrategy(context: string) {
 
 export async function analyzeImageStyle(base64Image: string) {
   const systemPrompt = `
-    ROLE: WORLD-CLASS MASTER STYLIST & IMAGE CONSULTANT.
-    TASK: Detailed visual analysis and personalized grooming/styling advice.
+    ROLE: DÜNYA ÇAPINDA MASTER STİLİST, GÖRÜNTÜ YÖNETMENİ VE KİŞİSEL İMAJ DANIŞMANI.
+    TASK: Görsel üzerinden derinlemesine karakter ve fizik analizi yaparak, kişiye özel profesyonel stil/bakım planı oluşturmak.
     
-    ANALYSIS STEPS:
-    1. SUBJECT IDENTIFICATION: Determine Gender, Age Group (Child/Teen/Young Adult/Mature/Senior), and Facial Fullness (Thin/Average/Full).
-    2. GEOMETRIC ANALYSIS: Identify precise face shape (Oval, Square, Round, Heart, Diamond, Oblong).
-    3. TAILORED STRATEGY: Create a styling plan that balances the subject's specific features (e.g., if full face, use thinning cuts; if mature, use rejuvenating styles).
+    ANALİZ KRİTERLERİ (HAYATİ ÖNEM):
+    1. DEMOGRAFİK TESPİT: Cinsiyet, Yaş Grubu (Çocuk/Genç/Yetişkin/Olgun/Yaşlı).
+    2. FİZİKSEL YAPI & YÜZ DOLGUNLUĞU: 
+       - Şişko/Dolgun (Geniş hatlı): Yüzü daha ince ve uzun gösterecek vertikal hacimli kesimler (Örn: High Volume Quiff, Tapered sides) öner.
+       - Zayıf (Keskin hatlı): Yüz hatlarını yumuşatacak, elmacık kemiklerini dengeleyecek yan hacimli modeller öner.
+       - Normal: Dengeli ve simetriyi ön plana çıkaran fütüristik modeller.
+    3. GEOMETRİK ANALİZ: Tam yüz şekli (Oval, Kare, Yuvarlak, Kalp, Elmas, Dikdörtgen).
+    4. CİLT & SAÇ DOKUSU: Renk tonu ve doku tahmini (Sakallıysa sakal tipi, saçın gürlüğü/seyrekliği).
     
-    RULES:
-    - MANDATORY: DO NOT attempt to name the person. Focus ONLY on professional styling characteristics.
-    - NO GENERIC TIPS: Avoid "wash your hair". Use technical advice like "add volume at the crown to elongate the face" or "tapered sides to define the jawline".
-    - LANGUAGE: TURKISH.
-    - OUTPUT: STRICT JSON.
+    EVRENSEL STİL KURALLARI (2026 TRENDLERİ):
+    - ERKEK: Fade geçişleri, sakal konturları, jawline vurgusu.
+    - KADIN: Yüz çerçeveleme (face-framing), katmanlı kesimler, hacim yönetimi.
+    - YAŞLI: Gençleştirici (lifting) etkili modeller, beyaz saçın asaletini vurgulayan kesimler.
+    - GENÇ: Daha cesur, dokulu (textured), dinamik ve sosyal medya trendlerine uygun modeller.
+    
+    ÖNEMLİ: Her analizde "NEDEN" bu öneriyi verdiğini profesyonel mimari terimlerle açıkla. Statik veya genel geçer ifadelerden (Örn: "Güzel olur") ASLA kaçın.
+    
+    FORMAT: STRICT JSON (TURKISH).
     
     JSON SCHEMA:
     {
       "faceShape": "Belirlenen Yüz Şekli",
-      "subjectProfile": "Örn: Genç, dolgun yüzlü kadın",
+      "subjectProfile": "Örn: Olgun, hafif dolgun yüzlü erkek",
+      "physicalAnalysis": "Yüz hatları (dolgunluk/zayıflık), jawline durumu ve alın genişliği analizi",
       "suggestions": [
         {
-          "title": "Teknik Model Adı",
-          "description": "Neden bu kişiye özel olarak yakışacağı (teknik detaylarla)",
+          "title": "Teknik Saç/Sakal Modeli Adı",
+          "description": "NEDEN BU MİMARİ? (Örn: Yüzünüz dolgun olduğu için üstleri hacimli, yanları kısa tutup yüzünüzü daha ince göstereceğiz)",
           "matchScore": 98
         }
       ],
-      "tips": ["Profesyonel teknik bakım/stil sırrı 1", "Profesyonel teknik bakım/stil sırrı 2"]
+      "tips": [
+        "Yüz şekline ve yaş grubuna özel şekillendirme sırrı",
+        "Profesyonel ürün tavsiyesi (Mat balm, hacim pudrası vb.)"
+      ]
     }
   `;
 
@@ -153,13 +165,13 @@ export async function analyzeImageStyle(base64Image: string) {
           {
             role: "user",
             content: [
-              { type: "text", text: "Lütfen bu fotoğrafı analiz et ve saç/sakal önerilerini sun." },
+              { type: "text", text: "Lütfen bu fotoğrafı profesyonel bir gözle analiz et. Kişinin yaşına, cinsiyetine ve yüz hatlarındaki dolgunluk durumuna göre en uygun stil önerilerini sun." },
               { type: "image_url", image_url: { url: base64Image } }
             ]
           }
         ],
         systemPrompt,
-        temperature: 0.3
+        temperature: 0.5
       }
     });
 

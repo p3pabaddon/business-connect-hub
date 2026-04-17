@@ -143,11 +143,68 @@ const BlogPostPage = () => {
         <p>Soğuk havada parfümler daha yavaş yayılır. Bu yüzden öd ağacı, vanilya, kehribar gibi ağır ve kalıcı notalar tercih edilmelidir.</p>
         
         <h3>Yaz ve Bahar: Ferah ve Hafif</h3>
-        <p>Yüksek sıcaklık, kokunun hızla uçmasına neden olur. Bergamot, deniz notaları ve narenciye bazlı hafif kokular, sıcak havalarda sizi boğmadan tazelik sunar.</p>
+        <p>高 sıcaklık, kokunun hızla uçmasına neden olur. Bergamot, deniz notaları ve narenciye bazlı hafif kokular, sıcak havalarda sizi boğmadan tazelik sunar.</p>
         
         <p>Parfümünüzü her zaman nabız noktalarına (bilek, boyun) uygulayın ve mevsim değişimlerinde imza kokunuzu güncellemeyi unutmayın.</p>
       `,
       main_image: "https://images.unsplash.com/photo-1541604193435-22287d32c2c2?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString()
+    },
+    {
+      id: 'f7',
+      title: "Gelin Makyajında 2026 Trendi: 'Glazed Skin'",
+      slug: "gelin-makyaji-2026-trendleri",
+      category: "Güzellik",
+      excerpt: "En özel gününüzde doğal ama çarpıcı bir görünüm. Pürüzsüz ve cam gibi parlayan bir cilt için makyaj artistlerinin sırları.",
+      content: `
+        <h2>2026'nın Gelin Makyajı Vizyonu</h2>
+        <p>Abartılı konturlar ve ağır kapatıcılar artık geride kaldı. 'Glazed Skin' (Cam Cilt) akımıyla gelinler artık daha doğal ve taze görünüyor.</p>
+        
+        <h3>Glazed Skin Nasıl Elde Edilir?</h3>
+        <p>Bu görünümün sırrı makyajda değil, makyaj öncesi yapılan derinlemesine nemlendirmededir. Likit aydınlatıcıların fondötenle karıştırılması, cilde içten gelen bir ışıltı katar.</p>
+        
+        <p>Gözlerde ise pastel tonlar ve ince bir çekik eyeliner (foxy eyes) etkisi, bakışları daha romantik ve modern kılıyor.</p>
+      `,
+      main_image: "https://images.unsplash.com/photo-1482555662440-3e157a20cc1e?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString()
+    },
+    {
+      id: 'f8',
+      title: "Diş Estetiğinde Gülüş Tasarımı: Hollywood Smile Nedir?",
+      slug: "dis-estetigi-gulus-tasarimi",
+      category: "Bakım",
+      excerpt: "Sadece beyaz dişler değil, yüz hattınıza uygun bir gülüş. Modern diş hekimliğinde dijital tasarımın gücü.",
+      content: `
+        <h2>Kişiye Özel Gülüş Mimarisi</h2>
+        <p>Hollywood Smile, sadece porselen lamine uygulaması değildir; dudak yapınız, diş eti hattınız ve yüz şeklinizin bir harmoni içinde tasarlanmasıdır.</p>
+        
+        <h3>Zirkonyum ve Lamine Farkı</h3>
+        <p>Zirkonyum daha dayanıklı ve doğal ışık geçirgenliği sunarken, lamine dişler minimum aşındırma ile estetik bir devrim yaratır. Hangi yöntemin size uygun olduğuna dijital simülasyonlar ile karar veriliyor.</p>
+        
+        <p>Gülüşünüz, imzanızdır. En modern klinikleri keşfederek siz de bu değişime ortak olabilirsiniz.</p>
+      `,
+      main_image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString()
+    },
+    {
+      id: 'f9',
+      title: "Evde Profesyonel Saç Bakımı İçin 5 Altın İpucu",
+      slug: "evde-profesyonel-sac-bakimi",
+      category: "Stil",
+      excerpt: "Salon kalitesinde bakımı eve taşıyın. Saç tipinize uygun maskeler ve doğru kurutma teknikleriyle saçlarınızı canlandırın.",
+      content: `
+        <h2>Salon Etkisi Her Gün Sizinle</h2>
+        <p>Profesyonel bakımı evde sürdürmek, saç sağlığının devamlılığı için kritiktir.</p>
+        
+        <ol>
+          <li><strong>Soğuk Durulama:</strong> Yıkama sonunda soğuk su kullanmak saç tellerini kapatır ve parlaklık kazandırır.</li>
+          <li><strong>Mikrofiber Havlu:</strong> Saçın elektriklenmesini önlemek için pamuklu havlular yerine mikrofiber dokuları tercih edin.</li>
+          <li><strong>Dip-Uç Dengesi:</strong> Şampuanı sadece diplere, kremi ise sadece uçlara uygulayın.</li>
+        </ol>
+        
+        <p>Saçlarınız en değerli aksesuarınızdır; onlara hak ettikleri özeni gösterin.</p>
+      `,
+      main_image: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&q=80&w=1200",
       published_at: new Date().toISOString()
     }
   ];

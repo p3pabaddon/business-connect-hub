@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Calendar, User, Compass } from "lucide-react";
+import { Home, Search, Calendar, User, Compass, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/translations";
 
@@ -8,8 +8,9 @@ export function MobileNav() {
 
   const navItems = [
     { icon: Home, label: t("nav.home"), href: "/" },
-    { icon: Compass, label: t("nav.businesses"), href: "/isletmeler" },
-    { icon: Search, label: t("hero.search_btn"), href: "/harita" },
+    { icon: Compass, label: "Keşfet", href: "/kesfet" },
+    { icon: Search, label: "İşletmeler", href: "/isletmeler" },
+    { icon: MapPin, label: "Harita", href: "/harita" },
     { icon: User, label: t("common.profile"), href: "/profil" },
   ];
 
