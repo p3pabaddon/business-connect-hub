@@ -25,10 +25,13 @@ export function Header() {
     navigate("/");
   };
 
-  const navLinks = [
+  const primaryLinks = [
     { href: "/", label: t("nav.home") },
     { href: "/kesfet", label: "Keşfet" },
     { href: "/stil-danismani", label: "Stil Danışmanı" },
+  ];
+
+  const secondaryLinks = [
     { href: "/blog", label: "Blog" },
     { href: "/isletmeler", label: t("nav.businesses") },
     { href: "/hakkimizda", label: t("nav.about") },
@@ -37,11 +40,11 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-white/80 dark:bg-background/80 backdrop-blur-xl transition-all duration-300">
+    <header className="sticky top-0 z-50 border-b border-white/5 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-all duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group px-2 py-1 rounded-xl hover:bg-white/5 transition-all">
-            <div className="relative h-10 w-10 sm:h-12 sm:w-12 bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
+            <div className="relative h-10 w-10 sm:h-12 sm:w-12 bg-white rounded-xl shadow-lg border border-black/5 overflow-hidden flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
               <img 
                 src="/logo.png" 
                 alt="Randevu Dünyası" 
@@ -58,8 +61,9 @@ export function Header() {
             </div>
           </Link>
 
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
+            {primaryLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
@@ -68,13 +72,29 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+
+            {/* Dropdown for secondary links - "More" */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all rounded-lg flex items-center gap-1 group">
+                  <Menu className="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" />
+                  <span>{t("common.more") || "Daha Fazla"}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 backdrop-blur-xl bg-white/90 dark:bg-slate-900/90 border-white/10 shadow-2xl">
+                {secondaryLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} onClick={() => navigate(link.href)} className="cursor-pointer">
+                    {link.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           <div className="hidden md:flex items-center gap-2 lg:gap-4">
             <div className="flex items-center gap-1.5 mr-2 pr-2 border-r border-border/50">
               <LanguageToggle />
               <ThemeToggle />
-
             </div>
             
             <div className="flex items-center gap-4">
@@ -94,7 +114,7 @@ export function Header() {
               <div className="hidden md:block">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2">
+                    <Button variant="outline" size="sm" className="gap-2 border-accent/20 hover:border-accent/50 transition-colors">
                       <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
                         <User className="w-3.5 h-3.5 text-primary" />
                       </div>
@@ -103,7 +123,7 @@ export function Header() {
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent align="end" className="w-48 backdrop-blur-xl">
                     <DropdownMenuItem onClick={() => navigate("/profil")}>
                       <User className="w-4 h-4 mr-2" /> {t("common.profile")}
                     </DropdownMenuItem>
@@ -130,7 +150,7 @@ export function Header() {
                   <Button variant="outline" size="sm">{t("nav.login")}</Button>
                 </Link>
                 <Link to="/kayit">
-                  <Button size="sm">{t("nav.register")}</Button>
+                  <Button size="sm" className="shadow-lg shadow-primary/20">{t("nav.register")}</Button>
                 </Link>
               </div>
             )}
@@ -140,7 +160,7 @@ export function Header() {
           <div className="flex md:hidden items-center gap-2">
             <NotificationBell />
             <button
-              className="p-2 text-muted-foreground hover:bg-muted rounded-full transition-colors active:scale-90"
+              className="p-2 text-muted-foreground hover:bg-muted rounded-xl transition-all active:scale-95 bg-muted/50"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
             >
@@ -150,12 +170,12 @@ export function Header() {
         </div>
 
         {mobileOpen && (
-          <div className="md:hidden border-t border-border py-4 space-y-2">
-            {navLinks.map((link) => (
+          <div className="md:hidden border-t border-border py-6 px-4 space-y-4 bg-background/95 backdrop-blur-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+            {[...primaryLinks, ...secondaryLinks].map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted"
+                className="block px-4 py-3 text-base font-semibold text-foreground hover:text-accent rounded-2xl hover:bg-accent/5 transition-all border border-transparent hover:border-accent/10"
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}
