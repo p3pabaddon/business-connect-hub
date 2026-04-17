@@ -38,7 +38,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o',
         messages: [{ role: 'system', content: systemPrompt }, ...messages],
-        temperature: temperature || 0.7,
+        temperature: temperature || 0.3,
+        max_tokens: 1000, // Vision analizleri için gerekli
       }),
     })
 
