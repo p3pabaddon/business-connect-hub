@@ -166,9 +166,17 @@ export async function analyzeImageStyle(base64Image: string) {
       throw new Error("Yapay zeka yanıt oluşturamadı. Lütfen tekrar deneyin.");
     }
 
-    // Gelişmiş JSON Ayıklayıcı: Metin içindeki ilk { ve son } arasını alır.
-    const jsonMatch = resultText.match(/\{[\s\S]*\}/);
-    const cleanedJson = jsonMatch ? jsonMatch[0] : resultText.replace(/```json|```/g, "").trim();
+    // Kurşun Geçirmez JSON Ayıklayıcı: İlk { ve son } indislerini bulur.
+    const startIndex = resultText.indexOf('{');
+    const endIndex = resultText.lastIndexOf('}');
+    
+    let cleanedJson = resultText;
+    if (startIndex !== -1 && endIndex !== -1) {
+      cleanedJson = resultText.substring(startIndex, endIndex + 1);
+    }
+
+    console.log("AI Raw Response:", resultText);
+    console.log("Extracted Cleaned JSON:", cleanedJson);
     
     try {
       const parsed = JSON.parse(cleanedJson);
@@ -177,8 +185,9 @@ export async function analyzeImageStyle(base64Image: string) {
       }
       return parsed;
     } catch (parseErr) {
-      console.error("JSON Parse Error. Raw text:", resultText);
-      if (resultText && resultText.length > 5 && !resultText.includes("{")) {
+      console.error("JSON Parse Error:", parseErr);
+      // Eğer JSON değilse ama düz metinse (Örn: "Üzgünüm...")
+      if (!cleanedJson.includes("{")) {
         throw new Error(resultText);
       }
       throw new Error("Yapay zeka formatı bozuk bir yanıt verdi.");
