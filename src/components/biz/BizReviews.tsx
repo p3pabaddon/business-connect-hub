@@ -80,24 +80,34 @@ export function BizReviews({ reviews, onRefresh }: Props) {
       return;
     }
 
-    // Optimistic update
+    // Attempt to save vote locally first to avoid re-clicks while processing
+    const currentVotes = [...votedReviews, reviewId];
+    setVotedReviews(currentVotes);
+    localStorage.setItem("randevu_helpful_votes", JSON.stringify(currentVotes));
+
+    // Optimistic update for UI count
     setLocalHelpfulCounts(prev => ({
       ...prev,
       [reviewId]: (prev[reviewId] || reviews.find(r => r.id === reviewId)?.helpful_count || 0) + 1
     }));
     
-    saveVote(reviewId);
-
     try {
       await markReviewHelpful(reviewId);
-      toast.success("Oyunuz kaydedildi!");
-      // No need to refresh immediately if we have optimistic update, 
-      // but we do it to keep sync with DB
-      setTimeout(onRefresh, 2000); 
-    } catch (error) {
-      toast.error("İşlem başarısız.");
-      // Rollback on error
-      setVotedReviews(prev => prev.filter(id => id !== reviewId));
+      toast.success("Oyunuz başarıyla kaydedildi!");
+      // Delayed refresh to sync with DB
+      setTimeout(onRefresh, 3000); 
+    } catch (error: any) {
+      console.error("Helpful vote error:", error);
+      toast.error("Oylama sırasında bir hata oluştu. Bağlantınızı kontrol edin.");
+      // Rollback
+      const reverted = currentVotes.filter(id => id !== reviewId);
+      setVotedReviews(reverted);
+      localStorage.setItem("randevu_helpful_votes", JSON.stringify(reverted));
+      setLocalHelpfulCounts(prev => {
+        const next = { ...prev };
+        delete next[reviewId];
+        return next;
+      });
     }
   };
 
