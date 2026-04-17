@@ -22,8 +22,8 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        navigateFallback: "index.html",
-        // index.html should be network first
+        navigateFallback: "/index.html",
+        navigateFallbackAllowlist: [/^(?!\/__).*/], // Exclude internal paths
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.mode === 'navigate',
