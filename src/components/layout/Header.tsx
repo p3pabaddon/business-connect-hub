@@ -55,6 +55,9 @@ export function Header() {
             <Link to="/kesfet" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg">
               Keşfet
             </Link>
+            <Link to="/isletmeler" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg">
+              İşletmeler
+            </Link>
             <Link to="/stil-danismani" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg">
               Stil Danışmanı
             </Link>
@@ -168,6 +171,7 @@ export function Header() {
               { href: "/", label: t("nav.home") },
               { href: "/nasil-calisir", label: "Nasıl Çalışır?" },
               { href: "/kesfet", label: "Keşfet" },
+              { href: "/isletmeler", label: "İşletmeler" },
               { href: "/stil-danismani", label: "Stil Danışmanı" },
               { href: "/blog", label: "Blog" },
               { href: "/iletisim", label: t("nav.contact") },
