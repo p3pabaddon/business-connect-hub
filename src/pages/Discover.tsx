@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { SalonCard } from '@/components/Discover/SalonCard';
 import { Loader2, MapPin, Sparkles, RefreshCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { SEOHead } from '@/components/SEOHead';
 
 const Discover = () => {
+  const { user } = useAuth();
   const { coords, loading: geoLoading, error: geoError, getPosition } = useGeolocation();
   const [salons, setSalons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,17 +23,15 @@ const Discover = () => {
     const fetchSalons = async () => {
       setLoading(true);
       try {
-        // Check if we have geolocation
         if (coords) {
           const { data, error } = await supabase.rpc('find_businesses_near', {
             lat: coords.latitude,
             lng: coords.longitude,
-            radius_meters: 100000 // Increased to 100km for better initial results
+            radius_meters: 100000 
           });
           
           if (error) {
             console.error('RPC Error:', error);
-            // Fallback to regular fetch if RPC fails
             throw new Error('RPC_FAILED');
           }
 
@@ -56,7 +56,6 @@ const Discover = () => {
           }
         }
 
-        // Default or Fallback: general fetch
         const { data, error } = await supabase
           .from('businesses')
           .select('*')
@@ -67,14 +66,9 @@ const Discover = () => {
         setSalons(data || []);
       } catch (error: any) {
         console.error('Error fetching salons:', error);
-        
-        // If RPC failed, we already tried fallback above or entered catch.
-        // Only show toast if it's a real unexpected error.
         if (error.message !== 'RPC_FAILED') {
-          toast.error('Salonlar yüklenirken bir hata oluştu. Sayfayı yenilemeyi deneyebilirsiniz.');
+          toast.error('Salonlar yüklenirken bir hata oluştu.');
         } else {
-          // If RPC failed but fallback succeeded, we don't need a toast
-          // This part handles the case where catch is hit from throw new Error('RPC_FAILED')
           const { data, error: fbError } = await supabase
             .from('businesses')
             .select('*')
@@ -89,12 +83,31 @@ const Discover = () => {
     fetchSalons();
   }, [coords]);
 
-  const handleSwipe = (direction: 'left' | 'right') => {
-    if (direction === 'right') {
-      toast.success(`${salons[currentIndex].name} favorilere eklendi!`, {
-        icon: '💖'
-      });
+  const handleSwipe = async (direction: 'left' | 'right') => {
+    const currentSalon = salons[currentIndex];
+    
+    if (direction === 'right' && user && currentSalon) {
+      try {
+        const { error } = await supabase
+          .from('favorites')
+          .upsert({
+            user_id: user.id,
+            business_id: currentSalon.id
+          }, { onConflict: 'user_id,business_id' });
+
+        if (error) throw error;
+
+        toast.success(`${currentSalon.name} favorilere eklendi!`, {
+          icon: '💖'
+        });
+      } catch (err) {
+        console.error('Error adding to favorites:', err);
+        toast.error('Favorilere eklenirken bir sorun oluştu.');
+      }
+    } else if (direction === 'right' && !user) {
+      toast.error('Favorilere eklemek için giriş yapmalısınız.');
     }
+    
     setCurrentIndex(prev => prev + 1);
   };
 
@@ -109,11 +122,10 @@ const Discover = () => {
         title="Yeni İşletmeler Keşfet | Yakınındaki En İyi Salonlar"
         description="Sana en yakın berber, kuaför ve güzellik salonlarını keşfetmenin en eğlenceli yolu. Sağa kaydır ve favorini bul!"
       />
-      {/* Background elements */}
+      
       <div className="absolute top-1/4 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse" />
 
-      {/* Header Info */}
       <div className="text-center mb-8 z-10">
         <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center justify-center gap-3">
           <Sparkles className="text-amber-500 w-8 h-8" />
@@ -121,7 +133,7 @@ const Discover = () => {
         </h1>
         <p className="text-muted-foreground flex items-center justify-center gap-2">
           <MapPin className="w-4 h-4 text-primary" />
-          {coords ? 'Yakınındaki en iyi salonlar' : 'Mükemmel salonunu bulmak için kaydır'}
+          Yakınındaki en iyi salonlar
         </p>
       </div>
 
@@ -164,7 +176,6 @@ const Discover = () => {
         )}
       </div>
 
-      {/* Navigation Help */}
       <div className="mt-8 flex gap-8 z-10 text-xs font-medium text-muted-foreground">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-red-400" />
