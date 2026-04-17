@@ -46,6 +46,36 @@ const BlogPage = () => {
       main_image: "https://images.unsplash.com/photo-1599351431202-1e0f013f899a?auto=format&fit=crop&q=80&w=1200",
       published_at: new Date().toISOString(),
       read_time: '6 dk'
+    },
+    {
+      id: 'f4',
+      title: "Minimalist Güzellik: Az Ama Öz Ürünle Işıldayın",
+      slug: "minimalist-guzellik-rehberi",
+      category: "Bakım",
+      excerpt: "Karmaşık rutinler yerine sadeleşin. İhtiyacınız olan sadece 3 temel ürünle maksimum verim almanın yollarını açıklıyoruz.",
+      main_image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString(),
+      read_time: '3 dk'
+    },
+    {
+      id: 'f5',
+      title: "Master Barber Olmanın Sırları: Teknikten Sanata Yolculuk",
+      slug: "master-barber-olmanin-sirlari",
+      category: "Barber",
+      excerpt: "Sadece makas tutmak yetmez, bir vizyon inşa etmelisiniz. Dünyaca ünlü berberlerden kariyer tavsiyeleri.",
+      main_image: "https://images.unsplash.com/photo-1512690196236-d4f13470764b?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString(),
+      read_time: '8 dk'
+    },
+    {
+      id: 'f6',
+      title: "Parfüm Seçiminde Mevsimlerin Etkisi",
+      slug: "mevsime-gore-parfum-secimi",
+      category: "Moda",
+      excerpt: "Hangi koku hangi havada daha iyi yayılır? Kışın baharatlı, yazın ferah notalar seçmenin bilimsel nedenleri.",
+      main_image: "https://images.unsplash.com/photo-1541604193435-22287d32c2c2?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString(),
+      read_time: '5 dk'
     }
   ];
 

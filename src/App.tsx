@@ -68,6 +68,7 @@ const AppContent = () => {
     pathname.startsWith("/admin-secure") || 
     pathname.startsWith("/hq-dashboard") ||
     pathname.startsWith("/hq-intelligence") ||
+    pathname.startsWith("/hq-gate") ||
     pathname.startsWith("/personel-paneli") ||
     pathname.startsWith("/profil");
 

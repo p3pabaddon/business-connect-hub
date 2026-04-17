@@ -155,7 +155,7 @@ const IsletmeBasvuruPage = () => {
     <div className="min-h-screen flex flex-col">
       <SEOHead 
         title="İşletmeni Ekle | Ücretsiz Randevu Sistemi ve Takip Programı" 
-        description="Berber, kuaför veya güzellik salonunuz için ücretsiz randevu sistemi kurun. Randevunurunuzu kolayca yönetin, müşteri sadakatini artırın ve gelirinizi katlayın." 
+        description="Berber, kuaför veya güzellik salonunuz için ücretsiz randevu sistemi kurun. Randevularınızı kolayca yönetin, müşteri sadakatini artırın ve gelirinizi katlayın." 
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebPage",

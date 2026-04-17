@@ -82,9 +82,72 @@ const BlogPostPage = () => {
         <p><strong>Kare Yüz:</strong> Yanları kısa tutarak çene bölgesini biraz daha uzun bırakın. Bu, yüzü daha ince ve uzun gösterir.</p>
         <p><strong>Yuvarlak Yüz:</strong> Çene hattında açılı bir kesim tercih ederek yüzünüze definisyon katın. Yuvarlaklığı kırmak için köşeli hatlar oluşturun.</p>
         
-        <p>Unutmayın, sakal boyun çizgisi her zaman adem elmasının iki parmak üzerinde bitmelidir. Daha aşağısı bakımsız bir görünüme neden olur. Profesyonel bir sakal bakımı için bizi her zaman ziyaret edebilirsiniz.</p>
+        <p>Unutmayın, sakal boyun çizgisi her zaman adem elmasının iki parmak üzerinde bitmelidir. Profesyonel bir sakal bakımı için bizi her zaman ziyaret edebilirsiniz.</p>
       `,
       main_image: "https://images.unsplash.com/photo-1599351431202-1e0f013f899a?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString()
+    },
+    {
+      id: 'f4',
+      title: "Minimalist Güzellik: Az Ama Öz Ürünle Işıldayın",
+      slug: "minimalist-guzellik-rehberi",
+      category: "Bakım",
+      excerpt: "Karmaşık rutinler yerine sadeleşin. İhtiyacınız olan sadece 3 temel ürünle maksimum verim almanın yollarını açıklıyoruz.",
+      content: `
+        <h2>Sadelik En Büyük Lükstür</h2>
+        <p>20 ticari ürünle dolu raflar artık geride kaldı. Modern cilt bakımı 'skin-minimalism' akımıyla sadeleşiyor.</p>
+        
+        <h3>İhtiyacınız Olan 3 Temel Ürün</h3>
+        <p><strong>1. Kaliteli Bir Temizleyici:</strong> Cildin doğal bariyerine zarar vermeyen, pH dengeli bir yıkama jeli.</p>
+        <p><strong>2. Geniş Spektrumlu Güneş Kremi:</strong> Yaşlanma karşıtı en güçlü silahınız. Sadece yazın değil, her gün kullanmalısınız.</p>
+        <p><strong>3. Nemlendirici:</strong> Cilt tipinize uygun, hiyalüronik asit veya seramid içeren bir bariyer koruyucu.</p>
+        
+        <p>Cildinizi yormak yerine ona nefes alacak alan tanıyın. Az ürün, daha az iritasyon ve daha sürdürülebilir bir güzellik demektir.</p>
+      `,
+      main_image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString()
+    },
+    {
+      id: 'f5',
+      title: "Master Barber Olmanın Sırları: Teknikten Sanata Yolculuk",
+      slug: "master-barber-olmanin-sirlari",
+      category: "Barber",
+      excerpt: "Sadece makas tutmak yetmez, bir vizyon inşa etmelisiniz. Dünyaca ünlü berberlerden kariyer tavsiyeleri.",
+      content: `
+        <h2>Zanaattan Sanata</h2>
+        <p>Bir berber koltuğu, sadece saç kesilen bir yer değil; hikayelerin paylaşıldığı ve güvenin inşa edildiği bir kürsüdür.</p>
+        
+        <h3>Profesyonelliğin 3 Sütunu</h3>
+        <ol>
+          <li><strong>Sürekli Eğitim:</strong> Trendler her ay değişir. Klasik tekniklerinizi modern dokunuşlarla her gün güncelleyin.</li>
+          <li><strong>Ekipman Kalitesi:</strong> Makasınız elinizin bir uzantısıdır. En iyi ekipmana yatırım yapmak, işinize duyduğunuz saygının göstergesidir.</li>
+          <li><strong>İletişim Sanatı:</strong> Müşterinizin ne istediğini duymak yetmez, ne hissetmek istediğini anlamalısınız.</li>
+        </ol>
+        
+        <blockquote>"İyi bir berber saç keser, usta bir berber karakteri ortaya çıkarır."</blockquote>
+      `,
+      main_image: "https://images.unsplash.com/photo-1512690196236-d4f13470764b?auto=format&fit=crop&q=80&w=1200",
+      published_at: new Date().toISOString()
+    },
+    {
+      id: 'f6',
+      title: "Parfüm Seçiminde Mevsimlerin Etkisi",
+      slug: "mevsime-gore-parfum-secimi",
+      category: "Moda",
+      excerpt: "Hangi koku hangi havada daha iyi yayılır? Kışın baharatlı, yazın ferah notalar seçmenin bilimsel nedenleri.",
+      content: `
+        <h2>Kokuların Mevsimsel Yolculuğu</h2>
+        <p>Sıcaklık ve nem, parfüm moleküllerinin teninizde nasıl buharlaştığını doğrudan etkiler.</p>
+        
+        <h3>Kış ve Sonbahar: Yoğun ve Sıcak</h3>
+        <p>Soğuk havada parfümler daha yavaş yayılır. Bu yüzden öd ağacı, vanilya, kehribar gibi ağır ve kalıcı notalar tercih edilmelidir.</p>
+        
+        <h3>Yaz ve Bahar: Ferah ve Hafif</h3>
+        <p>Yüksek sıcaklık, kokunun hızla uçmasına neden olur. Bergamot, deniz notaları ve narenciye bazlı hafif kokular, sıcak havalarda sizi boğmadan tazelik sunar.</p>
+        
+        <p>Parfümünüzü her zaman nabız noktalarına (bilek, boyun) uygulayın ve mevsim değişimlerinde imza kokunuzu güncellemeyi unutmayın.</p>
+      `,
+      main_image: "https://images.unsplash.com/photo-1541604193435-22287d32c2c2?auto=format&fit=crop&q=80&w=1200",
       published_at: new Date().toISOString()
     }
   ];
