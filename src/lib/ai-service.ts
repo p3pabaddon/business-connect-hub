@@ -166,19 +166,22 @@ export async function analyzeImageStyle(base64Image: string) {
       throw new Error("Yapay zeka yanıt oluşturamadı. Lütfen tekrar deneyin.");
     }
 
-    const cleanedJson = resultText.replace(/```json|```/g, "").trim();
+    // Gelişmiş JSON Ayıklayıcı: Metin içindeki ilk { ve son } arasını alır.
+    const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+    const cleanedJson = jsonMatch ? jsonMatch[0] : resultText.replace(/```json|```/g, "").trim();
     
     try {
       const parsed = JSON.parse(cleanedJson);
-      if (parsed.error) {
+      if (parsed.error && !parsed.faceShape) {
         throw new Error(parsed.error);
       }
       return parsed;
     } catch (parseErr) {
-      if (resultText && resultText.length > 5) {
+      console.error("JSON Parse Error. Raw text:", resultText);
+      if (resultText && resultText.length > 5 && !resultText.includes("{")) {
         throw new Error(resultText);
       }
-      throw new Error("Yapay zeka anlaşılmaz bir yanıt verdi.");
+      throw new Error("Yapay zeka formatı bozuk bir yanıt verdi.");
     }
   } catch (err: any) {
     console.error("Style analysis failed:", err);
