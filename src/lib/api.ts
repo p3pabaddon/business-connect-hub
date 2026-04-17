@@ -21,32 +21,38 @@ export async function getBusinesses(filters?: { city?: string; district?: string
     query = query.or(`name.ilike.%${filters.search}%,category.ilike.%${filters.search}%`);
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
-  
-  // Inject mock latitude and longitude based on city or name for location sorting to work
-  // This is a fallback until `latitude` and `longitude` are added to the DB schema
-  const mappedData = data?.map((biz: any) => {
-    // Generate deterministic pseudo-random offset based on ID
-    const hash = biz.id.charCodeAt(0) + (biz.id.charCodeAt(biz.id.length-1) || 0);
-    const offsetLat = (hash % 100) * 0.001;
-    const offsetLng = (hash % 100) * 0.001;
+  try {
+    const { data, error } = await query;
+    if (error) {
+      console.error("Supabase error fetching businesses:", error);
+      return [];
+    }
     
-    let baseLat = 41.0082; // Istanbul default
-    let baseLng = 28.9784;
-    
-    if (biz.city === "Ankara") { baseLat = 39.9334; baseLng = 32.8597; }
-    else if (biz.city === "İzmir") { baseLat = 38.4192; baseLng = 27.1287; }
-    else if (biz.city === "Bursa") { baseLat = 40.1826; baseLng = 29.0669; }
+    if (!data || data.length === 0) return [];
 
-    return {
-      ...biz,
-      latitude: baseLat + offsetLat,
-      longitude: baseLng + offsetLng
-    };
-  });
+    // Inject mock latitude and longitude for location sorting
+    return data.map((biz: any) => {
+      const hash = biz.id.charCodeAt(0) + (biz.id.charCodeAt(biz.id.length-1) || 0);
+      const offsetLat = (hash % 100) * 0.001;
+      const offsetLng = (hash % 100) * 0.001;
+      
+      let baseLat = 41.0082; // Istanbul default
+      let baseLng = 28.9784;
+      
+      if (biz.city === "Ankara") { baseLat = 39.9334; baseLng = 32.8597; }
+      else if (biz.city === "İzmir") { baseLat = 38.4192; baseLng = 27.1287; }
+      else if (biz.city === "Bursa") { baseLat = 40.1826; baseLng = 29.0669; }
 
-  return mappedData;
+      return {
+        ...biz,
+        latitude: baseLat + offsetLat,
+        longitude: baseLng + offsetLng
+      };
+    });
+  } catch (err) {
+    console.error("Critical error in getBusinesses:", err);
+    return [];
+  }
 }
 
 export async function getBusinessBySlug(slug: string) {
