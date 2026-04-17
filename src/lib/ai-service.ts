@@ -177,13 +177,21 @@ Sen dünyanın en iyi stilistisin. Görevin, yüklenen fotoğraftaki yüz tipini
     }
 
     const cleanedJson = resultText.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(cleanedJson);
     
-    if (parsed.error) {
-      throw new Error(parsed.error);
+    try {
+      const parsed = JSON.parse(cleanedJson);
+      if (parsed.error) {
+        throw new Error(parsed.error);
+      }
+      return parsed;
+    } catch (parseErr) {
+      // Eğer JSON değilse ama düz metinse (Örn: "Üzgünüm, bu görseli analiz edemem...")
+      // Bu metni kullanıcıya hata olarak göster.
+      if (resultText && resultText.length > 5) {
+        throw new Error(resultText);
+      }
+      throw new Error("Yapay zeka anlaşılmaz bir yanıt verdi. Lütfen tekrar deneyin.");
     }
-    
-    return parsed;
   } catch (err: any) {
     console.error("Style analysis failed:", err);
     throw new Error(err.message || "Analiz sırasında bir teknik hata oluştu.");
