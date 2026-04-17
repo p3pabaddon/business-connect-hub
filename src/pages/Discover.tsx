@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { SEOHead } from '@/components/SEOHead';
 
 const Discover = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { coords, loading: geoLoading, error: geoError, getPosition } = useGeolocation();
   const [salons, setSalons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,6 +88,7 @@ const Discover = () => {
     
     if (direction === 'right' && user && currentSalon) {
       try {
+        console.log('Adding to favorites:', { userId: user.id, businessId: currentSalon.id });
         const { error } = await supabase
           .from('favorites')
           .upsert({
@@ -95,7 +96,10 @@ const Discover = () => {
             business_id: currentSalon.id
           }, { onConflict: 'user_id,business_id' });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase error adding favorite:', error);
+          throw error;
+        }
 
         toast.success(`${currentSalon.name} favorilere eklendi!`, {
           icon: '💖'
@@ -138,7 +142,7 @@ const Discover = () => {
       </div>
 
       <div className="relative w-full flex-1 flex justify-center items-center">
-        {loading || geoLoading ? (
+        {loading || geoLoading || authLoading ? (
           <div className="flex flex-col items-center gap-4 text-muted-foreground">
             <Loader2 className="w-12 h-12 animate-spin text-primary" />
             <p className="animate-pulse">Senin için en yakın salonlar aranıyor...</p>
