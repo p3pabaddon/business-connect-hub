@@ -15,6 +15,14 @@ import { Business } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface BizPremiumHubProps {
   business: Business;
@@ -23,48 +31,8 @@ interface BizPremiumHubProps {
 
 export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
-
-  const handlePurchase = async (planId: string) => {
-    setPurchasingId(planId);
-    try {
-      const updates: any = {};
-      const now = new Date();
-      
-      if (planId === "boost") {
-        updates.is_featured = true;
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        updates.featured_until = tomorrow.toISOString();
-        // Skip approval if paying
-        updates.status = "approved";
-        updates.is_active = true;
-      } else if (planId === "pro") {
-        updates.is_premium = true;
-        updates.personnel_limit = 99;
-        updates.status = "approved";
-        updates.is_active = true;
-      } else if (planId === "branding") {
-        updates.branding_config = { ...(business.branding_config || {}), custom_colors: true };
-        updates.status = "approved";
-        updates.is_active = true;
-      }
-
-      const { error } = await supabase
-        .from("businesses")
-        .update(updates)
-        .eq("id", business.id);
-
-      if (error) throw error;
-      
-      alert("Tebrikler! Özellik başarıyla aktifleştirildi.");
-      onUpdate();
-    } catch (err) {
-      console.error("Purchase error:", err);
-      alert("Bir hata oluştu. Lütfen tekrar deneyiniz.");
-    } finally {
-      setPurchasingId(null);
-    }
-  };
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successItem, setSuccessItem] = useState<{title: string, icon: any} | null>(null);
 
   const plans = [
     {
@@ -104,6 +72,53 @@ export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
       bgColor: "bg-blue-500/10",
     }
   ];
+
+  const handlePurchase = async (planId: string) => {
+    setPurchasingId(planId);
+    try {
+      const updates: any = {};
+      const now = new Date();
+      
+      if (planId === "boost") {
+        updates.is_featured = true;
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        updates.featured_until = tomorrow.toISOString();
+        // Skip approval if paying
+        updates.status = "approved";
+        updates.is_active = true;
+      } else if (planId === "pro") {
+        updates.is_premium = true;
+        updates.personnel_limit = 99;
+        updates.status = "approved";
+        updates.is_active = true;
+      } else if (planId === "branding") {
+        updates.branding_config = { ...(business.branding_config || {}), custom_colors: true };
+        updates.status = "approved";
+        updates.is_active = true;
+      }
+
+      const { error } = await supabase
+        .from("businesses")
+        .update(updates)
+        .eq("id", business.id);
+
+      if (error) throw error;
+      
+      const plan = plans.find(p => p.id === planId);
+      setSuccessItem({ title: plan?.title || "Özellik", icon: plan?.icon || CheckCircle2 });
+      setShowSuccess(true);
+      
+      onUpdate();
+    } catch (err) {
+      console.error("Purchase error:", err);
+      toast.error("İşlem Başarısız", {
+        description: "Ödeme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyiniz.",
+      });
+    } finally {
+      setPurchasingId(null);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -247,6 +262,46 @@ export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
            </Button>
         </div>
       </div>
+
+      <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <DialogContent className="sm:max-w-md bg-slate-950 border-slate-800 rounded-[2.5rem] overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[80px] -mr-32 -mt-32 rounded-full" />
+          
+          <DialogHeader className="relative z-10 pt-6">
+            <div className="mx-auto w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 mb-4 shadow-xl shadow-emerald-500/5">
+              {successItem && <successItem.icon className="w-10 h-10 text-emerald-500" />}
+            </div>
+            <DialogTitle className="text-2xl font-black text-white text-center uppercase tracking-tight">KONTROL SİZDE! 🎉</DialogTitle>
+            <DialogDescription className="text-slate-400 text-center text-sm font-medium pt-2 italic leading-relaxed">
+              <strong>{successItem?.title}</strong> başarıyla aktifleştirildi. İşletmeniz artık daha güçlü ve profesyonel!
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="relative z-10 p-6 flex flex-col gap-4">
+             <div className="space-y-3 bg-white/5 border border-white/10 p-5 rounded-3xl">
+                <div className="flex items-center gap-3">
+                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                   <span className="text-xs text-slate-300 font-bold">Özellik anında tanımlandı</span>
+                </div>
+                <div className="flex items-center gap-3">
+                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                   <span className="text-xs text-slate-300 font-bold">Tüm kullanıcılar için aktif</span>
+                </div>
+                <div className="flex items-center gap-3">
+                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                   <span className="text-xs text-slate-300 font-bold">Abonelik durumu güncellendi</span>
+                </div>
+             </div>
+
+             <Button 
+               onClick={() => setShowSuccess(false)}
+               className="w-full h-14 bg-primary text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+             >
+               HARİKA, DEVAM ET
+             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
