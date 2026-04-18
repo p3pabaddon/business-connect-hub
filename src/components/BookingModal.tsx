@@ -15,7 +15,6 @@ import { tr } from "date-fns/locale";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { calculateSmartPrice, generateTimeSlots, getWorkingHoursForDay, isSlotOccupied } from "@/lib/booking-utils";
 import { supabase } from "@/lib/supabase";
-import { sendEmail, EMAIL_TEMPLATES } from "@/lib/email-service";
 
 interface Service {
   id: string;
@@ -96,10 +95,10 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
 
   const fetchOccupiedSlots = async () => {
     if (!selectedDate || loadingSlots) return; // Prevent double trigger
-    
+
     setLoadingSlots(true);
     const safetyTimeout = setTimeout(() => setLoadingSlots(false), 8000); // Emergency stop
-    
+
     try {
       const dateStr = format(selectedDate, "yyyy-MM-dd");
       console.log("Fetching slots for:", businessId, dateStr);
@@ -124,7 +123,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
   const smartBasePrice = chosenServices.reduce((sum, s) => {
     return sum + calculateSmartPrice(Number(s.price), selectedDate, dynamicPricing).price;
   }, 0);
-  
+
   const totalPrice = (() => {
     if (!appliedCoupon) return smartBasePrice;
     if (appliedCoupon.discount_type === "percentage") {
@@ -161,7 +160,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
       });
       setInWaitlist(true);
       toast.success("Sıraya eklendiniz!", { description: "Yer açıldığında size bildirim ve e-posta göndereceğiz." });
-      
+
       // 2 saniye sonra otomatik kapat
       setTimeout(() => {
         handleClose(false);
@@ -194,26 +193,14 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
     const code = generateOTP();
     setGeneratedCode(code);
 
-    try {
-      const { success, error } = await sendEmail({
-        to: customerEmail,
-        subject: "Randevu Dünyası - Doğrulama Kodu",
-        html: EMAIL_TEMPLATES.verification(code),
-      });
-
-      if (!success) throw error;
-
+    setTimeout(() => {
       setCodeSent(true);
-      setCountdown(120);
-      toast.success("Doğrulama kodu gönderildi", {
-        description: `${customerEmail} adresine doğrulama kodu başarıyla gönderildi. | Kalan hak: ${otpCheck.remaining}`,
-      });
-    } catch (error: any) {
-      console.error("Email send error:", error);
-      toast.error("Kod gönderilemedi", { description: "Mail servisimizde bir sorun oluştu. Lütfen daha sonra tekrar deneyin." });
-    } finally {
       setSendingCode(false);
-    }
+      setCountdown(120);
+      toast.info("Doğrulama kodu gönderildi", {
+        description: `${customerEmail} adresine doğrulama kodu gönderildi. (Demo kod: ${code}) | Kalan hak: ${otpCheck.remaining}`,
+      });
+    }, 1000);
   };
 
   const handleVerifyCode = () => {
@@ -376,32 +363,31 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                 <button
                   key={service.id}
                   onClick={() => toggleService(service.id)}
-                  className={`w-full text-left p-4 rounded-xl border transition-colors ${
-                    selectedServices.includes(service.id)
+                  className={`w-full text-left p-4 rounded-xl border transition-colors ${selectedServices.includes(service.id)
                       ? "border-accent bg-accent/5"
                       : "border-border hover:border-accent/30"
-                  }`}
+                    }`}
                 >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium text-foreground">{service.name}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                      <Clock className="w-3.5 h-3.5" /> {service.duration} dk
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-accent">
-                      {calculateSmartPrice(service.price, selectedDate, dynamicPricing).price} TL
-                    </div>
-                    {calculateSmartPrice(service.price, selectedDate, dynamicPricing).multiplier !== 1 && (
-                      <div className="text-xs text-accent/80 font-medium">
-                        {calculateSmartPrice(service.price, selectedDate, dynamicPricing).label}
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-foreground">{service.name}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <Clock className="w-3.5 h-3.5" /> {service.duration} dk
                       </div>
-                    )}
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-accent">
+                        {calculateSmartPrice(service.price, selectedDate, dynamicPricing).price} TL
+                      </div>
+                      {calculateSmartPrice(service.price, selectedDate, dynamicPricing).multiplier !== 1 && (
+                        <div className="text-xs text-accent/80 font-medium">
+                          {calculateSmartPrice(service.price, selectedDate, dynamicPricing).label}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </button>
-            )))}
+                </button>
+              )))}
             {selectedServices.length > 0 && (
               <div className="flex justify-between items-center pt-3 border-t border-border">
                 <span className="text-sm text-muted-foreground">
@@ -420,9 +406,8 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
           <div className="space-y-3 mt-4">
             <button
               onClick={() => setSelectedStaff(null)}
-              className={`w-full text-left p-4 rounded-xl border transition-colors ${
-                selectedStaff === null ? "border-accent bg-accent/5" : "border-border hover:border-accent/30"
-              }`}
+              className={`w-full text-left p-4 rounded-xl border transition-colors ${selectedStaff === null ? "border-accent bg-accent/5" : "border-border hover:border-accent/30"
+                }`}
             >
               <p className="font-medium text-foreground">Fark etmez</p>
               <p className="text-sm text-muted-foreground">Müsait herhangi bir personel</p>
@@ -431,9 +416,8 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
               <button
                 key={member.id}
                 onClick={() => setSelectedStaff(member.id)}
-                className={`w-full text-left p-4 rounded-xl border transition-colors ${
-                  selectedStaff === member.id ? "border-accent bg-accent/5" : "border-border hover:border-accent/30"
-                }`}
+                className={`w-full text-left p-4 rounded-xl border transition-colors ${selectedStaff === member.id ? "border-accent bg-accent/5" : "border-border hover:border-accent/30"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
@@ -466,11 +450,11 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 if (date < today) return true;
-                
+
                 // Final safety check: if workingHours is empty or malformed, 
                 // we treat the business as 'Always Open' for the UI to prevent total lock-out
                 if (!workingHours || Object.keys(workingHours).length === 0) return false;
-                
+
                 return !getWorkingHoursForDay(workingHours, date);
               }}
               className="rounded-xl border border-border mx-auto"
@@ -487,10 +471,10 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                   try {
                     const dayHours = getWorkingHoursForDay(workingHours, selectedDate);
                     if (!dayHours) return <p className="text-center text-sm text-destructive">Bugün kapalı.</p>;
-                    
+
                     const slots = generateTimeSlots(dayHours.start, dayHours.end, 30, dayHours.breakStart, dayHours.breakEnd) || [];
                     const sList = staff || [];
-                    const isToday = selectedDate && format(selectedDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd"); 
+                    const isToday = selectedDate && format(selectedDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
                     const nowTime = format(new Date(), "HH:mm");
 
                     const validSlots = slots.filter(time => {
@@ -498,37 +482,36 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                       if (isToday && time <= nowTime) return false;
                       return true;
                     });
-                    
+
                     if (validSlots.length > 0) {
                       return (
                         <div className="space-y-4">
                           <div className="grid grid-cols-4 gap-2">
                             {validSlots.map((time) => {
                               const isOccupied = isSlotOccupied(time, occupiedSlots || [], selectedStaff, sList.length, totalDuration);
-                              
+
                               return (
                                 <button
                                   key={time}
                                   onClick={() => setSelectedTime(time)}
-                                  className={`py-2 text-sm rounded-lg border transition-colors ${
-                                    isOccupied
+                                  className={`py-2 text-sm rounded-lg border transition-colors ${isOccupied
                                       ? selectedTime === time
                                         ? "border-yellow-500 bg-yellow-500/20 text-yellow-400 ring-1 ring-yellow-500/50"
                                         : "border-muted bg-muted/30 text-muted-foreground opacity-50 line-through decoration-accent/50"
                                       : selectedTime === time
                                         ? "border-accent bg-accent text-accent-foreground"
                                         : "border-border hover:border-accent/30 text-foreground"
-                                  }`}
+                                    }`}
                                 >
                                   {time}
                                 </button>
                               );
                             })}
                           </div>
-                          
+
                           <div className="pt-4 border-t border-border/50 text-center">
-                             <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-2">İstediğiniz saat dolu mu?</p>
-                             <p className="text-xs text-muted-foreground">Üzeri çizili saatlere tıklayarak o saate özel bekleme listesine katılabilirsiniz.</p>
+                            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-2">İstediğiniz saat dolu mu?</p>
+                            <p className="text-xs text-muted-foreground">Üzeri çizili saatlere tıklayarak o saate özel bekleme listesine katılabilirsiniz.</p>
                           </div>
                         </div>
                       );
@@ -559,15 +542,15 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                 const isSelectedOccupied = selectedTime ? isSlotOccupied(selectedTime, occupiedSlots || [], selectedStaff, sList.length, totalDuration) : false;
 
                 if (isSelectedOccupied) {
-                   return (
-                     <Button 
-                       className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white" 
-                       disabled={!selectedDate || !selectedTime || loadingSlots || waitlistLoading || inWaitlist} 
-                       onClick={handleJoinWaitlist}
-                     >
-                       {inWaitlist ? "Sıraya Girdiniz ✅" : waitlistLoading ? "Ekleniyor..." : "Bekleme Listesine Katıl"}
-                     </Button>
-                   );
+                  return (
+                    <Button
+                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white"
+                      disabled={!selectedDate || !selectedTime || loadingSlots || waitlistLoading || inWaitlist}
+                      onClick={handleJoinWaitlist}
+                    >
+                      {inWaitlist ? "Sıraya Girdiniz ✅" : waitlistLoading ? "Ekleniyor..." : "Bekleme Listesine Katıl"}
+                    </Button>
+                  );
                 }
 
                 return (
@@ -618,10 +601,10 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
               </div>
               <div>
                 <Label htmlFor="booking-notes">Randevu Notu (Opsiyonel)</Label>
-                <textarea 
-                  id="booking-notes" 
-                  value={customerNotes} 
-                  onChange={(e) => setCustomerNotes(e.target.value)} 
+                <textarea
+                  id="booking-notes"
+                  value={customerNotes}
+                  onChange={(e) => setCustomerNotes(e.target.value)}
                   placeholder="İşletmeye iletmek istediğiniz özel bir not var mı?"
                   className="w-full mt-1 min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
@@ -634,15 +617,14 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                 </Label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <Input 
-                      id="coupon-code" 
-                      value={couponCode} 
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())} 
-                      placeholder="KODUNUZ" 
-                      className={`uppercase tracking-widest font-mono text-sm ${
-                        appliedCoupon ? "bg-emerald-500/10 border-emerald-500 text-emerald-500 focus-visible:ring-emerald-500" : 
-                        couponError ? "bg-destructive/10 border-destructive text-destructive focus-visible:ring-destructive" : ""
-                      }`}
+                    <Input
+                      id="coupon-code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="KODUNUZ"
+                      className={`uppercase tracking-widest font-mono text-sm ${appliedCoupon ? "bg-emerald-500/10 border-emerald-500 text-emerald-500 focus-visible:ring-emerald-500" :
+                          couponError ? "bg-destructive/10 border-destructive text-destructive focus-visible:ring-destructive" : ""
+                        }`}
                       disabled={appliedCoupon}
                     />
                     {appliedCoupon && (
@@ -653,19 +635,19 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                     )}
                   </div>
                   {!appliedCoupon ? (
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={handleVerifyCoupon} 
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleVerifyCoupon}
                       disabled={couponLoading || !couponCode}
                       className="shrink-0"
                     >
                       {couponLoading ? "..." : "Uygula"}
                     </Button>
                   ) : (
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
+                    <Button
+                      type="button"
+                      variant="ghost"
                       size="icon"
                       onClick={() => {
                         setAppliedCoupon(null);
@@ -679,18 +661,18 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                   )}
                 </div>
                 {couponError && <p className="text-[10px] text-destructive mt-1 font-medium">{couponError}</p>}
-                 {appliedCoupon && (
-                   <p className="text-[10px] text-emerald-500 mt-1 font-medium italic">
-                     {appliedCoupon.discount_type === "percentage" ? `%${appliedCoupon.discount_value}` : `${appliedCoupon.discount_value} TL`} indirim uygulandı! 🎉
-                   </p>
-                 )}
+                {appliedCoupon && (
+                  <p className="text-[10px] text-emerald-500 mt-1 font-medium italic">
+                    {appliedCoupon.discount_type === "percentage" ? `%${appliedCoupon.discount_value}` : `${appliedCoupon.discount_value} TL`} indirim uygulandı! 🎉
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="flex items-start gap-3 p-4 bg-accent/5 border border-accent/20 rounded-xl mt-4">
-              <input 
-                type="checkbox" 
-                id="kvkk-check" 
+              <input
+                type="checkbox"
+                id="kvkk-check"
                 checked={isKvkkAccepted}
                 onChange={(e) => setIsKvkkAccepted(e.target.checked)}
                 className="mt-1 w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent accent-accent cursor-pointer"
@@ -705,7 +687,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
               {(() => {
                 const sList = staff || [];
                 const isSelectedOccupied = selectedTime ? isSlotOccupied(selectedTime, occupiedSlots || [], selectedStaff, sList.length, totalDuration) : false;
-                
+
                 // Eğer seçilen saat doluysa, bekleme listesine katılım butonu göster
                 if (isSelectedOccupied) {
                   return (
@@ -713,9 +695,9 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                       className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white"
                       disabled={
                         !isKvkkAccepted ||
-                        waitlistLoading || 
-                        inWaitlist || 
-                        customerName.trim().length < 3 || 
+                        waitlistLoading ||
+                        inWaitlist ||
+                        customerName.trim().length < 3 ||
                         !/^05\d{9}$/.test(customerPhone.replace(/[\s-]/g, ""))
                       }
                       onClick={handleJoinWaitlist}
@@ -731,8 +713,8 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
                     className="flex-1"
                     disabled={
                       !isKvkkAccepted ||
-                      !customerName.trim().includes(" ") || 
-                      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail) || 
+                      !customerName.trim().includes(" ") ||
+                      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail) ||
                       !/^05\d{9}$/.test(customerPhone.replace(/[\s-]/g, ""))
                     }
                     onClick={async () => {
@@ -830,7 +812,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
 
               </div>
             )}
-            
+
             {codeVerified && (
               <div className="pt-4 border-t border-border mt-4">
                 <Button
@@ -881,8 +863,8 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
 
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setStep(5)}>Geri</Button>
-                <Button 
-                  className="flex-1" 
+                <Button
+                  className="flex-1"
                   onClick={() => {
                     setPaymentSuccess(true);
                     handleSubmit();
