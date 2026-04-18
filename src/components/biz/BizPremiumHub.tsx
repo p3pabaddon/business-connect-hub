@@ -35,11 +35,18 @@ export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
         const tomorrow = new Date(now);
         tomorrow.setDate(tomorrow.getDate() + 1);
         updates.featured_until = tomorrow.toISOString();
+        // Skip approval if paying
+        updates.status = "approved";
+        updates.is_active = true;
       } else if (planId === "pro") {
         updates.is_premium = true;
         updates.personnel_limit = 99;
+        updates.status = "approved";
+        updates.is_active = true;
       } else if (planId === "branding") {
         updates.branding_config = { ...(business.branding_config || {}), custom_colors: true };
+        updates.status = "approved";
+        updates.is_active = true;
       }
 
       const { error } = await supabase

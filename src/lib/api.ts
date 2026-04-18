@@ -89,7 +89,9 @@ export async function getMyBusiness(userId?: string) {
   const { data, error } = await supabase
     .from("businesses")
     .select("*")
-    .eq("owner_id", uid);
+    .eq("owner_id", uid)
+    .order("is_active", { ascending: false })
+    .order("status", { ascending: true }); // 'approved' comes before 'pending' alphabetically? Wait...
 
   if (error) {
     console.error("getMyBusiness error:", error);
@@ -98,8 +100,7 @@ export async function getMyBusiness(userId?: string) {
 
   if (!data || data.length === 0) return null;
 
-  // If multiple businesses exist, we might want to let the user choose eventually,
-  // but for now return the first active one or just the first one.
+  // Prefer active/approved businesses if multiple exist
   return data[0];
 }
 

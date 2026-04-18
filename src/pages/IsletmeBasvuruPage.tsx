@@ -74,6 +74,18 @@ const IsletmeBasvuruPage = () => {
       return;
     }
 
+    // Check if user already has a business to prevent duplicates
+    const { data: existing } = await supabase.from("businesses").select("id").eq("owner_id", user.id).limit(1);
+    if (existing && existing.length > 0) {
+      toast({ 
+        title: "Zaten bir işletmeniz var", 
+        description: "Mevcut işletmeniz üzerinden devam edebilirsiniz. Yeni bir işletme başvurusu için lütfen destekle iletişime geçin.",
+        variant: "destructive" 
+      });
+      navigate("/isletme-paneli");
+      return;
+    }
+
     setSubmitting(true);
     const { error } = await supabase.from("businesses").insert({
       owner_id: user.id,
@@ -232,7 +244,7 @@ const IsletmeBasvuruPage = () => {
                           <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Üyelik Planı *</Label>
                           <div className="grid grid-cols-2 gap-4 mt-2">
                             <div 
-                              onClick={() => setForm({ ...form, plan: "starter", plan_price: 800 })}
+                              onClick={() => setForm({ ...form, plan: "starter", plan_price: 1200 })}
                               className={cn(
                                 "relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col items-center gap-2",
                                 form.plan === "starter" 
@@ -244,7 +256,7 @@ const IsletmeBasvuruPage = () => {
                                 <Zap className={cn("w-4 h-4", form.plan === "starter" ? "text-primary" : "text-muted-foreground")} />
                                 <span className="font-bold text-sm">Starter</span>
                               </div>
-                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺800/Ay</span>
+                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺1200/Ay</span>
                               {form.plan === "starter" && (
                                 <div className="absolute top-2 right-2">
                                   <CheckCircle className="w-4 h-4 text-primary" />
@@ -252,7 +264,7 @@ const IsletmeBasvuruPage = () => {
                               )}
                             </div>
                             <div 
-                              onClick={() => setForm({ ...form, plan: "premium", plan_price: 1200 })}
+                              onClick={() => setForm({ ...form, plan: "premium", plan_price: 2000 })}
                               className={cn(
                                 "relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col items-center gap-2",
                                 form.plan === "premium" 
@@ -264,7 +276,7 @@ const IsletmeBasvuruPage = () => {
                                 <Crown className={cn("w-4 h-4", form.plan === "premium" ? "text-primary" : "text-muted-foreground")} />
                                 <span className="font-bold text-sm">Premium</span>
                               </div>
-                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺1200/Ay</span>
+                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺2000/Ay</span>
                               {form.plan === "premium" && (
                                 <div className="absolute top-2 right-2">
                                   <CheckCircle className="w-4 h-4 text-primary" />

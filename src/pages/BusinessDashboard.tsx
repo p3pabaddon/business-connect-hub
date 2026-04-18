@@ -222,6 +222,29 @@ export default function BusinessDashboard() {
           <Button variant="outline" onClick={() => navigate("/")}>
             Ana Sayfaya Dön
           </Button>
+          
+          {window.location.hostname === "localhost" && (
+            <div className="mt-8 pt-8 border-t border-border/50">
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mb-4">
+                Test Modu: Geliştirici Seçenekleri
+              </p>
+              <Button 
+                variant="secondary" 
+                className="w-full bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20"
+                onClick={async () => {
+                  try {
+                    await supabase.from("businesses").update({ status: 'approved', is_active: true }).eq("id", business.id);
+                    toast.success("İşletme anında onaylandı! (Test Modu)");
+                    reloadBusiness();
+                  } catch (e) {
+                    toast.error("Hata oluştu");
+                  }
+                }}
+              >
+                İşletmeyi Anında Onayla
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     );

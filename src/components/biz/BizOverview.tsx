@@ -233,7 +233,7 @@ export function BizOverview({ stats, recentApts, inventory, isPremium }: Props) 
                      Sınırsız personel, gelişmiş CRM araçları ve yapay zeka desteği için yükseltin.
                    </p>
                    <Button className="w-full h-12 text-[10px] uppercase font-black tracking-widest bg-primary text-white border-none hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-2xl">
-                      ŞİMDİ YÜKSELT (800₺/Ay)
+                      ŞİMDİ YÜKSELT (1200₺/Ay)
                    </Button>
                  </>
                )}
