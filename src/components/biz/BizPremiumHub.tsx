@@ -77,7 +77,7 @@ export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
       icon: Crown,
       title: "Pro İşletme Paketi",
       desc: "Sınırsız personel, gelişmiş analitik ve özel markalama özellikleri.",
-      price: "₺299",
+      price: "₺1200",
       period: "aylık",
       features: ["Sınırsız Personel", "Beyaz Etiket (No Branding)", "Gelişmiş AI Analizler"],
       active: business.is_premium,

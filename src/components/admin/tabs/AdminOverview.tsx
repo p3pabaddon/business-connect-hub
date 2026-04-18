@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Bell, Building2, Users, Calendar, Wallet } from "lucide-react";
+import { TrendingUp, Bell, Building2, Users, Calendar, Wallet, Sparkles, Zap } from "lucide-react";
 import { StatCard, AlertItem } from "../AdminComponents";
+import { cn } from "@/lib/utils";
 
 interface AdminOverviewProps {
   systemStats: {
@@ -38,7 +39,19 @@ export const AdminOverview = ({ systemStats, businesses, pendingCount }: AdminOv
                     <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center text-xs font-black text-primary uppercase">{biz.name?.[0]}</div>
                     <div>
                       <p className="text-sm font-bold text-foreground leading-tight">{biz.name}</p>
-                      <p className="text-[10px] text-muted-foreground font-medium mt-1">{biz.city} • {biz.category}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-[10px] text-muted-foreground font-medium">{biz.city} • {biz.category}</p>
+                        {(biz.plan || biz.is_premium) && (
+                          <Badge variant="outline" className={cn(
+                            "text-[8px] uppercase font-black px-1.5 py-0 rounded-md shrink-0 border-none",
+                            (biz.plan === 'premium' || biz.is_premium) 
+                              ? "bg-amber-500/10 text-amber-500" 
+                              : "bg-primary/10 text-primary"
+                          )}>
+                            {biz.plan || (biz.is_premium ? 'premium' : 'starter')}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <Badge variant={biz.status === 'active' ? 'secondary' : 'outline'} className="text-[9px] font-bold uppercase tracking-tighter h-5">

@@ -2,6 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Receipt, TrendingUp, Building2 } from "lucide-react";
 import { FinanceCard } from "../AdminComponents";
+import { cn } from "@/lib/utils";
 
 interface FinancePanelProps {
   systemStats: {
@@ -31,9 +32,14 @@ export const FinancePanel = ({ systemStats, businesses }: FinancePanelProps) => 
                   <span className="text-foreground font-medium uppercase tracking-tight">{biz.name}</span>
                 </div>
                 <div className="flex items-center gap-6">
-                  <span className="text-muted-foreground text-[10px] uppercase font-bold tabular-nums">12/01/2024</span>
-                  <span className="font-black text-foreground">₺{Math.floor(Math.random() * 1000 + 500)}</span>
-                  <Badge className="bg-emerald-500/10 text-emerald-500 border-none h-5 text-[9px] font-black tabular-nums">MATCH</Badge>
+                  <span className="text-muted-foreground text-[10px] uppercase font-bold tabular-nums">{new Date(biz.created_at).toLocaleDateString()}</span>
+                  <span className="font-black text-foreground">₺{biz.plan_price || 800}</span>
+                  <Badge className={cn(
+                    "border-none h-5 text-[9px] font-black tabular-nums",
+                    (biz.plan === 'premium' || biz.is_premium) ? "bg-amber-500/10 text-amber-500" : "bg-emerald-500/10 text-emerald-500"
+                  )}>
+                    {biz.plan?.toUpperCase() || (biz.is_premium ? 'PREMIUM' : 'STARTER')}
+                  </Badge>
                 </div>
               </div>
             ))}

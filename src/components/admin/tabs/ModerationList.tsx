@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Globe, Clock, Sparkles, RefreshCw, BrainCircuit, Link2, CheckCheck, HelpCircle } from "lucide-react";
+import { Building2, Globe, Clock, Sparkles, RefreshCw, BrainCircuit, Link2, CheckCheck, HelpCircle, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ModerationListProps {
@@ -63,6 +63,21 @@ export const ModerationList = ({
                     <span className="flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {biz.city}</span>
                     <span className="opacity-30">•</span>
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {new Date(biz.created_at).toLocaleDateString()}</span>
+                    {(biz.plan || biz.is_premium) && (
+                      <>
+                        <span className="opacity-30">•</span>
+                        <Badge variant="outline" className={cn(
+                          "text-[10px] uppercase font-black px-2 py-0.5 rounded-lg shrink-0",
+                          (biz.plan === 'premium' || biz.is_premium) 
+                            ? "border-amber-500/20 bg-amber-500/10 text-amber-600" 
+                            : "border-primary/20 bg-primary/10 text-primary"
+                        )}>
+                          {(biz.plan === 'premium' || biz.is_premium) ? <Sparkles className="w-3 h-3 mr-1 inline" /> : <Zap className="w-3 h-3 mr-1 inline" />}
+                          {biz.plan?.toUpperCase() || (biz.is_premium ? 'PREMIUM' : 'STARTER')}
+                          {biz.plan_price && <span className="ml-1 opacity-70">(₺{biz.plan_price})</span>}
+                        </Badge>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
