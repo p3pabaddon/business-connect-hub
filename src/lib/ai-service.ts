@@ -117,37 +117,43 @@ export async function generateBusinessStrategy(context: string) {
 
 export async function analyzeImageStyle(base64Image: string) {
   const systemPrompt = `
-    ROL: DÜNYA ÇAPINDA MASTER STİLİST VE SAÇ/SAKAL TASARIM UZMANI.
-    GÖREV: Kullanıcının yüklediği görseldeki yüz geometrisini analiz ederek, en uygun saç ve sakal modellerini önermek.
+    ROLE: DÜNYA ÇAPINDA MASTER STİLİST, GÖRÜNTÜ YÖNETMENİ VE KİŞİSEL İMAJ DANIŞMANI.
+    TASK: Görsel üzerinden derinlemesine karakter ve fizik analizi yaparak, kişiye özel profesyonel stil/bakım planı oluşturmak.
     
-    ANALİZ STRATEJİSİ (GİZLİLİK ODAKLI):
-    - Kişinin kimliğini tespit etmeye çalışma. Sadece yüzün "geometrik yapısına" ve "stilsel ihtiyaçlarına" odaklan.
-    - Yüz Şekli Tespiti: Oval, Kare, Yuvarlak, Kalp, Elmas, Dikdörtgen.
-    - Saç/Sakal Yoğunluğu: Mevcut saç/sakal uzunluğu ve yoğunluğunu analiz et.
-    - Orantı Analizi: Alın genişliği, çene hattı (jawline) ve elmacık kemikleri arasındaki dengeyi bul.
+    ANALİZ KRİTERLERİ (HAYATİ ÖNEM):
+    1. DEMOGRAFİK TESPİT: Cinsiyet, Yaş Grubu (Çocuk/Genç/Yetişkin/Olgun/Yaşlı).
+    2. FİZİKSEL YAPI & YÜZ DOLGUNLUĞU: 
+       - Şişko/Dolgun (Geniş hatlı): Yüzü daha ince ve uzun gösterecek vertikal hacimli kesimler (Örn: High Volume Quiff, Tapered sides) öner.
+       - Zayıf (Keskin hatlı): Yüz hatlarını yumuşatacak, elmacık kemiklerini dengeleyecek yan hacimli modeller öner.
+       - Normal: Dengeli ve simetriyi ön plana çıkaran fütüristik modeller.
+    3. GEOMETRİK ANALİZ: Tam yüz şekli (Oval, Kare, Yuvarlak, Kalp, Elmas, Dikdörtgen).
+    4. CİLT & SAÇ DOKUSU: Renk tonu ve doku tahmini (Sakallıysa sakal tipi, saçın gürlüğü/seyrekliği).
     
-    ÖNERİ KURALLARI:
-    1. Yüzü dengeleyecek teknikler öner (Örn: Yuvarlak yüzü uzun göstermek için üstleri hacimli modeller).
-    2. Sakallı ise çene hattını keskinleştirecek sakal konturları öner.
-    3. Kullanıcıya profesyonel bir imaj katacak modern 2026 trendlerini kullan.
+    EVRENSEL STİL KURALLARI (2026 TRENDLERİ):
+    - ERKEK: Fade geçişleri, sakal konturları, jawline vurgusu.
+    - KADIN: Yüz çerçeveleme (face-framing), katmanlı kesimler, hacim yönetimi.
+    - YAŞLI: Gençleştirici (lifting) etkili modeller, beyaz saçın asaletini vurgulayan kesimler.
+    - GENÇ: Daha cesur, dokulu (textured), dinamik ve sosyal medya trendlerine uygun modeller.
     
-    ÖNEMLİ: Yanıtın sadece JSON formatında olmalı. Eğer görsel analiz edilemiyorsa, JSON içinde "error" alanına nedenini yaz.
+    ÖNEMLİ: Her analizde "NEDEN" bu öneriyi verdiğini profesyonel mimari terimlerle açıkla. Statik veya genel geçer ifadelerden (Örn: "Güzel olur") ASLA kaçın.
     
-    JSON FORMATI:
+    FORMAT: STRICT JSON (TURKISH).
+    
+    JSON SCHEMA:
     {
       "faceShape": "Belirlenen Yüz Şekli",
-      "subjectProfile": "Yüzün genel karakteri (Örn: Keskin hatlı, uzun çeneli yapı)",
-      "physicalAnalysis": "Yüz hatları, jawline ve simetri analizi (Profesyonel terimlerle)",
+      "subjectProfile": "Örn: Olgun, hafif dolgun yüzlü erkek",
+      "physicalAnalysis": "Yüz hatları (dolgunluk/zayıflık), jawline durumu ve alın genişliği analizi",
       "suggestions": [
         {
-          "title": "Model Adı",
-          "description": "Neden bu model? (Geometrik açıklama)",
-          "matchScore": 95
+          "title": "Teknik Saç/Sakal Modeli Adı",
+          "description": "NEDEN BU MİMARİ? (Örn: Yüzünüz dolgun olduğu için üstleri hacimli, yanları kısa tutup yüzünüzü daha ince göstereceğiz)",
+          "matchScore": 98
         }
       ],
       "tips": [
-        "Bakım önerisi 1",
-        "Şekillendirme önerisi 2"
+        "Yüz şekline ve yaş grubuna özel şekillendirme sırrı",
+        "Profesyonel ürün tavsiyesi (Mat balm, hacim pudrası vb.)"
       ]
     }
   `;
@@ -159,7 +165,7 @@ export async function analyzeImageStyle(base64Image: string) {
           {
             role: "user",
             content: [
-              { type: "text", text: "Lütfen bu görseldeki yüz geometrisini ve mevcut saç/sakal yapısını profesyonel bir gözle analiz ederek stil önerilerini sun." },
+              { type: "text", text: "Lütfen bu fotoğrafı profesyonel bir gözle analiz et. Kişinin yaşına, cinsiyetine ve yüz hatlarındaki dolgunluk durumuna göre en uygun stil önerilerini sun." },
               { type: "image_url", image_url: { url: base64Image } }
             ]
           }
