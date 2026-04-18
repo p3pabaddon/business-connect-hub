@@ -16,8 +16,6 @@ const plans = [
       t("pricing.free_feature4"),
       t("pricing.free_feature5"),
       t("pricing.free_feature6"),
-      t("pricing.free_feature7"),
-      t("pricing.free_feature8")
     ],
     cta: t("pricing.free_cta"), variant: "outline" as const,
   },
