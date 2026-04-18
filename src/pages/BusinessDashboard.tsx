@@ -55,13 +55,27 @@ export default function BusinessDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const premiumTabs = [
+    "waitlist", "performance", "staff-performance", "analytics", 
+    "inventory", "coupons", "loyalty", "marketing", 
+    "portfolio", "page-editor", "notifications"
+  ];
+
+  const { data: business, isLoading: loading, refetch: reloadBusiness } = useMyBusiness();
+
+  useEffect(() => {
+    if (business && !business.is_premium && premiumTabs.includes(activeTab)) {
+      setActiveTab("premium");
+      toast.info("Bu özellik Premium pakete dahildir. Avantajlar sayfasından yükseltme yapabilirsiniz.");
+    }
+  }, [activeTab, business]);
+
   useEffect(() => {
     if (tabParam && tabParam !== activeTab) {
       setActiveTab(tabParam);
     }
   }, [tabParam, activeTab]);
   
-  const { data: business, isLoading: loading, refetch: reloadBusiness } = useMyBusiness();
   const { data: bizData, refetch: reloadAnalytics } = useBizAnalytics(business?.id || "");
   const { data: invData, refetch: reloadInventory } = useInventory(business?.id || "");
   
@@ -223,6 +237,7 @@ export default function BusinessDashboard() {
         businessName={business?.name || "İşletme"} 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
+        isPremium={business?.is_premium}
       />
 
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
@@ -333,7 +348,7 @@ export default function BusinessDashboard() {
            <div className="max-w-[1600px] mx-auto">
               <VerificationGuard>
               {activeTab === "overview" && stats && (
-                 <BizOverview stats={stats} recentApts={appointments} inventory={inventory} />
+                 <BizOverview stats={stats} recentApts={appointments} inventory={inventory} isPremium={business?.is_premium} />
               )}
               {activeTab === "calendar" && (
                  <BizCalendar 
@@ -357,7 +372,13 @@ export default function BusinessDashboard() {
                  <BizReviews reviews={reviews} onRefresh={loadData} />
               )}
               {activeTab === "catalog" && (
-                 <BizCatalog businessId={business?.id} services={services} staff={staff} personnelLimit={business?.personnel_limit || 2} onRefresh={loadData} />
+                 <BizCatalog 
+                   businessId={business?.id} 
+                   services={services} 
+                   staff={staff} 
+                   personnelLimit={business?.is_premium ? 999 : (business?.personnel_limit || 2)} 
+                   onRefresh={loadData} 
+                 />
               )}
               {activeTab === "loyalty" && (
                  <BizLoyaltySettings businessId={business?.id} />
@@ -400,12 +421,14 @@ export default function BusinessDashboard() {
         </div>
       </main>
 
-      <BizAiAdvisor 
-         businessName={business?.name || "İşletme"}
-         stats={stats}
-         services={services}
-         staff={staff}
-       />
+      {business?.is_premium && (
+        <BizAiAdvisor 
+          businessName={business?.name || "İşletme"}
+          stats={stats}
+          services={services}
+          staff={staff}
+        />
+      )}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {

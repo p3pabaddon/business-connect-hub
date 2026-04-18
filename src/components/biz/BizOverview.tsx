@@ -14,9 +14,10 @@ interface Props {
   stats: BizStats;
   recentApts: any[];
   inventory: any[];
+  isPremium?: boolean;
 }
 
-export function BizOverview({ stats, recentApts, inventory }: Props) {
+export function BizOverview({ stats, recentApts, inventory, isPremium }: Props) {
   const kpis = [
     { label: "Günlük Ciro", value: `₺${stats.revenueToday.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-500", trend: "+12%" },
     { label: "Bugünkü Randevu", value: stats.appointmentsToday.toString(), icon: Calendar, color: "text-blue-500", trend: "Live" },
@@ -195,22 +196,47 @@ export function BizOverview({ stats, recentApts, inventory }: Props) {
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="p-6 lg:p-8 bg-slate-900 border border-white/5 rounded-3xl lg:rounded-[3rem] shadow-sm relative overflow-hidden group">
+          <div className={cn(
+            "p-6 lg:p-8 border rounded-3xl lg:rounded-[3rem] shadow-sm relative overflow-hidden group transition-all duration-500",
+            isPremium 
+              ? "bg-gradient-to-br from-slate-900 to-indigo-950 border-indigo-500/30" 
+              : "bg-slate-900 border-white/5"
+          )}>
              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                <Zap className="w-24 h-24 text-primary" />
+                <Zap className={cn("w-24 h-24", isPremium ? "text-amber-500" : "text-primary")} />
              </div>
              <div className="relative z-10">
                <div className="flex items-center justify-between mb-4">
-                  <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black tracking-widest uppercase px-3">ÜCRETSİZ PAKET</Badge>
+                  <Badge className={cn(
+                    "border-none text-[8px] font-black tracking-widest uppercase px-3",
+                    isPremium ? "bg-amber-500/20 text-amber-500" : "bg-primary/20 text-primary"
+                  )}>
+                    {isPremium ? "PREMIUM ÜYE" : "ÜCRETSİZ PAKET"}
+                  </Badge>
                   <span className="text-[10px] text-muted-foreground font-black uppercase opacity-40">Sürüm 1.0</span>
                </div>
-               <h4 className="text-lg font-black text-white uppercase tracking-tight mb-2">Premium'a Geç</h4>
-               <p className="text-[11px] text-slate-400 font-medium leading-relaxed mb-6">
-                 Sınırsız personel, gelişmiş CRM araçları ve yapay zeka desteği için yükseltin.
-               </p>
-               <Button className="w-full h-12 text-[10px] uppercase font-black tracking-widest bg-primary text-white border-none hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-2xl">
-                  ŞİMDİ YÜKSELT (800₺/Ay)
-               </Button>
+               
+               {isPremium ? (
+                 <>
+                   <h4 className="text-lg font-black text-white uppercase tracking-tight mb-2">Öncelikli İletişim Ayrıcalığı</h4>
+                   <p className="text-[11px] text-slate-400 font-medium leading-relaxed mb-6">
+                     Premium üye olarak 7/24 öncelikli destek ve özel danışmanlık hattına doğrudan erişiminiz bulunmaktadır.
+                   </p>
+                   <Button className="w-full h-12 text-[10px] uppercase font-black tracking-widest bg-amber-500 text-black border-none hover:bg-amber-400 shadow-lg shadow-amber-500/20 rounded-2xl">
+                      DESTEK HATTIMIZ (VIP)
+                   </Button>
+                 </>
+               ) : (
+                 <>
+                   <h4 className="text-lg font-black text-white uppercase tracking-tight mb-2">Premium'a Geç</h4>
+                   <p className="text-[11px] text-slate-400 font-medium leading-relaxed mb-6">
+                     Sınırsız personel, gelişmiş CRM araçları ve yapay zeka desteği için yükseltin.
+                   </p>
+                   <Button className="w-full h-12 text-[10px] uppercase font-black tracking-widest bg-primary text-white border-none hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-2xl">
+                      ŞİMDİ YÜKSELT (800₺/Ay)
+                   </Button>
+                 </>
+               )}
              </div>
           </div>
 
