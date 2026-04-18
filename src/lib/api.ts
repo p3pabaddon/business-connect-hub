@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { sendEmail, EMAIL_TEMPLATES } from "@/lib/email-service";
 
 export async function getBusinesses(filters?: { city?: string; district?: string; category?: string; search?: string }) {
   let query = supabase
@@ -315,9 +316,11 @@ async function sendNotification(params: { type: string, to: string, data: any })
   const html = (NOTIFICATION_TEMPLATES as any)[params.type]?.(templateData);
   
   if (html) {
-    console.log(`[REAL NOTIFICATION SIMULATION] to: ${params.to}`);
-    console.log(`SUBJECT: ${params.type === 'waitlist_alert' ? 'Yer Açıldı!' : 'Randevu Güncellemesi'}`);
-    console.log(`CONTENT: ${html}`);
+    await sendEmail({
+      to: params.to,
+      subject: params.type === 'waitlist_alert' ? 'Yer Açıldı! - Randevu Dünyası' : 'Randevu Güncellemesi - Randevu Dünyası',
+      html: html
+    });
   }
 }
 

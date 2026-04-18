@@ -15,6 +15,7 @@ import { tr } from "date-fns/locale";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { calculateSmartPrice, generateTimeSlots, getWorkingHoursForDay, isSlotOccupied } from "@/lib/booking-utils";
 import { supabase } from "@/lib/supabase";
+import { sendEmail, EMAIL_TEMPLATES } from "@/lib/email-service";
 
 interface Service {
   id: string;
@@ -193,14 +194,26 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
     const code = generateOTP();
     setGeneratedCode(code);
 
-    setTimeout(() => {
-      setCodeSent(true);
-      setSendingCode(false);
-      setCountdown(120);
-      toast.info("Doğrulama kodu gönderildi", {
-        description: `${customerEmail} adresine doğrulama kodu gönderildi. | Kalan hak: ${otpCheck.remaining}`,
+    try {
+      const { success, error } = await sendEmail({
+        to: customerEmail,
+        subject: "Randevu Dünyası - Doğrulama Kodu",
+        html: EMAIL_TEMPLATES.verification(code),
       });
-    }, 1000);
+
+      if (!success) throw error;
+
+      setCodeSent(true);
+      setCountdown(120);
+      toast.success("Doğrulama kodu gönderildi", {
+        description: `${customerEmail} adresine doğrulama kodu başarıyla gönderildi. | Kalan hak: ${otpCheck.remaining}`,
+      });
+    } catch (error: any) {
+      console.error("Email send error:", error);
+      toast.error("Kod gönderilemedi", { description: "Mail servisimizde bir sorun oluştu. Lütfen daha sonra tekrar deneyin." });
+    } finally {
+      setSendingCode(false);
+    }
   };
 
   const handleVerifyCode = () => {
