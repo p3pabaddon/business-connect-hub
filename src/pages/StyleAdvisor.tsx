@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Wand2, Info, CheckCircle2, Scissors, Camera, BrainCircuit, ShieldCheck, ArrowLeft, ShieldAlert } from 'lucide-react';
+import { Sparkles, Wand2, Info, CheckCircle2, Scissors, Camera, BrainCircuit, ShieldCheck, ArrowLeft, ShieldAlert, Zap, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { analyzeImageStyle } from '@/lib/ai-service';
@@ -114,63 +114,79 @@ const StyleAdvisor = () => {
           <div className="h-1.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50 w-full" />
           
           <div className="p-6 sm:p-10">
-            <DialogHeader className="flex flex-col items-center justify-center text-center mb-10">
+            <DialogHeader className="flex flex-col items-center justify-center text-center px-4 sm:px-0">
               <motion.div 
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mb-6 border border-primary/20 transition-all duration-500 shadow-[0_0_30px_rgba(16,185,129,0.1)] relative"
+                initial={{ scale: 0.8, opacity: 0, rotate: -10 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                transition={{ type: "spring", damping: 15 }}
+                className="relative mb-8"
               >
-                <div className="absolute inset-0 bg-primary/5 blur-xl rounded-full" />
-                <ShieldCheck className="w-10 h-10 text-primary relative z-10" />
+                <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse" />
+                <div className="w-24 h-24 bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-3xl rounded-[2.5rem] flex items-center justify-center border border-primary/30 shadow-[0_0_50px_rgba(16,185,129,0.15)] relative z-10 group overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  <ShieldCheck className="w-12 h-12 text-primary drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                </div>
               </motion.div>
-              <DialogTitle className="text-2xl sm:text-3xl font-extrabold font-heading tracking-tight leading-tight mb-4">
-                Veri Güvenliği ve <br /> 
-                <span className="text-gradient block mt-1">Analiz Onayı</span>
+
+              <DialogTitle className="text-3xl sm:text-4xl font-black font-heading tracking-tight leading-[1.1] mb-5">
+                Veri Güvenliği & <br /> 
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">Analiz Onayı</span>
               </DialogTitle>
-              <DialogDescription className="text-gray-400 text-base leading-relaxed max-w-sm mx-auto">
-                Yapay zeka analizine başlamadan önce kişisel verilerinizin korunması hakkında sizi bilgilendirmek isteriz.
+              
+              <DialogDescription className="text-gray-400 text-lg leading-relaxed max-w-sm mx-auto font-medium">
+                Size özel analiz için verilerinizi en yüksek güvenlik standartlarında işliyoruz.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 mb-10">
-              <div className="relative group overflow-hidden rounded-2xl bg-white/[0.02] border border-white/5 p-5 transition-all hover:bg-white/[0.04] hover:border-white/10">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -mr-12 -mt-12 transition-all group-hover:bg-primary/10" />
-                <div className="flex gap-4 relative z-10">
-                  <ShieldAlert className="w-6 h-6 text-amber-500 shrink-0" />
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-bold text-gray-200">KVKK ve Gizlilik Politikası</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">
-                      Fotoğrafınız sadece anlık analiz için işlenir. Sunucularımızda **kaydedilmez** ve analiz biter bitmez kalıcı olarak silinir.
-                    </p>
+            <div className="mt-10 space-y-6">
+              {/* Privacy Feature Card */}
+              <div className="group relative">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
+                <div className="relative bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 transition-all duration-300 group-hover:bg-white/[0.05]">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center shrink-0 border border-primary/20">
+                      <Lock className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-bold text-lg mb-1">Uçtan Uca Gizlilik</h4>
+                      <p className="text-gray-400 text-sm leading-relaxed">
+                        Fotoğrafınız sunucularımızda **asla saklanmaz**. Analiz biter bitmez sistemden kalıcı olarak silinir.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/5 text-sm text-gray-400">
-                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                  <span>Anlık Analiz</span>
-                </div>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/5 text-sm text-gray-400">
-                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                  <span>%100 Gizlilik</span>
-                </div>
+
+              {/* Grid Features */}
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { icon: Zap, label: "Anlık Analiz", sub: "Milisaniyelik hız" },
+                  { icon: CheckCircle2, label: "%100 Güvenli", sub: "Şifreli iletim" }
+                ].map((item, i) => (
+                  <div key={i} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 text-center hover:bg-white/[0.05] transition-colors group">
+                    <item.icon className="w-6 h-6 text-primary mx-auto mb-2 opacity-50 group-hover:opacity-100 transition-opacity" />
+                    <span className="block text-white text-sm font-bold">{item.label}</span>
+                    <span className="block text-gray-500 text-[10px] uppercase tracking-widest mt-0.5">{item.sub}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+            <DialogFooter className="flex flex-col-reverse sm:grid sm:grid-cols-2 gap-4 mt-10">
               <Button 
                 onClick={handleDecline} 
-                variant="outline" 
-                className="flex-1 py-6 text-base font-semibold border-white/10 hover:bg-white/5 text-gray-400 hover:text-white rounded-2xl transition-all h-auto"
+                variant="ghost" 
+                className="py-7 text-gray-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all h-auto text-base font-semibold border border-transparent hover:border-white/10"
               >
                 Vazgeç
               </Button>
               <Button 
                 onClick={handleConsent} 
-                className="flex-1 py-6 text-base font-bold bg-primary hover:bg-primary/90 text-black rounded-2xl transition-all shadow-xl shadow-primary/10 hover:shadow-primary/20 h-auto"
+                className="py-7 text-black font-black text-lg bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 rounded-2xl transition-all h-auto shadow-[0_10px_30px_rgba(16,185,129,0.3)] border-t border-white/20 relative overflow-hidden group"
               >
-                Onaylıyorum
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
+                <span className="relative z-10">Onaylıyorum</span>
+                <ArrowRight className="w-5 h-5 ml-2 relative z-10 group-hover:translate-x-1 transition-transform" />
               </Button>
             </DialogFooter>
           </div>
