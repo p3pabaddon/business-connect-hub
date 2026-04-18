@@ -198,7 +198,7 @@ export function BookingModal({ open, onOpenChange, businessId, businessName, ser
       setSendingCode(false);
       setCountdown(120);
       toast.info("Doğrulama kodu gönderildi", {
-        description: `${customerEmail} adresine doğrulama kodu gönderildi. (Demo kod: ${code}) | Kalan hak: ${otpCheck.remaining}`,
+        description: `${customerEmail} adresine doğrulama kodu gönderildi. | Kalan hak: ${otpCheck.remaining}`,
       });
     }, 1000);
   };
