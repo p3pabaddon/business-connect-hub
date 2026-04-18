@@ -53,10 +53,10 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'system', content: systemPrompt }, ...messages],
         temperature: temperature || 0.3,
-        max_tokens: 1000, // Vision analizleri için gerekli
+        max_tokens: 1500, // Daha detaylı analiz için biraz artırdım
       }),
     })
 

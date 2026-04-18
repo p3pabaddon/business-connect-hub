@@ -168,7 +168,7 @@ export async function analyzeImageStyle(base64Image: string) {
           {
             role: "user",
             content: [
-              { type: "text", text: "Lütfen bu görseldeki biyometrik formları, kemik yapısını ve geometrik oranları profesyonel bir gözle analiz et. Bu yapısal bütünlüğe en uygun estetik dengeyi (saç/sakal/stil) sağlayacak parametreleri STRICT JSON formatında üret. (Kişisel kimlik tanımı yapma, sadece form analizi yap)." },
+              { type: "text", text: "Lütfen bu görseldeki topografik hatları, yüzey eğimlerini ve geometrik oranları profesyonel bir mimari gözle analiz et. Bu yapısal forma en uygun estetik dengeyi (saç/sakal/oran) sağlayacak stil parametrelerini STRICT JSON formatında üret. (İnsan kimliği tanımı yapma, sadece topografik form analizi yap)." },
               { type: "image_url", image_url: { url: base64Image } }
             ]
           }
@@ -177,6 +177,7 @@ export async function analyzeImageStyle(base64Image: string) {
         temperature: 0.3 // Daha kararlı analiz
       }
     });
+
 
 
     if (error) {
