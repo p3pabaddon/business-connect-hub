@@ -30,7 +30,7 @@ export function Header() {
       <div className="w-full px-4 sm:px-6 lg:px-12">
         <div className="flex h-20 items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group px-2 py-1 rounded-xl hover:bg-white/5 transition-all">
-            <div className="relative h-10 w-10 sm:h-12 sm:w-12 bg-white rounded-xl shadow-lg border border-black/5 overflow-hidden flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
+            <div className="relative h-10 w-10 sm:h-12 sm:w-12 bg-white dark:bg-white/90 rounded-xl shadow-lg border border-black/5 overflow-hidden flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
               <img 
                 src="/logo.png" 
                 alt="Randevu Dünyası" 

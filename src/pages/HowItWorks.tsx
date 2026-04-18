@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { CheckCircle2, Search, Calendar, TrendingUp, Sparkles, UserCheck } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 
@@ -11,15 +12,19 @@ const HowItWorks = () => {
       
       <main>
         {/* Hero Section */}
-        <section className="relative py-20 overflow-hidden bg-slate-950 text-white">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.1),transparent)]" />
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+        <section className="relative py-24 overflow-hidden bg-slate-950 text-white">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.15),transparent)]" />
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-4xl sm:text-5xl font-bold mb-6 tracking-tight">
-                Randevu Dünyası <span className="text-accent">Nasıl Çalışır?</span>
-              </h1>
-              <p className="text-xl text-slate-400 leading-relaxed">
-                İşletmenizi dijital dünyaya taşıyın ve müşterilerinizle saniyeler içinde buluşun. İşte platformumuzun temel işleyiş mantığı.
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-4xl sm:text-6xl font-black mb-8 tracking-tight leading-tight"
+              >
+                Randevu Dünyası <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-purple-400">Nasıl Çalışır?</span>
+              </motion.h1>
+              <p className="text-xl text-slate-400 leading-relaxed font-medium">
+                İşletmenizi dijital dünyaya taşıyın ve müşterilerinizle saniyeler içinde buluşun. İşte platformumuzun uçtan uca işleyiş mantığı.
               </p>
             </div>
           </div>
@@ -123,21 +128,25 @@ const HowItWorks = () => {
         </section>
 
         {/* Call to Action */}
-        <section className="py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="bg-accent rounded-[3rem] p-12 text-center text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-              <h2 className="text-3xl sm:text-4xl font-bold mb-6">Şimdi Başlamaya Hazır Mısınız?</h2>
-              <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
-                İster müşteri olun ister işletme sahibi, Randevu Dünyası sizin için en verimli çalışma ortamını sağlar.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <a href="/isletme-basvuru" className="px-8 py-4 bg-white text-accent font-bold rounded-2xl hover:bg-slate-50 transition-colors shadow-lg shadow-black/10">
-                  İşletmemi Kaydet
-                </a>
-                <a href="/kesfet" className="px-8 py-4 bg-accent-foreground text-white font-bold rounded-2xl hover:bg-opacity-90 transition-colors border border-white/20">
-                  Şimdi Keşfet
-                </a>
+        <section className="py-24">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="bg-gradient-to-br from-primary via-primary to-accent rounded-[3rem] p-10 sm:p-20 text-center text-white relative overflow-hidden shadow-2xl">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl opacity-50" />
+              
+              <div className="relative z-10">
+                <h2 className="text-4xl sm:text-5xl font-black mb-8 leading-tight">Şimdi Başlamaya Hazır Mısınız?</h2>
+                <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
+                  İster müşteri olun ister işletme sahibi, Randevu Dünyası sizin için en verimli çalışma ortamını ve en kolay randevu deneyimini sağlar.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                  <a href="/isletme-basvuru" className="px-10 py-5 bg-white text-primary text-lg font-black rounded-2xl hover:scale-105 transition-all shadow-xl hover:bg-slate-50">
+                    İşletmemi Kaydet
+                  </a>
+                  <a href="/kesfet" className="px-10 py-5 bg-primary-foreground/10 text-white text-lg font-black rounded-2xl hover:bg-primary-foreground/20 transition-all border border-white/20 hover:scale-105">
+                    Hemen Keşfet
+                  </a>
+                </div>
               </div>
             </div>
           </div>

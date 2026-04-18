@@ -15,6 +15,7 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { t } from "@/lib/translations";
 import { SEOHead } from "@/components/SEOHead";
 import { cn, getCategoryPlaceholder, toTitleCase } from "@/lib/utils";
+import { FeaturedSalonsSection } from "@/components/marketing/FeaturedSalonsSection";
 
 const categories = [
   { value: "all", label: t("isletmeler.all_categories") },
@@ -255,6 +256,11 @@ const IsletmelerPage = () => {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Featured Section */}
+        <div className="bg-surface border-b border-border/50">
+          <FeaturedSalonsSection />
         </div>
 
         {/* Results */}

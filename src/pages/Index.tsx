@@ -8,8 +8,8 @@ import { TestimonialsSection } from "@/components/marketing/TestimonialsSection"
 import { FeaturedCitiesSection } from "@/components/marketing/FeaturedCitiesSection";
 import { SEOHead } from "@/components/SEOHead";
 import { CustomerBenefitsSection } from "@/components/marketing/CustomerBenefitsSection";
-import { FeaturedSalonsSection } from "@/components/marketing/FeaturedSalonsSection";
 import { CustomerAppCTA } from "@/components/marketing/CustomerAppCTA";
+import { AIShowcaseSection } from "@/components/marketing/AIShowcaseSection";
 import { t } from "@/lib/translations";
 import { PublicAiAdvisor } from "@/components/layout/PublicAiAdvisor";
 
@@ -34,8 +34,8 @@ const Index = () => {
       <main className="flex-1">
         <HeroSection />
         <SectorsSection />
+        <AIShowcaseSection />
         <CustomerBenefitsSection />
-        <FeaturedSalonsSection />
         <HowItWorksSection />
         <TrustSection />
         <TestimonialsSection />
