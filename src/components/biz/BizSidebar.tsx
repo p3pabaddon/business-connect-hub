@@ -21,9 +21,10 @@ interface Props {
   businessName: string;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  isPremium?: boolean;
 }
 
-export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen, setSidebarOpen }: Props) {
+export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen, setSidebarOpen, isPremium = false }: Props) {
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -32,9 +33,9 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
       label: "Büyüme & CRM",
       items: [
         { id: "overview", label: "Genel Bakış", icon: LayoutDashboard },
-        { id: "waitlist", label: "Bekleme Listesi", icon: Megaphone },
+        { id: "waitlist", label: "Bekleme Listesi", icon: Megaphone, premium: true },
         { id: "crm", label: "Müşterilerim", icon: Users },
-        { id: "performance", label: "Müşteri Radarı (AI)", icon: ShieldCheck },
+        { id: "performance", label: "Müşteri Radarı (AI)", icon: ShieldCheck, premium: true },
       ]
     },
     {
@@ -42,27 +43,27 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
       items: [
         { id: "calendar", label: "Randevu Takvimi", icon: Calendar },
         { id: "catalog", label: "Hizmet & Personel", icon: ShoppingBag },
-        { id: "staff-performance", label: "Personel Performansı", icon: BarChart3 },
-        { id: "analytics", label: "Gelişmiş Analytics", icon: PieChart },
-        { id: "inventory", label: "Stok & Envanter", icon: Package },
+        { id: "staff-performance", label: "Personel Performansı", icon: BarChart3, premium: true },
+        { id: "analytics", label: "Gelişmiş Analytics", icon: PieChart, premium: true },
+        { id: "inventory", label: "Stok & Envanter", icon: Package, premium: true },
       ]
     },
     {
       label: "Zeka & Büyüme",
       items: [
-        { id: "analytics", label: "AI Analitik", icon: Sparkles },
-        { id: "coupons", label: "Kuponlar", icon: Ticket },
-        { id: "loyalty", label: "Sadakat Programı", icon: Heart },
+        { id: "analytics", label: "AI Analitik", icon: Sparkles, premium: true },
+        { id: "coupons", label: "Kuponlar", icon: Ticket, premium: true },
+        { id: "loyalty", label: "Sadakat Programı", icon: Heart, premium: true },
       ]
     },
     {
       label: "Büyüme Araçları",
       items: [
          { id: "premium", label: "Avantajlar", icon: Crown },
-         { id: "notifications", label: "Bildirimler", icon: Bell },
-         { id: "marketing", label: "Pazarlama Araçları", icon: Target },
-         { id: "portfolio", label: "Çalışmalarımız", icon: ImageIcon },
-         { id: "page-editor", label: "İşletme Sayfası", icon: Palette },
+         { id: "notifications", label: "Bildirimler", icon: Bell, premium: true },
+         { id: "marketing", label: "Pazarlama Araçları", icon: Target, premium: true },
+         { id: "portfolio", label: "Çalışmalarımız", icon: ImageIcon, premium: true },
+         { id: "page-editor", label: "İşletme Sayfası", icon: Palette, premium: true },
          { id: "reviews", label: "Müşteri Yorumları", icon: MessageSquare },
          { id: "support", label: "Destek Merkezi", icon: LifeBuoy },
          { id: "settings", label: "İşletme Ayarı", icon: Settings },
@@ -107,24 +108,47 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
           <div key={idx} className="space-y-2">
             {sidebarOpen && <p className="text-[10px] uppercase font-bold text-muted-foreground/60 px-4 tracking-[3px] mb-2">{group.label}</p>}
             <ul className="space-y-1">
-              {group.items.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => setActiveTab(item.id as BizTab)}
-                    className={cn(
-                      "w-full flex items-center rounded-xl transition-all duration-200 group",
-                      sidebarOpen ? "gap-3 px-4 py-3 justify-start" : "px-0 py-3 justify-center",
-                      activeTab === item.id 
-                        ? 'bg-primary/10 text-primary shadow-sm' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    )}
-                    title={!sidebarOpen ? item.label : undefined}
-                  >
-                    <item.icon className={cn("w-5 h-5 shrink-0 transition-transform group-hover:scale-110", activeTab === item.id ? 'text-primary' : '')} />
-                    {sidebarOpen && <span className="font-medium text-sm tracking-tight whitespace-nowrap">{item.label}</span>}
-                  </button>
-                </li>
-              ))}
+              {group.items.map((item) => {
+                const isLocked = item.premium && !isPremium;
+                return (
+                  <li key={`${item.id}-${idx}`}>
+                    <button
+                      onClick={() => {
+                        if (isLocked) {
+                          setActiveTab("premium");
+                        } else {
+                          setActiveTab(item.id as BizTab);
+                        }
+                      }}
+                      className={cn(
+                        "w-full flex items-center rounded-xl transition-all duration-200 group relative",
+                        sidebarOpen ? "gap-3 px-4 py-3 justify-start" : "px-0 py-3 justify-center",
+                        activeTab === item.id 
+                          ? 'bg-primary/10 text-primary shadow-sm' 
+                          : isLocked 
+                            ? 'text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted/50 cursor-pointer'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      )}
+                      title={!sidebarOpen ? item.label : undefined}
+                    >
+                      <item.icon className={cn("w-5 h-5 shrink-0 transition-transform group-hover:scale-110", activeTab === item.id ? 'text-primary' : '')} />
+                      {sidebarOpen && (
+                        <div className="flex items-center gap-2 flex-1 overflow-hidden">
+                          <span className="font-medium text-sm tracking-tight whitespace-nowrap">{item.label}</span>
+                          {isLocked && (
+                            <div className="bg-amber-500/10 p-1 rounded-md ml-auto">
+                              <Crown className="w-3 h-3 text-amber-500" />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {!sidebarOpen && isLocked && (
+                        <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-amber-500 rounded-full border border-background"></div>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}
@@ -147,3 +171,4 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
     </>
   );
 }
+

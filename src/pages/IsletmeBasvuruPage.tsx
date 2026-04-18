@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/select";
 import { turkiyeIller } from "@/lib/turkey-locations";
 import { useState } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Zap, Building, ArrowRight, Save, RefreshCw, Crown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { t } from "@/lib/translations";
 import { SEOHead } from "@/components/SEOHead";
+import { cn } from "@/lib/utils";
 
 const businessTypes = [
   { value: "Berber", key: "barber" },
@@ -45,6 +46,8 @@ const IsletmeBasvuruPage = () => {
     email: "",
     address: "",
     description: "",
+    plan: "starter",
+    plan_price: 299,
   });
   const [submitting, setSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -85,6 +88,9 @@ const IsletmeBasvuruPage = () => {
       address: form.address || null,
       is_active: false,
       status: "pending",
+      plan: form.plan,
+      plan_price: form.plan_price,
+      is_premium: form.plan === "premium",
       working_hours: {
         Pazartesi: "09:00 - 18:00",
         Salı: "09:00 - 18:00",
@@ -209,121 +215,162 @@ const IsletmeBasvuruPage = () => {
             
             <form className="relative z-10 space-y-6 sm:space-y-8" onSubmit={handleSubmit}>
               <div className="space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-1 gap-6">
-                  <div>
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.business_name")} *</Label>
-                    <Input 
-                      placeholder={t("apply.business_name_placeholder")} 
-                      className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base" 
-                      value={form.name} 
-                      onChange={(e) => setForm({ ...form, name: e.target.value })} 
-                      required 
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.description")}</Label>
-                    <Textarea 
-                      placeholder={t("apply.description_placeholder")} 
-                      className="mt-2 min-h-[100px] bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base resize-none" 
-                      value={form.description} 
-                      onChange={(e) => setForm({ ...form, description: e.target.value })} 
-                    />
-                  </div>
-                </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-6">
+                        <div>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.business_name")} *</Label>
+                          <Input 
+                            placeholder={t("apply.business_name_placeholder")} 
+                            className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base" 
+                            value={form.name} 
+                            onChange={(e) => setForm({ ...form, name: e.target.value })} 
+                            required 
+                          />
+                        </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.category")} *</Label>
-                    <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                      <SelectTrigger className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base">
-                        <SelectValue placeholder={t("apply.category_placeholder")} />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border/50">
-                        {businessTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value} className="rounded-lg">{t(`sectors.${type.key}`)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                        <div>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Üyelik Planı *</Label>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div 
+                              onClick={() => setForm({ ...form, plan: "starter", plan_price: 299 })}
+                              className={cn(
+                                "relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col items-center gap-2",
+                                form.plan === "starter" 
+                                  ? "bg-primary/5 border-primary shadow-sm" 
+                                  : "bg-background/50 border-border/50 hover:border-primary/30"
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Zap className={cn("w-4 h-4", form.plan === "starter" ? "text-primary" : "text-muted-foreground")} />
+                                <span className="font-bold text-sm">Starter</span>
+                              </div>
+                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺299/Ay</span>
+                              {form.plan === "starter" && (
+                                <div className="absolute top-2 right-2">
+                                  <CheckCircle className="w-4 h-4 text-primary" />
+                                </div>
+                              )}
+                            </div>
+                            <div 
+                              onClick={() => setForm({ ...form, plan: "premium", plan_price: 599 })}
+                              className={cn(
+                                "relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col items-center gap-2",
+                                form.plan === "premium" 
+                                  ? "bg-primary/5 border-primary shadow-sm" 
+                                  : "bg-background/50 border-border/50 hover:border-primary/30"
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Crown className={cn("w-4 h-4", form.plan === "premium" ? "text-primary" : "text-muted-foreground")} />
+                                <span className="font-bold text-sm">Premium</span>
+                              </div>
+                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺599/Ay</span>
+                              {form.plan === "premium" && (
+                                <div className="absolute top-2 right-2">
+                                  <CheckCircle className="w-4 h-4 text-primary" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.description")}</Label>
+                          <Textarea 
+                            placeholder={t("apply.description_placeholder")} 
+                            className="mt-2 min-h-[120px] bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base resize-none" 
+                            value={form.description} 
+                            onChange={(e) => setForm({ ...form, description: e.target.value })} 
+                          />
+                        </div>
+                      </div>
 
-                  <div>
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.phone")} *</Label>
-                    <Input 
-                      placeholder={t("apply.phone_placeholder")} 
-                      className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base" 
-                      value={form.phone} 
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })} 
-                      required 
-                    />
-                  </div>
-                </div>
+                      <div className="space-y-6">
+                        <div>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.category")} *</Label>
+                          <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                            <SelectTrigger className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl">
+                              <SelectValue placeholder={t("apply.category_placeholder")} />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border/50">
+                              {businessTypes.map((type) => (
+                                <SelectItem key={type.value} value={type.value} className="rounded-lg">{t(`sectors.${type.key}`)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.city")} *</Label>
-                    <Select value={selectedIl} onValueChange={(v) => { setSelectedIl(v); setSelectedIlce(""); }}>
-                      <SelectTrigger className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base">
-                        <SelectValue placeholder={t("common.select_city")} />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border/50">
-                        {turkiyeIller.map((loc) => (
-                          <SelectItem key={loc.il} value={loc.il} className="rounded-lg">{loc.il}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.district")}</Label>
-                    <Select value={selectedIlce} onValueChange={setSelectedIlce} disabled={!selectedIl}>
-                      <SelectTrigger className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base">
-                        <SelectValue placeholder={selectedIl ? t("common.select_district") : t("common.select_city_first")} />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border/50">
-                        {(turkiyeIller.find((l) => l.il === selectedIl)?.ilceler ?? []).map((ilce) => (
-                          <SelectItem key={ilce} value={ilce} className="rounded-lg">{ilce}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                        <div>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.phone")} *</Label>
+                          <Input 
+                            placeholder={t("apply.phone_placeholder")} 
+                            className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl text-base" 
+                            value={form.phone} 
+                            onChange={(e) => setForm({ ...form, phone: e.target.value })} 
+                            required 
+                          />
+                        </div>
 
-                <div>
-                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.email")}</Label>
-                  <Input 
-                    type="email" 
-                    placeholder={t("apply.email_placeholder")} 
-                    className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base" 
-                    value={form.email} 
-                    onChange={(e) => setForm({ ...form, email: e.target.value })} 
-                  />
-                </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.city")} *</Label>
+                            <Select value={selectedIl} onValueChange={(v) => { setSelectedIl(v); setSelectedIlce(""); }}>
+                              <SelectTrigger className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl">
+                                <SelectValue placeholder={t("common.select_city")} />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-xl border-border/50">
+                                {turkiyeIller.map((loc) => (
+                                  <SelectItem key={loc.il} value={loc.il} className="rounded-lg">{loc.il}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.district")}</Label>
+                            <Select value={selectedIlce} onValueChange={setSelectedIlce} disabled={!selectedIl}>
+                              <SelectTrigger className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl">
+                                <SelectValue placeholder={selectedIl ? t("common.select_district") : t("common.select_city_first")} />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-xl border-border/50">
+                                {(turkiyeIller.find((l) => l.il === selectedIl)?.ilceler ?? []).map((ilce) => (
+                                  <SelectItem key={ilce} value={ilce} className="rounded-lg">{ilce}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
 
-                <div>
-                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.address")}</Label>
-                  <Textarea 
-                    placeholder={t("apply.address_placeholder")} 
-                    className="mt-2 min-h-[80px] bg-background/50 border-border/50 rounded-xl focus:ring-accent/20 transition-all text-base resize-none" 
-                    value={form.address} 
-                    onChange={(e) => setForm({ ...form, address: e.target.value })} 
-                  />
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <Button 
-                  type="submit" 
-                  className="w-full h-14 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all bg-gradient-to-r from-primary to-accent border-none" 
-                  disabled={submitting}
-                >
-                  {submitting ? (
-                    <div className="flex items-center gap-2">
-                       <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                       {t("apply.submitting")}
+                        <div>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("apply.address")}</Label>
+                          <Input 
+                            placeholder={t("apply.address_placeholder")} 
+                            className="mt-2 h-12 bg-background/50 border-border/50 rounded-xl text-base" 
+                            value={form.address} 
+                            onChange={(e) => setForm({ ...form, address: e.target.value })} 
+                          />
+                        </div>
+                      </div>
                     </div>
-                  ) : t("apply.submit")}
-                </Button>
 
+                    <div className="pt-4">
+                      <Button 
+                        type="submit" 
+                        className="w-full h-16 rounded-2xl text-xl font-bold shadow-xl shadow-primary/20 transition-all bg-gradient-to-r from-emerald-600 to-teal-600 border-none gap-3 hover:scale-[1.01] active:scale-[0.99] group" 
+                        disabled={submitting || !form.name || !form.category || !form.phone || !selectedIl}
+                      >
+                        {submitting ? (
+                          <RefreshCw className="w-6 h-6 animate-spin" />
+                        ) : (
+                          <>
+                            {t("apply.complete")}
+                            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-center text-muted-foreground text-[10px] mt-4 font-medium uppercase tracking-[0.2em]">
+                        Başvurunuz ekibimiz tarafından incelendikten sonra aktif edilecektir
+                      </p>
+                    </div>
               </div>
             </form>
           </div>

@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Building2, CheckCircle, XCircle, Clock, 
-  Search, ExternalLink, MapPin, Phone
+  Search, ExternalLink, MapPin, Phone, Sparkles
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export function HqBusinessApproval() {
   const [applications, setApplications] = useState<any[]>([]);
@@ -123,6 +124,15 @@ export function HqBusinessApproval() {
                     <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {app.city}, {app.district}</span>
                     <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {app.phone}</span>
                     <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(app.created_at).toLocaleDateString('tr-TR')}</span>
+                    {app.plan && (
+                      <Badge variant="secondary" className={cn(
+                        "text-[9px] uppercase font-bold tracking-wider rounded-lg border-none",
+                        app.plan === "premium" ? "bg-amber-500/10 text-amber-500" : "bg-primary/10 text-primary"
+                      )}>
+                        {app.plan === "premium" && <Sparkles className="w-2.5 h-2.5 mr-1" />}
+                        {app.plan} Plan (₺{app.plan_price})
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
