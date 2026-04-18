@@ -269,6 +269,7 @@ export interface Business {
   amenities: string[];
   created_at: string;
   is_premium?: boolean;
+  plan?: string | null;
   premium_until?: string | null;
   personnel_limit?: number;
   is_featured?: boolean;

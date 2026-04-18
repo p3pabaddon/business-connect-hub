@@ -47,7 +47,7 @@ const IsletmeBasvuruPage = () => {
     address: "",
     description: "",
     plan: "starter",
-    plan_price: 299,
+    plan_price: 800,
   });
   const [submitting, setSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -102,7 +102,7 @@ const IsletmeBasvuruPage = () => {
       status: "pending",
       plan: form.plan,
       plan_price: form.plan_price,
-      is_premium: form.plan === "premium",
+      is_premium: form.plan === "pro",
       working_hours: {
         Pazartesi: "09:00 - 18:00",
         Salı: "09:00 - 18:00",
@@ -244,7 +244,7 @@ const IsletmeBasvuruPage = () => {
                           <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Üyelik Planı *</Label>
                           <div className="grid grid-cols-2 gap-4 mt-2">
                             <div 
-                              onClick={() => setForm({ ...form, plan: "starter", plan_price: 1200 })}
+                              onClick={() => setForm({ ...form, plan: "starter", plan_price: 800 })}
                               className={cn(
                                 "relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col items-center gap-2",
                                 form.plan === "starter" 
@@ -256,7 +256,7 @@ const IsletmeBasvuruPage = () => {
                                 <Zap className={cn("w-4 h-4", form.plan === "starter" ? "text-primary" : "text-muted-foreground")} />
                                 <span className="font-bold text-sm">Starter</span>
                               </div>
-                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺1200/Ay</span>
+                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺800/Ay</span>
                               {form.plan === "starter" && (
                                 <div className="absolute top-2 right-2">
                                   <CheckCircle className="w-4 h-4 text-primary" />
@@ -264,20 +264,20 @@ const IsletmeBasvuruPage = () => {
                               )}
                             </div>
                             <div 
-                              onClick={() => setForm({ ...form, plan: "premium", plan_price: 2000 })}
+                              onClick={() => setForm({ ...form, plan: "premium", plan_price: 1200 })}
                               className={cn(
                                 "relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col items-center gap-2",
-                                form.plan === "premium" 
+                                form.plan === "premium" || form.plan === "pro"
                                   ? "bg-primary/5 border-primary shadow-sm" 
                                   : "bg-background/50 border-border/50 hover:border-primary/30"
                               )}
                             >
                               <div className="flex items-center gap-2">
-                                <Crown className={cn("w-4 h-4", form.plan === "premium" ? "text-primary" : "text-muted-foreground")} />
+                                <Crown className={cn("w-4 h-4", (form.plan === "premium" || form.plan === "pro") ? "text-primary" : "text-muted-foreground")} />
                                 <span className="font-bold text-sm">Premium</span>
                               </div>
-                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺2000/Ay</span>
-                              {form.plan === "premium" && (
+                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺1200/Ay</span>
+                              {(form.plan === "premium" || form.plan === "pro") && (
                                 <div className="absolute top-2 right-2">
                                   <CheckCircle className="w-4 h-4 text-primary" />
                                 </div>

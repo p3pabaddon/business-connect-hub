@@ -68,12 +68,12 @@ export const ModerationList = ({
                         <span className="opacity-30">•</span>
                         <Badge variant="outline" className={cn(
                           "text-[10px] uppercase font-black px-2 py-0.5 rounded-lg shrink-0",
-                          (biz.plan === 'premium' || biz.is_premium) 
+                          (biz.plan === 'premium' || biz.plan === 'pro' || biz.is_premium) 
                             ? "border-amber-500/20 bg-amber-500/10 text-amber-600" 
                             : "border-primary/20 bg-primary/10 text-primary"
                         )}>
-                          {(biz.plan === 'premium' || biz.is_premium) ? <Sparkles className="w-3 h-3 mr-1 inline" /> : <Zap className="w-3 h-3 mr-1 inline" />}
-                          {biz.plan?.toUpperCase() || (biz.is_premium ? 'PREMIUM' : 'STARTER')}
+                          {(biz.plan === 'premium' || biz.plan === 'pro' || biz.is_premium) ? <Sparkles className="w-3 h-3 mr-1 inline" /> : <Zap className="w-3 h-3 mr-1 inline" />}
+                          {biz.plan?.toUpperCase() || (biz.is_premium ? 'PRO' : 'STARTER')}
                           {biz.plan_price && <span className="ml-1 opacity-70">(₺{biz.plan_price})</span>}
                         </Badge>
                       </>

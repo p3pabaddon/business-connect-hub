@@ -33,12 +33,12 @@ export const FinancePanel = ({ systemStats, businesses }: FinancePanelProps) => 
                 </div>
                 <div className="flex items-center gap-6">
                   <span className="text-muted-foreground text-[10px] uppercase font-bold tabular-nums">{new Date(biz.created_at).toLocaleDateString()}</span>
-                  <span className="font-black text-foreground">₺{biz.plan === 'premium' || biz.is_premium ? 2000 : 1200}</span>
+                  <span className="font-black text-foreground">₺{biz.plan === 'premium' || biz.plan === 'pro' || biz.is_premium ? 1200 : 800}</span>
                   <Badge className={cn(
                     "border-none h-5 text-[9px] font-black tabular-nums",
-                    (biz.plan === 'premium' || biz.is_premium) ? "bg-amber-500/10 text-amber-500" : "bg-emerald-500/10 text-emerald-500"
+                    (biz.plan === 'premium' || biz.plan === 'pro' || biz.is_premium) ? "bg-amber-500/10 text-amber-500" : "bg-emerald-500/10 text-emerald-500"
                   )}>
-                    {biz.plan?.toUpperCase() || (biz.is_premium ? 'PREMIUM' : 'STARTER')}
+                    {biz.plan?.toUpperCase() || (biz.is_premium ? 'PRO' : 'STARTER')}
                   </Badge>
                 </div>
               </div>

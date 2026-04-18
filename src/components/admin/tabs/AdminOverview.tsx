@@ -44,11 +44,11 @@ export const AdminOverview = ({ systemStats, businesses, pendingCount }: AdminOv
                         {(biz.plan || biz.is_premium) && (
                           <Badge variant="outline" className={cn(
                             "text-[8px] uppercase font-black px-1.5 py-0 rounded-md shrink-0 border-none",
-                            (biz.plan === 'premium' || biz.is_premium) 
+                            (biz.plan === 'premium' || biz.plan === 'pro' || biz.is_premium) 
                               ? "bg-amber-500/10 text-amber-500" 
                               : "bg-primary/10 text-primary"
                           )}>
-                            {biz.plan || (biz.is_premium ? 'premium' : 'starter')}
+                            {biz.plan?.toUpperCase() || (biz.is_premium ? 'PRO' : 'STARTER')}
                           </Badge>
                         )}
                       </div>

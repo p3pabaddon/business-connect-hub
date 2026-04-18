@@ -50,12 +50,12 @@ export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
     {
       id: "pro",
       icon: Crown,
-      title: "Pro İşletme Paketi",
+      title: "Premium İşletme Paketi",
       desc: "Sınırsız personel, gelişmiş analitik ve özel markalama özellikleri.",
       price: "₺1200",
       period: "aylık",
       features: ["Sınırsız Personel", "Beyaz Etiket (No Branding)", "Gelişmiş AI Analizler"],
-      active: business.is_premium,
+      active: business.is_premium || business.plan === "premium",
       color: "text-purple-500",
       bgColor: "bg-purple-500/10",
     },
@@ -89,6 +89,7 @@ export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
         updates.is_active = true;
       } else if (planId === "pro") {
         updates.is_premium = true;
+        updates.plan = "pro";
         updates.personnel_limit = 99;
         updates.status = "approved";
         updates.is_active = true;
@@ -236,7 +237,7 @@ export function BizPremiumHub({ business, onUpdate }: BizPremiumHubProps) {
                  />
               </div>
               <p className="text-[11px] text-muted-foreground font-medium leading-relaxed italic opacity-80">
-                 Personel sınırınızı tek tıkla artırmak için <span className="text-primary font-black uppercase not-italic">Pro Paket</span>'e geçiş yapın.
+                 Personel sınırınızı tek tıkla artırmak için <span className="text-primary font-black uppercase not-italic">Premium Paket</span>'e geçiş yapın.
               </p>
            </div>
         </div>
