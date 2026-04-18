@@ -7,7 +7,7 @@ import { ScrollReveal } from "@/hooks/useScrollReveal";
 
 const plans = [
   {
-    name: t("pricing.free_name"), price: "0", period: t("pricing.month"),
+    name: t("pricing.free_name"), price: "800", period: t("pricing.month"),
     description: t("pricing.free_desc"), badge: null,
     features: [
       t("pricing.free_feature1"),
@@ -20,7 +20,7 @@ const plans = [
     cta: t("pricing.free_cta"), variant: "outline" as const,
   },
   {
-    name: t("pricing.premium_name"), price: "800", period: t("pricing.month"),
+    name: t("pricing.premium_name"), price: "1200", period: t("pricing.month"),
     description: t("pricing.premium_desc"), badge: t("pricing.best_value"),
     features: [
       t("pricing.premium_feature1"),
