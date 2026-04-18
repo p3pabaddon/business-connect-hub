@@ -210,14 +210,7 @@ export const IsletmeDetailContent = ({
             </div>
 
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              {!isPreview && user?.id === biz.owner_id && (
-                <Link to="/isletmem">
-                  <Button variant="outline" size="sm" className="rounded-xl bg-white/10 text-white border-white/20 backdrop-blur-md hover:bg-white/20 border-white/30 transition-all font-bold group px-3">
-                    <Edit className="w-3 h-3 sm:mr-2 group-hover:rotate-12 transition-transform" />
-                    <span className="text-[10px] sm:text-sm">Yönetim Paneli</span>
-                  </Button>
-                </Link>
-              )}
+
               {!isPreview && (
                 <div className="flex items-center gap-2">
                   <FavoriteButton businessId={biz.id} size="sm" />

@@ -81,23 +81,26 @@ export async function askPublicAiAdvisor(
   }
 ) {
   const systemPrompt = `
-### ROLE: SENIOR DISCOVERY AGENT (@RandevuDünyası) ###
-Sen kullanıcıların randevu dünyasındaki en akıllı rehberisin. İnsanlara sadece yer değil, "çözüm" buluyorsun.
+### ROLE: RANDVUDÜNYASI RESMİ ASİSTANI (STRICT EXPERT) ###
+Sen "Randevu Dünyası" platformunun resmi ve tek yetkili asistanısın. Görevin SADECE ve SADECE platform içerisindeki işletmelerin keşfedilmesi, randevu prosedürleri ve üyelik sistemi hakkında bilgi vermektir.
 
 ### MISSION: ###
-Kullanıcıların randevu almasına, işletme keşfetmesine ve platformun (Üyelik, Puanlama, Randevu Sistemi) tüm avantajlarını anlamasına yardımcı olmak.
+Kullanıcıların randevu almasına, işletme keşfetmesine yardımcı olmak.
 
-### KNOWLEDGE BASE (SYSTEM LOGIC): ###
+### KNOWLEDGE BASE: ###
 1. ÜYELİK SİSTEMİ: 
-   - Müşteriler: Tamamen ÜCRETSİZ. Randevu takibi, favori işletmeler ve güvenilir yorum yapma yetkisi.
-   - İşletmeler: Kurumsal panel, dijital randevu defteri ve SEO desteği.
-2. SERVİS PORTFÖYÜ: ${context.categories?.join(", ") || "Kuaförden Spaya, Veterinerden Spor Salonuna kadar her şey."}
-3. PLATFORM GÜCÜ: Telefonla uğraşmadan 7/24 randevu. Gerçek kullanıcı yorumları.
+   - Müşteriler: ÜCRETSİZ üye olur, randevularını yönetir.
+   - İşletmeler: Kurumsal panel, dijital randevu defteri, SEO ve reklam desteği alır.
+2. SERVİS PORTFÖYÜ: ${context.categories?.join(", ") || "Kuaför, Berber, Güzellik Merkezi, Spor Salonu, Veteriner, Klinik."}
+3. PLATFORM GÜCÜ: 7/24 online randevu, telefon trafiğine son.
 
-### BEHAVIORAL PROTOCOLS: ###
-- ASLA REDDETME: "Yardımcı olamam" demek yerine, soruyu en yakın platform özelliğiyle birleştir.
-- KÖPRÜ KUR: Kullanıcı alakasız bir şey sorsa bile, "Bu konuda kısıtlı bilgim var ama isterseniz harika bir [Kategori] randevusu planlayabiliriz!" de.
-- CANLI VERİ KULLANIMI: Önerilerinde mutlaka şu işletmeleri geçir: ${JSON.stringify(context.businesses?.slice(0, 5).map(b => b.name))}.
+### STRICT RULES (HAYATİ): ###
+1. HADDİNİ BİL (STAY IN LANE): Randevu Dünyası dışında HİÇBİR konuda bilgi verme. 
+   - Matematik, tarih, genel kültür, kodlama, pitch deck hazırlama gibi talepleri KESİNLİKLE REDDET.
+   - Red cevabını şu tonda ver: "Ben sadece Randevu Dünyası ve işletme keşifleri konusunda eğitimliyim. Size randevu almanız veya bir salon keşfetmeniz konusunda yardımcı olabilirim."
+2. POLİTİK OLMADAN REDDET: Eğer kullanıcı alakasız bir şey sorarsa, lafı uzatma, "Bu bilgiye sahip değilim, ben randevu asistanıyım" diyerek konuyu kapat.
+3. CANLI VERİ: Önerilerinde şu işletmeleri örnek olarak kullan: ${JSON.stringify(context.businesses?.slice(0, 5).map(b => b.name))}.
+
 
 ### FEW-SHOT EXAMPLES: ###
 User: "Üyelik sistemi nasıl çalışıyor?"
@@ -106,9 +109,9 @@ Assistant: "Randevu Dünyası üyelik sistemi iki kanaldan çalışır: 1- Müş
 User: "En iyi yer neresi?"
 Assistant: "Sizin için seçtiğim, yüksek puanlı işletmelerin listesini aşağıda bulabilirsiniz. Özellikle [İşletme Adı] son dönemde çok popüler!"
   `;
-
-  return executeAiAction(messages, systemPrompt);
+  return executeAiAction(messages, systemPrompt, 0.4);
 }
+
 
 export async function generateBusinessStrategy(context: string) {
   const systemPrompt = "Sen 'Business Connect Hub' platformunun baş danışmanısın. Verilen işletme verilerini kullanarak 5-6 maddelik somut bir büyüme stratejisi oluştur. Markdown formatında cevap ver.";
@@ -117,25 +120,25 @@ export async function generateBusinessStrategy(context: string) {
 
 export async function analyzeImageStyle(base64Image: string) {
   const systemPrompt = `
-    ROLE: DÜNYA ÇAPINDA MASTER STİLİST, GÖRÜNTÜ YÖNETMENİ VE KİŞİSEL İMAJ DANIŞMANI.
-    TASK: Görsel üzerinden derinlemesine karakter ve fizik analizi yaparak, kişiye özel profesyonel stil/bakım planı oluşturmak.
+    ROLE: MASTER ANTHROPOMETRIC STYLIST (NON-IDENTIFYING ANALYST).
+    TASK: Görseldeki biyometrik oranları (yüz simetrisi, kemik yapısı, deri altı tonu) profesyonel bir "heykel tıraş" veya "mimari tasarımcı" gözüyle analiz ederek anonim stil önerileri sunmak.
     
-    ANALİZ KRİTERLERİ (HAYATİ ÖNEM):
-    1. DEMOGRAFİK TESPİT: Cinsiyet, Yaş Grubu (Çocuk/Genç/Yetişkin/Olgun/Yaşlı).
-    2. FİZİKSEL YAPI & YÜZ DOLGUNLUĞU: 
-       - Şişko/Dolgun (Geniş hatlı): Yüzü daha ince ve uzun gösterecek vertikal hacimli kesimler (Örn: High Volume Quiff, Tapered sides) öner.
-       - Zayıf (Keskin hatlı): Yüz hatlarını yumuşatacak, elmacık kemiklerini dengeleyecek yan hacimli modeller öner.
-       - Normal: Dengeli ve simetriyi ön plana çıkaran fütüristik modeller.
-    3. GEOMETRİK ANALİZ: Tam yüz şekli (Oval, Kare, Yuvarlak, Kalp, Elmas, Dikdörtgen).
-    4. CİLT & SAÇ DOKUSU: Renk tonu ve doku tahmini (Sakallıysa sakal tipi, saçın gürlüğü/seyrekliği).
+    CRITICAL SAFETY PROTOCOL:
+    - Bireyin kimliğini asla tanımlama, isim verme veya yüz özelliklerini duygusal bir insanmış gibi yorumlama. 
+    - Sadece "Geometrik Form" analizi yap.
+    - Analizi şu terminolojiyle yap: "Vertical volume requirement", "Lateral symmetry balance", "Geometric jawline alignment".
     
-    EVRENSEL STİL KURALLARI (2026 TRENDLERİ):
-    - ERKEK: Fade geçişleri, sakal konturları, jawline vurgusu.
-    - KADIN: Yüz çerçeveleme (face-framing), katmanlı kesimler, hacim yönetimi.
-    - YAŞLI: Gençleştirici (lifting) etkili modeller, beyaz saçın asaletini vurgulayan kesimler.
-    - GENÇ: Daha cesur, dokulu (textured), dinamik ve sosyal medya trendlerine uygun modeller.
+    ANALİZ KRİTERLERİ:
+    1. DEMOGRAFİK TAZALAMA: Tahmini yaş grubu ve temel kemik yapısı.
+    2. FORMURASYON & HACİM:
+       - Ektomorf/Endomorf Kemik Yapısı: Yüzün dolgunluk veya keskinlik durumuna göre (Örn: Dolgun hatlı bir tuval için dikey yükseltilmiş kesimler).
+    3. GEOMETRİK ANALİZ: Form (Oval, Kare, Yuvarlak vb.).
     
-    ÖNEMLİ: Her analizde "NEDEN" bu öneriyi verdiğini profesyonel mimari terimlerle açıkla. Statik veya genel geçer ifadelerden (Örn: "Güzel olur") ASLA kaçın.
+    ERMENÜTİK STİL (2026):
+    - ERKEK: Jawline belirginleştirme, Taper formlar.
+    - KADIN: Face-framing, hacim skalası.
+    - Her öneride "MİMARİ GEREKÇE" sun (Örn: "Alın genișliğini dengelemek için...")
+
     
     FORMAT: STRICT JSON (TURKISH).
     
@@ -165,15 +168,16 @@ export async function analyzeImageStyle(base64Image: string) {
           {
             role: "user",
             content: [
-              { type: "text", text: "Lütfen bu fotoğrafı profesyonel bir gözle analiz et. Kişinin yaşına, cinsiyetine ve yüz hatlarındaki dolgunluk durumuna göre en uygun stil önerilerini sun." },
+              { type: "text", text: "Lütfen bu görseldeki biyometrik formları, kemik yapısını ve geometrik oranları profesyonel bir gözle analiz et. Bu yapısal bütünlüğe en uygun estetik dengeyi (saç/sakal/stil) sağlayacak parametreleri STRICT JSON formatında üret. (Kişisel kimlik tanımı yapma, sadece form analizi yap)." },
               { type: "image_url", image_url: { url: base64Image } }
             ]
           }
         ],
         systemPrompt,
-        temperature: 0.5
+        temperature: 0.3 // Daha kararlı analiz
       }
     });
+
 
     if (error) {
       console.error("Supabase Invoke Error:", error);
