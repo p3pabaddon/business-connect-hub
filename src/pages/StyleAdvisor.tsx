@@ -114,18 +114,20 @@ const StyleAdvisor = () => {
           <div className="h-1.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50 w-full" />
           
           <div className="p-6 sm:p-10">
-            <DialogHeader className="items-center text-center mb-8">
+            <DialogHeader className="flex flex-col items-center justify-center text-center mb-10">
               <motion.div 
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mb-6 border border-primary/20 rotate-3 group-hover:rotate-0 transition-transform duration-500 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
+                className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mb-6 border border-primary/20 transition-all duration-500 shadow-[0_0_30px_rgba(16,185,129,0.1)] relative"
               >
-                <ShieldCheck className="w-10 h-10 text-primary" />
+                <div className="absolute inset-0 bg-primary/5 blur-xl rounded-full" />
+                <ShieldCheck className="w-10 h-10 text-primary relative z-10" />
               </motion.div>
-              <DialogTitle className="text-2xl sm:text-3xl font-extrabold font-heading tracking-tight leading-tight">
-                Veri Güvenliği ve <br /> <span className="text-gradient">Analiz Onayı</span>
+              <DialogTitle className="text-2xl sm:text-3xl font-extrabold font-heading tracking-tight leading-tight mb-4">
+                Veri Güvenliği ve <br /> 
+                <span className="text-gradient block mt-1">Analiz Onayı</span>
               </DialogTitle>
-              <DialogDescription className="text-gray-400 text-base mt-3 leading-relaxed max-w-[340px]">
+              <DialogDescription className="text-gray-400 text-base leading-relaxed max-w-sm mx-auto">
                 Yapay zeka analizine başlamadan önce kişisel verilerinizin korunması hakkında sizi bilgilendirmek isteriz.
               </DialogDescription>
             </DialogHeader>
