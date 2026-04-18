@@ -4,13 +4,11 @@ import { HeroSection } from "@/components/marketing/HeroSection";
 import { SectorsSection } from "@/components/marketing/SectorsSection";
 import { HowItWorksSection } from "@/components/marketing/HowItWorksSection";
 import { TrustSection } from "@/components/marketing/TrustSection";
-import { TestimonialsSection } from "@/components/marketing/TestimonialsSection";
 import { FeaturedCitiesSection } from "@/components/marketing/FeaturedCitiesSection";
 import { SEOHead } from "@/components/SEOHead";
 import { CustomerBenefitsSection } from "@/components/marketing/CustomerBenefitsSection";
 import { FeaturedSalonsSection } from "@/components/marketing/FeaturedSalonsSection";
 import { CustomerAppCTA } from "@/components/marketing/CustomerAppCTA";
-import { t } from "@/lib/translations";
 import { PublicAiAdvisor } from "@/components/layout/PublicAiAdvisor";
 
 const Index = () => {
@@ -34,11 +32,10 @@ const Index = () => {
       <main className="flex-1">
         <HeroSection />
         <SectorsSection />
-        <CustomerBenefitsSection />
         <FeaturedSalonsSection />
+        <CustomerBenefitsSection />
         <HowItWorksSection />
         <TrustSection />
-        <TestimonialsSection />
         <CustomerAppCTA />
         <FeaturedCitiesSection />
       </main>

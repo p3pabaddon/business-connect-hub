@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, List, Map as MapIcon } from "lucide-react";
 import { useBusinesses } from "@/hooks/useQueries";
 import { Link } from "react-router-dom";
+import { getCategoryPlaceholder } from "@/lib/utils";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 // Lazy load map to avoid SSR issues
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -59,7 +61,6 @@ const HaritaPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEOHead title="Harita - İşletmeler" description="Harita üzerinde işletmeleri keşfedin." />
-      <Header />
       <main className="flex-1 bg-surface">
         <div className="bg-background border-b border-border py-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -132,7 +133,12 @@ const HaritaPage = () => {
                   className="bg-card border border-border rounded-xl p-4 hover:border-accent/30 transition-colors flex items-center gap-4"
                 >
                   <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex-shrink-0 overflow-hidden">
-                    {biz.image_url && <img src={biz.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />}
+                    <img 
+                      src={biz.image_url || biz.cover_image || biz.logo || getCategoryPlaceholder(biz.category || "")} 
+                      alt="" 
+                      className="w-full h-full object-cover" 
+                      loading="lazy" 
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm text-foreground truncate">{biz.name}</h3>
@@ -150,7 +156,6 @@ const HaritaPage = () => {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 };

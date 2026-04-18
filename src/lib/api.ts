@@ -21,32 +21,38 @@ export async function getBusinesses(filters?: { city?: string; district?: string
     query = query.or(`name.ilike.%${filters.search}%,category.ilike.%${filters.search}%`);
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
-  
-  // Inject mock latitude and longitude based on city or name for location sorting to work
-  // This is a fallback until `latitude` and `longitude` are added to the DB schema
-  const mappedData = data?.map((biz: any) => {
-    // Generate deterministic pseudo-random offset based on ID
-    const hash = biz.id.charCodeAt(0) + (biz.id.charCodeAt(biz.id.length-1) || 0);
-    const offsetLat = (hash % 100) * 0.001;
-    const offsetLng = (hash % 100) * 0.001;
-    
-    let baseLat = 41.0082; // Istanbul default
-    let baseLng = 28.9784;
-    
-    if (biz.city === "Ankara") { baseLat = 39.9334; baseLng = 32.8597; }
-    else if (biz.city === "İzmir") { baseLat = 38.4192; baseLng = 27.1287; }
-    else if (biz.city === "Bursa") { baseLat = 40.1826; baseLng = 29.0669; }
+  try {
+    const { data, error } = await query;
+    if (error) {
+      console.error("Supabase error fetching businesses:", error);
+      return [];
+    }
 
-    return {
-      ...biz,
-      latitude: baseLat + offsetLat,
-      longitude: baseLng + offsetLng
-    };
-  });
+    if (!data || data.length === 0) return [];
 
-  return mappedData;
+    // Inject mock latitude and longitude for location sorting
+    return data.map((biz: any) => {
+      const hash = biz.id.charCodeAt(0) + (biz.id.charCodeAt(biz.id.length - 1) || 0);
+      const offsetLat = (hash % 100) * 0.001;
+      const offsetLng = (hash % 100) * 0.001;
+
+      let baseLat = 41.0082; // Istanbul default
+      let baseLng = 28.9784;
+
+      if (biz.city === "Ankara") { baseLat = 39.9334; baseLng = 32.8597; }
+      else if (biz.city === "İzmir") { baseLat = 38.4192; baseLng = 27.1287; }
+      else if (biz.city === "Bursa") { baseLat = 40.1826; baseLng = 29.0669; }
+
+      return {
+        ...biz,
+        latitude: baseLat + offsetLat,
+        longitude: baseLng + offsetLng
+      };
+    });
+  } catch (err) {
+    console.error("Critical error in getBusinesses:", err);
+    return [];
+  }
 }
 
 export async function getBusinessBySlug(slug: string) {
@@ -89,9 +95,9 @@ export async function getMyBusiness(userId?: string) {
     console.error("getMyBusiness error:", error);
     throw error;
   }
-  
+
   if (!data || data.length === 0) return null;
-  
+
   // If multiple businesses exist, we might want to let the user choose eventually,
   // but for now return the first active one or just the first one.
   return data[0];
@@ -143,33 +149,33 @@ export async function updateAppointmentStatus(id: string, status: string) {
 
     // Automate Loyalty if completed
     if (status === 'completed' && apt.customer_id) {
-        await awardLoyaltyStamp(apt.business_id, apt.customer_id);
-        
-        // Referral Award Logic
-        const { data: refRecord } = await supabase
-          .from("referrals")
-          .select("*")
-          .eq("referred_id", apt.customer_id)
-          .eq("is_rewarded", false)
-          .single();
+      await awardLoyaltyStamp(apt.business_id, apt.customer_id);
 
-        if (refRecord) {
-          await awardReferralReward(apt.business_id, refRecord.referrer_id, apt.customer_id);
-          // Mark this referral as rewarded so they don't get rewards multiple times
-          await supabase.from("referrals").update({ 
-            is_rewarded: true,
-            status: 'completed',
-            completed_at: new Date().toISOString(),
-            business_id: apt.business_id // Track which business paid the reward
-          }).eq("id", refRecord.id);
-        }
-        
-        await supabase.from("loyalty_logs").insert({
-         customer_id: apt.customer_id,
-         business_id: apt.business_id,
-         appointment_id: id,
-         action_type: 'appointment_complete'
-       });
+      // Referral Award Logic
+      const { data: refRecord } = await supabase
+        .from("referrals")
+        .select("*")
+        .eq("referred_id", apt.customer_id)
+        .eq("is_rewarded", false)
+        .single();
+
+      if (refRecord) {
+        await awardReferralReward(apt.business_id, refRecord.referrer_id, apt.customer_id);
+        // Mark this referral as rewarded so they don't get rewards multiple times
+        await supabase.from("referrals").update({
+          is_rewarded: true,
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          business_id: apt.business_id // Track which business paid the reward
+        }).eq("id", refRecord.id);
+      }
+
+      await supabase.from("loyalty_logs").insert({
+        customer_id: apt.customer_id,
+        business_id: apt.business_id,
+        appointment_id: id,
+        action_type: 'appointment_complete'
+      });
     }
 
     // Waitlist logic: if cancelled, notify people waiting for this day
@@ -179,7 +185,7 @@ export async function updateAppointmentStatus(id: string, status: string) {
         .select("*")
         .eq("business_id", apt.business_id)
         .eq("desired_date", apt.appointment_date);
-      
+
       if (waitlist && waitlist.length > 0) {
         waitlist.forEach((entry: any) => {
           sendNotification({
@@ -203,19 +209,19 @@ export async function updateBusinessStatus(id: string, updates: { status?: strin
     .eq("id", id)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 }
 
-export async function joinWaitlist(data: { 
-  business_id: string; 
-  user_id: string; 
-  date: string; 
+export async function joinWaitlist(data: {
+  business_id: string;
+  user_id: string;
+  date: string;
   time?: string;
-  customer_name?: string; 
-  customer_phone?: string; 
-  customer_email?: string 
+  customer_name?: string;
+  customer_phone?: string;
+  customer_email?: string
 }) {
   // 1. Profil bilgilerini güncelle (Fallback olarak)
   if (data.user_id && (data.customer_name || data.customer_phone)) {
@@ -240,7 +246,7 @@ export async function joinWaitlist(data: {
     customer_phone: data.customer_phone || null,
     customer_email: data.customer_email || null
   });
-  
+
   if (error) throw error;
   return true;
 }
@@ -295,19 +301,19 @@ const NOTIFICATION_TEMPLATES = {
 };
 
 async function sendNotification(params: { type: string, to: string, data: any }) {
-  const statusLabels: any = { 
-    confirmed: "Onaylandı ✅", 
-    cancelled: "İptal Edildi ❌", 
-    completed: "Tamamlandı ✨" 
+  const statusLabels: any = {
+    confirmed: "Onaylandı ✅",
+    cancelled: "İptal Edildi ❌",
+    completed: "Tamamlandı ✨"
   };
-  
+
   const templateData = {
     ...params.data,
     statusLabel: statusLabels[params.data.status] || params.data.status
   };
 
   const html = (NOTIFICATION_TEMPLATES as any)[params.type]?.(templateData);
-  
+
   if (html) {
     console.log(`[REAL NOTIFICATION SIMULATION] to: ${params.to}`);
     console.log(`SUBJECT: ${params.type === 'waitlist_alert' ? 'Yer Açıldı!' : 'Randevu Güncellemesi'}`);
@@ -317,7 +323,7 @@ async function sendNotification(params: { type: string, to: string, data: any })
 
 export async function getBusinessStats(businessId: string) {
   const today = new Date().toISOString().split("T")[0];
-  
+
   const [totalRes, todayRes, pendingRes, revenueRes] = await Promise.all([
     supabase.from("appointments").select("id", { count: "exact", head: true }).eq("business_id", businessId),
     supabase.from("appointments").select("id", { count: "exact", head: true }).eq("business_id", businessId).eq("appointment_date", today),
@@ -337,7 +343,7 @@ export async function getBusinessStats(businessId: string) {
 
 export async function createAppointment(data: any) {
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   // Kara liste (banned users) kontrolü
   if (data.customer_phone) {
     const { data: banRecord } = await supabase
@@ -346,7 +352,7 @@ export async function createAppointment(data: any) {
       .eq("phone", data.customer_phone)
       .limit(1)
       .single();
-      
+
     if (banRecord) {
       throw new Error("İşlem reddedildi: Bu telefon numarası platform kuralları ihlali nedeniyle kalıcı olarak askıya alınmıştır.");
     }
@@ -396,7 +402,7 @@ export async function createAppointment(data: any) {
 
 export async function getOccupiedSlots(businessId: string, date: string, staffId?: string) {
   try {
-    const timeout = new Promise((_, reject) => 
+    const timeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("Timeout")), 5000)
     );
 
@@ -423,264 +429,264 @@ export async function getOccupiedSlots(businessId: string, date: string, staffId
 // --- Loyalty & Growth Functions ---
 
 export async function getLoyaltyProgram(businessId: string) {
-   const { data, error } = await supabase
-     .from("loyalty_programs")
-     .select("*")
-     .eq("business_id", businessId)
-     .eq("is_active", true)
-     .single();
-   
-   if (error && error.code !== "PGRST116") throw error;
-   return data;
+  const { data, error } = await supabase
+    .from("loyalty_programs")
+    .select("*")
+    .eq("business_id", businessId)
+    .eq("is_active", true)
+    .single();
+
+  if (error && error.code !== "PGRST116") throw error;
+  return data;
 }
 
 export async function joinLoyaltyProgram(businessId: string) {
-   const { data: { user } } = await supabase.auth.getUser();
-   if (!user) throw new Error("Giriş yapmalısınız");
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Giriş yapmalısınız");
 
-   const { data, error } = await supabase
-     .from("customer_loyalty")
-     .insert({
-       business_id: businessId,
-       customer_id: user.id,
-       current_stamps: 0,
-       total_completed_appointments: 0
-     })
-     .select()
-     .single();
-   
-   if (error) throw error;
-   return data;
+  const { data, error } = await supabase
+    .from("customer_loyalty")
+    .insert({
+      business_id: businessId,
+      customer_id: user.id,
+      current_stamps: 0,
+      total_completed_appointments: 0
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
 export async function getCustomerLoyalty(businessId: string) {
-   const { data: { user } } = await supabase.auth.getUser();
-   if (!user) return null;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
-   const { data, error } = await supabase
-     .from("customer_loyalty")
-     .select("*")
-     .eq("business_id", businessId)
-     .eq("customer_id", user.id)
-     .single();
-   
-   if (error && error.code !== "PGRST116") throw error;
-   return data;
+  const { data, error } = await supabase
+    .from("customer_loyalty")
+    .select("*")
+    .eq("business_id", businessId)
+    .eq("customer_id", user.id)
+    .single();
+
+  if (error && error.code !== "PGRST116") throw error;
+  return data;
 }
 
 async function awardLoyaltyStamp(businessId: string, customerId: string) {
-   // Check if business has an active loyalty program
-   const program = await getLoyaltyProgram(businessId);
-   if (!program) return;
+  // Check if business has an active loyalty program
+  const program = await getLoyaltyProgram(businessId);
+  if (!program) return;
 
-   // Update or Insert loyalty progress
-   const { data: current } = await supabase
-     .from("customer_loyalty")
-     .select("*")
-     .eq("business_id", businessId)
-     .eq("customer_id", customerId)
-     .single();
+  // Update or Insert loyalty progress
+  const { data: current } = await supabase
+    .from("customer_loyalty")
+    .select("*")
+    .eq("business_id", businessId)
+    .eq("customer_id", customerId)
+    .single();
 
-   if (current) {
-     const newStamps = current.current_stamps + 1;
-     const totalCompleted = current.total_completed_appointments + 1;
-     
-     // Check for reward
-     if (newStamps >= program.target_stamps) {
-       // Reset stamps and generate a promo code
-       await supabase.from("customer_loyalty").update({
-         current_stamps: 0,
-         total_completed_appointments: totalCompleted,
-         updated_at: new Date().toISOString()
-       }).eq("id", current.id);
-       
-       // Generate Reward Code
-       await createPromoCode({
-         business_id: businessId,
-         customer_id: customerId,
-         discount_type: program.reward_type === 'free_service' ? 'percent' : program.reward_type,
-         discount_value: program.reward_type === 'free_service' ? 100 : program.reward_value,
-         code: `LOYALTY-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-       });
-     } else {
-       await supabase.from("customer_loyalty").update({
-         current_stamps: newStamps,
-         total_completed_appointments: totalCompleted,
-         updated_at: new Date().toISOString()
-       }).eq("id", current.id);
-     }
-   } else {
-     await supabase.from("customer_loyalty").insert({
-       business_id: businessId,
-       customer_id: customerId,
-       current_stamps: 1,
-       total_completed_appointments: 1
-     });
-   }
+  if (current) {
+    const newStamps = current.current_stamps + 1;
+    const totalCompleted = current.total_completed_appointments + 1;
+
+    // Check for reward
+    if (newStamps >= program.target_stamps) {
+      // Reset stamps and generate a promo code
+      await supabase.from("customer_loyalty").update({
+        current_stamps: 0,
+        total_completed_appointments: totalCompleted,
+        updated_at: new Date().toISOString()
+      }).eq("id", current.id);
+
+      // Generate Reward Code
+      await createPromoCode({
+        business_id: businessId,
+        customer_id: customerId,
+        discount_type: program.reward_type === 'free_service' ? 'percent' : program.reward_type,
+        discount_value: program.reward_type === 'free_service' ? 100 : program.reward_value,
+        code: `LOYALTY-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+      });
+    } else {
+      await supabase.from("customer_loyalty").update({
+        current_stamps: newStamps,
+        total_completed_appointments: totalCompleted,
+        updated_at: new Date().toISOString()
+      }).eq("id", current.id);
+    }
+  } else {
+    await supabase.from("customer_loyalty").insert({
+      business_id: businessId,
+      customer_id: customerId,
+      current_stamps: 1,
+      total_completed_appointments: 1
+    });
+  }
 }
 
 export async function createPromoCode(params: any) {
-   const { error } = await supabase.from("promo_codes").insert({
-     ...params,
-     expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
-   });
-   if (error) throw error;
+  const { error } = await supabase.from("promo_codes").insert({
+    ...params,
+    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+  });
+  if (error) throw error;
 }
 
 export async function getMyPromoCodes() {
-   const { data: { user } } = await supabase.auth.getUser();
-   if (!user) return [];
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
 
-   const { data, error } = await supabase
-     .from("promo_codes")
-     .select("*, business:businesses(name)")
-     .eq("customer_id", user.id)
-     .eq("is_used", false)
-     .gt("expires_at", new Date().toISOString());
-   
-   if (error) throw error;
-   return data;
+  const { data, error } = await supabase
+    .from("promo_codes")
+    .select("*, business:businesses(name)")
+    .eq("customer_id", user.id)
+    .eq("is_used", false)
+    .gt("expires_at", new Date().toISOString());
+
+  if (error) throw error;
+  return data;
 }
 
 export async function claimReferral(referralCode: string) {
-   const { data: { user } } = await supabase.auth.getUser();
-   if (!user) throw new Error("Giriş yapmalısınız");
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Giriş yapmalısınız");
 
-   // 1. Find referral
-   const { data: referral, error: refError } = await supabase
-     .from("referrals")
-     .select("*")
-     .eq("referral_code", referralCode)
-     .eq("status", "pending")
-     .single();
-   
-   if (refError || !referral) throw new Error("Geçersiz veya kullanılmış kod");
-   if (referral.referrer_id === user.id) throw new Error("Kendi kodunuzu kullanamazsınız");
+  // 1. Find referral
+  const { data: referral, error: refError } = await supabase
+    .from("referrals")
+    .select("*")
+    .eq("referral_code", referralCode)
+    .eq("status", "pending")
+    .single();
 
-   // 2. Mark as completed
-   await supabase.from("referrals").update({
-     referred_id: user.id,
-     status: "completed",
-     completed_at: new Date().toISOString()
-   }).eq("id", referral.id);
+  if (refError || !referral) throw new Error("Geçersiz veya kullanılmış kod");
+  if (referral.referrer_id === user.id) throw new Error("Kendi kodunuzu kullanamazsınız");
 
-   // 3. Give rewards (Global 50 TL discount)
-   await createPromoCode({
-     customer_id: user.id,
-     discount_type: "fixed",
-     discount_value: 50,
-     code: `REF-WELCOME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-   });
+  // 2. Mark as completed
+  await supabase.from("referrals").update({
+    referred_id: user.id,
+    status: "completed",
+    completed_at: new Date().toISOString()
+  }).eq("id", referral.id);
 
-   await createPromoCode({
-     customer_id: referral.referrer_id,
-     discount_type: "fixed",
-     discount_value: 50,
-     code: `REF-BONUS-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-   });
+  // 3. Give rewards (Global 50 TL discount)
+  await createPromoCode({
+    customer_id: user.id,
+    discount_type: "fixed",
+    discount_value: 50,
+    code: `REF-WELCOME-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+  });
 
-   return true;
+  await createPromoCode({
+    customer_id: referral.referrer_id,
+    discount_type: "fixed",
+    discount_value: 50,
+    code: `REF-BONUS-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+  });
+
+  return true;
 }
 
 export async function getReferralStats() {
-   const { data: { user } } = await supabase.auth.getUser();
-   if (!user) return { count: 0, earnings: 0 };
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { count: 0, earnings: 0 };
 
-   const [countRes, earningsRes] = await Promise.all([
-     supabase.from("referrals").select("id", { count: "exact" }).eq("referrer_id", user.id).eq("status", "completed"),
-     supabase.from("promo_codes").select("discount_value").eq("customer_id", user.id).ilike("code", "REF-%")
-   ]);
+  const [countRes, earningsRes] = await Promise.all([
+    supabase.from("referrals").select("id", { count: "exact" }).eq("referrer_id", user.id).eq("status", "completed"),
+    supabase.from("promo_codes").select("discount_value").eq("customer_id", user.id).ilike("code", "REF-%")
+  ]);
 
-   const totalEarnings = (earningsRes.data || []).reduce((sum, p) => sum + (Number(p.discount_value) || 0), 0);
-   
-   return {
-     count: countRes.count || 0,
-     earnings: totalEarnings
-   };
+  const totalEarnings = (earningsRes.data || []).reduce((sum, p) => sum + (Number(p.discount_value) || 0), 0);
+
+  return {
+    count: countRes.count || 0,
+    earnings: totalEarnings
+  };
 }
 
 export async function awardReferralReward(businessId: string, referrerId: string, refereeId: string) {
-   // 1. Get business referral config
-   const { data: biz } = await supabase.from("businesses").select("is_referral_active, referral_reward_type, referral_reward_value, referral_reward_target").eq("id", businessId).single();
-   
-   if (!biz || !biz.is_referral_active) return;
+  // 1. Get business referral config
+  const { data: biz } = await supabase.from("businesses").select("is_referral_active, referral_reward_type, referral_reward_value, referral_reward_target").eq("id", businessId).single();
 
-   // 2. Award to Referrer
-   if (biz.referral_reward_target === 'referrer' || biz.referral_reward_target === 'both') {
-     await createPromoCode({
-       business_id: businessId,
-       customer_id: referrerId,
-       discount_type: biz.referral_reward_type === 'percent' ? 'percent' : 'fixed',
-       discount_value: biz.referral_reward_value,
-       code: `REF-B-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-     });
-   }
+  if (!biz || !biz.is_referral_active) return;
 
-   // 3. Award to Referee
-   if (biz.referral_reward_target === 'referee' || biz.referral_reward_target === 'both') {
-     await createPromoCode({
-       business_id: businessId,
-       customer_id: refereeId,
-       discount_type: biz.referral_reward_type === 'percent' ? 'percent' : 'fixed',
-       discount_value: biz.referral_reward_value,
-       code: `REF-W-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-     });
-   }
+  // 2. Award to Referrer
+  if (biz.referral_reward_target === 'referrer' || biz.referral_reward_target === 'both') {
+    await createPromoCode({
+      business_id: businessId,
+      customer_id: referrerId,
+      discount_type: biz.referral_reward_type === 'percent' ? 'percent' : 'fixed',
+      discount_value: biz.referral_reward_value,
+      code: `REF-B-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+    });
+  }
+
+  // 3. Award to Referee
+  if (biz.referral_reward_target === 'referee' || biz.referral_reward_target === 'both') {
+    await createPromoCode({
+      business_id: businessId,
+      customer_id: refereeId,
+      discount_type: biz.referral_reward_type === 'percent' ? 'percent' : 'fixed',
+      discount_value: biz.referral_reward_value,
+      code: `REF-W-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+    });
+  }
 }
 
 // --- Intelligence & AI Functions ---
 
 export async function getPricingRules(businessId: string) {
-   const { data, error } = await supabase
-     .from("pricing_rules")
-     .select("id, rule_name, discount_percentage, day_of_week, start_time, end_time")
-     .eq("business_id", businessId)
-     .eq("is_active", true);
-   
-   if (error) throw error;
-   return data || [];
+  const { data, error } = await supabase
+    .from("pricing_rules")
+    .select("id, rule_name, discount_percentage, day_of_week, start_time, end_time")
+    .eq("business_id", businessId)
+    .eq("is_active", true);
+
+  if (error) throw error;
+  return data || [];
 }
 
 export async function getChurnSentinelData(businessId: string) {
-   // 1. Get all completed appointments for this business
-   const { data: appointments, error } = await supabase
-     .from("appointments")
-     .select("customer_id, customer_name, customer_email, customer_phone, appointment_date")
-     .eq("business_id", businessId)
-     .eq("status", "completed")
-     .order("appointment_date", { ascending: false });
+  // 1. Get all completed appointments for this business
+  const { data: appointments, error } = await supabase
+    .from("appointments")
+    .select("customer_id, customer_name, customer_email, customer_phone, appointment_date")
+    .eq("business_id", businessId)
+    .eq("status", "completed")
+    .order("appointment_date", { ascending: false });
 
-   if (error) throw error;
-   if (!appointments || appointments.length === 0) return [];
+  if (error) throw error;
+  if (!appointments || appointments.length === 0) return [];
 
-   // 2. Group by customer and find latest visit
-   const customerMap = new Map();
-   const fortyFiveDaysAgo = new Date();
-   fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 45);
+  // 2. Group by customer and find latest visit
+  const customerMap = new Map();
+  const fortyFiveDaysAgo = new Date();
+  fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 45);
 
-   appointments.forEach(a => {
-     if (!a.customer_email && !a.customer_phone) return;
-     const key = a.customer_id || a.customer_email || a.customer_phone;
-     
-     if (!customerMap.has(key)) {
-       customerMap.set(key, {
-         name: a.customer_name,
-         email: a.customer_email,
-         phone: a.customer_phone,
-         last_visit: new Date(a.appointment_date),
-         visit_count: 1
-       });
-     } else {
-       customerMap.get(key).visit_count += 1;
-     }
-   });
+  appointments.forEach(a => {
+    if (!a.customer_email && !a.customer_phone) return;
+    const key = a.customer_id || a.customer_email || a.customer_phone;
 
-   // 3. Filter for churn risk: last visit > 45 days ago AND had at least 1 visit
-   const churned = Array.from(customerMap.values())
-     .filter(c => c.last_visit < fortyFiveDaysAgo && c.visit_count >= 1)
-     .sort((a, b) => a.last_visit.getTime() - b.last_visit.getTime());
+    if (!customerMap.has(key)) {
+      customerMap.set(key, {
+        name: a.customer_name,
+        email: a.customer_email,
+        phone: a.customer_phone,
+        last_visit: new Date(a.appointment_date),
+        visit_count: 1
+      });
+    } else {
+      customerMap.get(key).visit_count += 1;
+    }
+  });
 
-   return churned;
+  // 3. Filter for churn risk: last visit > 45 days ago AND had at least 1 visit
+  const churned = Array.from(customerMap.values())
+    .filter(c => c.last_visit < fortyFiveDaysAgo && c.visit_count >= 1)
+    .sort((a, b) => a.last_visit.getTime() - b.last_visit.getTime());
+
+  return churned;
 }
 
 // --- Inventory Management Functions ---
@@ -691,7 +697,7 @@ export async function getInventory(businessId: string) {
     .select("*")
     .eq("business_id", businessId)
     .order("name", { ascending: true });
-  
+
   if (error) throw error;
   return data || [];
 }
@@ -702,7 +708,7 @@ export async function addInventoryItem(itemData: any) {
     .insert(itemData)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 }
@@ -714,7 +720,7 @@ export async function updateInventoryItem(id: string, updates: any) {
     .eq("id", id)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 }
@@ -724,7 +730,7 @@ export async function deleteInventoryItem(id: string) {
     .from("inventory")
     .delete()
     .eq("id", id);
-  
+
   if (error) throw error;
   return true;
 }
@@ -736,7 +742,7 @@ export async function updateMyBusiness(businessId: string, updates: any) {
     .eq("id", businessId)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 }

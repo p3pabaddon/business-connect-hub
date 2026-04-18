@@ -15,12 +15,14 @@ import { getLoyaltyProgram, getCustomerLoyalty, joinLoyaltyProgram } from "@/lib
 import { useAuth } from "@/contexts/AuthContext";
 import { SEOHead } from "@/components/SEOHead";
 import { cn, getCategoryPlaceholder, toTitleCase, hexToHsl } from "@/lib/utils";
+import DOMPurify from "dompurify";
 import { toast } from "sonner";
 import { StampCard } from "@/components/loyalty/StampCard";
 import { ReviewAISummary } from "@/components/ReviewAISummary";
 import { supabase } from "@/lib/supabase";
 import { MoveRight, ImageIcon, Sparkles } from "lucide-react";
 import { markReviewHelpful, reportReview } from "@/lib/biz-api";
+import { SocialProofWidget } from "@/components/SocialProofWidget";
 
 interface IsletmeDetailContentProps {
   biz: any;
@@ -102,10 +104,10 @@ export const IsletmeDetailContent = ({
       <div className={cn(isPreview && "preview-scoped h-full w-full")}>
         <style dangerouslySetInnerHTML={{ __html: `
           ${selector} {
-            --primary: ${hexToHsl(branding.primary_color)};
-            --accent: ${hexToHsl(branding.secondary_color)};
-            --secondary: ${hexToHsl(branding.secondary_color)};
-            --ring: ${hexToHsl(branding.primary_color)};
+            --primary: ${hexToHsl(branding.primary_color || "#7c3aed")};
+            --accent: ${hexToHsl(branding.secondary_color || "#db2777")};
+            --secondary: ${hexToHsl(branding.secondary_color || "#db2777")};
+            --ring: ${hexToHsl(branding.primary_color || "#7c3aed")};
           }
         `}} />
         {content}
@@ -219,7 +221,7 @@ export const IsletmeDetailContent = ({
               {!isPreview && (
                 <div className="flex items-center gap-2">
                   <FavoriteButton businessId={biz.id} size="sm" />
-                  <ShareButtons title={biz.name} />
+                  <ShareButtons title={biz.name} url={window.location.href} />
                 </div>
               )}
               <Button size="lg" className="flex-1 sm:flex-none rounded-xl sm:rounded-2xl shadow-xl shadow-primary/20 h-10 sm:h-12 px-4 sm:px-8 font-bold text-sm sm:text-base" onClick={() => !isPreview && setBookingOpen(true)}>
@@ -570,6 +572,7 @@ export const IsletmeDetailContent = ({
           />
         </>
       )}
+      <SocialProofWidget businessId={biz.id} />
     </main>
   );
 };
@@ -671,6 +674,32 @@ const IsletmeDetailPage = () => {
         description={seoDesc}
         url={window.location.href}
         image={biz.image_url || biz.logo || getCategoryPlaceholder(biz.category)}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": biz.name,
+          "image": biz.image_url || biz.logo,
+          "description": biz.description,
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": biz.address,
+            "addressLocality": biz.district,
+            "addressRegion": biz.city,
+            "addressCountry": "TR"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": biz.latitude,
+            "longitude": biz.longitude
+          },
+          "url": window.location.href,
+          "telephone": biz.phone,
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": biz.rating || "5",
+            "reviewCount": biz.review_count || "1"
+          }
+        }}
       />
       
       <IsletmeDetailContent 

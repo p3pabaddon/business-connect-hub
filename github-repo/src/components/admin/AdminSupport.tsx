@@ -1,0 +1,374 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { LifeBuoy, Send, MessageSquare, Loader2, Search, Building2 } from "lucide-react";
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
+import { useAuth } from "@/contexts/AuthContext";
+
+interface Ticket {
+  id: string;
+  subject: string;
+  status: string;
+  created_at: string;
+  business_id: string;
+  owner_id: string;
+  business?: { name: string };
+}
+
+interface Message {
+  id: string;
+  ticket_id: string;
+  sender_id: string;
+  message: string;
+  created_at: string;
+}
+
+const NOTIFICATION_SOUND = "https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3";
+
+const playNotificationSound = () => {
+  const audio = new Audio(NOTIFICATION_SOUND);
+  audio.play().catch(() => {});
+};
+
+export function AdminSupport() {
+  const { user } = useAuth();
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
+  // Mesajları yükle - sadece temel alanlar (profiles join olmadan)
+  // Sender belirleme işini sender_id vs ticket.owner_id üzerinden yapıyoruz
+  const loadMessages = useCallback(async (ticketId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("support_messages")
+        .select("*")
+        .eq("ticket_id", ticketId)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (err: any) {
+      console.error("Mesaj yükleme hatası:", err);
+      toast.error("Mesajlar yüklenemedi: " + err.message);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedTicket) {
+      loadMessages(selectedTicket.id);
+
+      const channel = supabase
+        .channel(`admin-chat-${selectedTicket.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'support_messages',
+            filter: `ticket_id=eq.${selectedTicket.id}`
+          },
+          (payload: any) => {
+            // Sadece başkasından gelen mesajlar için ses çal
+            if (payload.new && payload.new.sender_id !== user?.id) {
+              playNotificationSound();
+            }
+            loadMessages(selectedTicket.id);
+          }
+        )
+        .subscribe((status) => {
+          console.log("Admin Realtime status:", status);
+        });
+
+      return () => { supabase.removeChannel(channel); };
+    }
+  }, [selectedTicket, loadMessages]);
+
+  const loadTickets = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("support_tickets")
+        .select("*, business:businesses(name), owner_id")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setTickets(data || []);
+    } catch (err) {
+      toast.error("Talepler yüklenemedi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedTicket || !user) return;
+
+    const messageText = newMessage.trim();
+    setNewMessage("");
+    setSending(true);
+
+    try {
+      const { error } = await supabase
+        .from("support_messages")
+        .insert({
+          ticket_id: selectedTicket.id,
+          sender_id: user.id,   // Admin kendi ID'si ile mesaj atıyor
+          message: messageText
+        });
+
+      if (error) {
+        setNewMessage(messageText);
+        throw error;
+      }
+    } catch (err: any) {
+      toast.error("Mesaj gönderilemedi: " + err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleCloseTicket = async (ticketId: string) => {
+    await updateTicketStatus(ticketId, 'closed');
+  };
+
+  const updateTicketStatus = async (ticketId: string, status: string) => {
+    const { error } = await supabase
+      .from("support_tickets")
+      .update({ status })
+      .eq("id", ticketId);
+
+    if (!error) {
+      setTickets(tickets.map(t => t.id === ticketId ? { ...t, status } : t));
+      if (selectedTicket?.id === ticketId) setSelectedTicket({ ...selectedTicket, status });
+      toast.success("Talep durumu güncellendi: " + status);
+    } else {
+      toast.error("Hata: " + error.message);
+    }
+  };
+
+  const filteredTickets = tickets.filter(t =>
+    t.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.business?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-280px)] animate-in fade-in duration-500">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full overflow-hidden">
+        <div className="lg:col-span-4 flex flex-col bg-card border border-border rounded-[2.5rem] overflow-hidden">
+           <div className="p-6 border-b border-border bg-muted/20">
+              <div className="relative">
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                 <Input
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                   placeholder="İşletme veya konu ara..."
+                   className="pl-10 h-10 text-sm bg-background rounded-xl"
+                 />
+              </div>
+           </div>
+
+           <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+              {loading ? (
+                  <div className="flex justify-center p-10"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+              ) : filteredTickets.length === 0 ? (
+                  <p className="text-center text-xs text-muted-foreground p-10">Talep bulunamadı.</p>
+              ) : (
+                filteredTickets.map(ticket => (
+                  <button
+                    key={ticket.id}
+                    onClick={() => setSelectedTicket(ticket)}
+                    className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                      selectedTicket?.id === ticket.id
+                      ? "bg-primary/10 border-primary/30 shadow-sm"
+                      : "bg-muted/10 border-border hover:bg-muted/30"
+                    }`}
+                  >
+                     <div className="flex justify-between items-start mb-2">
+                        <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-full ${
+                           ticket.status === 'open' ? 'bg-emerald-500/10 text-emerald-500' : 
+                           ticket.status === 'in_review' ? 'bg-amber-500/10 text-amber-500' :
+                           ticket.status === 'queued' ? 'bg-blue-500/10 text-blue-500' :
+                           ticket.status === 'waiting_reply' ? 'bg-violet-500/10 text-violet-500' :
+                           'bg-muted text-muted-foreground'
+                        }`}>
+                           {ticket.status === 'open' ? 'Aktif' : 
+                            ticket.status === 'in_review' ? 'İnceleniyor' :
+                            ticket.status === 'queued' ? 'Sırada' :
+                            ticket.status === 'waiting_reply' ? 'Cevap' : 'Kapalı'}
+                        </span>
+                        <span className="text-[9px] font-mono text-muted-foreground">
+                           {format(new Date(ticket.created_at), "d MMM HH:mm", { locale: tr })}
+                        </span>
+                     </div>
+                    <p className="text-sm font-bold text-foreground mb-1">{ticket.subject}</p>
+                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium uppercase tracking-tight">
+                       <Building2 className="w-3 h-3" /> {ticket.business?.name || "Bilinmeyen İşletme"}
+                    </div>
+                  </button>
+                ))
+              )}
+           </div>
+        </div>
+
+        <div className="lg:col-span-8 flex flex-col bg-card border border-border rounded-[2.5rem] overflow-hidden relative shadow-2xl shadow-primary/5">
+           {selectedTicket ? (
+             <>
+                <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between bg-muted/10 gap-4">
+                   <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shrink-0">
+                         <MessageSquare className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                         <h4 className="font-black text-xs sm:text-sm text-foreground uppercase tracking-tight italic truncate">{selectedTicket.subject}</h4>
+                         <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] text-muted-foreground font-bold uppercase truncate max-w-[150px]">{selectedTicket.business?.name}</span>
+                            <span className="text-[10px] text-muted-foreground/30">•</span>
+                            <span className="text-[10px] text-primary font-mono">{selectedTicket.id.slice(0, 8)}</span>
+                         </div>
+                      </div>
+                   </div>
+                   
+                   <div className="flex flex-wrap items-center gap-2">
+                      {selectedTicket.status !== 'closed' && (
+                        <>
+                          <div className="flex items-center gap-1 bg-background/50 border border-border p-1 rounded-2xl shadow-inner">
+                             {[
+                               { id: 'open', label: 'Açık', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                               { id: 'in_review', label: 'İnceleniyor', color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                               { id: 'queued', label: 'Sırada', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                               { id: 'waiting_reply', label: 'Cevap Bekliyor', color: 'text-violet-500', bg: 'bg-violet-500/10' }
+                             ].map((st) => (
+                               <Button
+                                 key={st.id}
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => updateTicketStatus(selectedTicket.id, st.id)}
+                                 className={`text-[9px] h-8 px-3 font-black uppercase transition-all rounded-xl ${
+                                   selectedTicket.status === st.id 
+                                   ? `${st.bg} ${st.color} border border-${st.color.split('-')[1]}-500/20 shadow-sm` 
+                                   : 'text-muted-foreground hover:bg-muted'
+                                 }`}
+                               >
+                                 {st.label}
+                               </Button>
+                             ))}
+                          </div>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCloseTicket(selectedTicket.id)}
+                            className="bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all font-black text-[9px] uppercase h-8 px-4 rounded-xl shadow-lg shadow-rose-500/10"
+                          >
+                             TALEBİ KAPAT
+                          </Button>
+                        </>
+                      )}
+                      {selectedTicket.status === 'closed' && (
+                        <div className="px-4 py-1.5 bg-muted rounded-xl border border-border">
+                          <span className="text-[10px] font-black text-muted-foreground uppercase italic tracking-widest">BU TALEP ARŞİVLENDİ</span>
+                        </div>
+                      )}
+                   </div>
+                </div>
+
+               <div
+                  className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.01),transparent_40%)]"
+                  ref={scrollRef}
+               >
+                  {messages.map(msg => {
+                    // ADMİN PANELİ MANTIĞI:
+                    // - user.id === msg.sender_id → Bu mesajı admin (BEN/SİZ) yazdı
+                    // - selectedTicket.owner_id === msg.sender_id → Bu mesajı işletme sahibi yazdı
+                    // - Başka bir ID → Başka bir admin yazmış olabilir
+                    const isBusiness = msg.sender_id === selectedTicket?.owner_id;
+                    const isMe = !isBusiness;
+
+                    let senderLabel: string;
+                    if (isBusiness) {
+                      senderLabel = selectedTicket?.business?.name || 'İŞLETME SAHİBİ';
+                    } else if (msg.sender_id === user?.id) {
+                      senderLabel = 'SİZ (YÖNETİCİ)';
+                    } else {
+                      senderLabel = 'DESTEK EKİBİ';
+                    }
+
+                    return (
+                      <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
+                         <div className={`max-w-[80%] p-5 rounded-[1.5rem] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md ${
+                            isMe
+                            ? 'bg-primary text-white rounded-tr-none'
+                            : isBusiness
+                              ? 'bg-muted/80 text-foreground rounded-tl-none border border-border'
+                              : 'bg-blue-500/10 text-foreground rounded-tl-none border border-blue-500/20'
+                         }`}>
+                            {msg.message}
+                            <div className={`text-[10px] mt-3 font-bold opacity-60 flex items-center gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                               <span className="uppercase tracking-widest italic">
+                                 {senderLabel}
+                               </span>
+                               <span>•</span>
+                               {msg.created_at ? format(new Date(msg.created_at), "HH:mm") : '...'}
+                            </div>
+                         </div>
+                      </div>
+                    );
+                  })}
+               </div>
+
+               <div className="p-6 border-t border-border bg-background/50 backdrop-blur-md">
+                  <div className="relative group">
+                    <input
+                      disabled={selectedTicket.status === 'closed'}
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                      placeholder={selectedTicket.status === 'closed' ? "Bu talep kapatıldığı için mesaj gönderilemez." : "Cevabınızı buraya yazın..."}
+                      className="w-full bg-muted/40 border border-border rounded-2xl py-5 pl-8 pr-16 focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={sending || !newMessage.trim() || selectedTicket.status === 'closed'}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl h-12 w-12 p-0 shadow-lg shadow-primary/20"
+                    >
+                       <Send className="w-5 h-5" />
+                    </Button>
+                  </div>
+               </div>
+             </>
+           ) : (
+             <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-10 text-center">
+                <div className="w-24 h-24 bg-primary/5 rounded-[2rem] flex items-center justify-center mb-8 border border-primary/10">
+                   <LifeBuoy className="w-10 h-10 text-primary opacity-40" />
+                </div>
+                <h3 className="text-xl font-black text-foreground uppercase tracking-tight italic">Destek Operasyon Merkezi</h3>
+                <p className="text-sm max-w-sm mt-3 font-medium opacity-60 italic">İletişime geçmek için aktif bir talep seçin. Tüm yazışmalar kayıt altındadır.</p>
+             </div>
+           )}
+        </div>
+      </div>
+    </div>
+  );
+}

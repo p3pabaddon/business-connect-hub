@@ -4,7 +4,6 @@ import { Footer } from "@/components/layout/Footer";
 const KvkkPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-surface">
-      <Header />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-16">
         <div className="mb-12 text-center">
           <h1 className="text-5xl font-black text-foreground mb-4 uppercase tracking-tighter">6698 Sayılı KVKK Aydınlatma Metni</h1>
@@ -75,7 +74,6 @@ const KvkkPage = () => {
           </section>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

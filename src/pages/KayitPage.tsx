@@ -9,6 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
 import { checkRateLimit, getRateLimitMessage } from "@/lib/rate-limiter";
+import { registerSchema } from "@/lib/validations";
+import { z } from "zod";
 
 const KayitPage = () => {
   const [searchParams] = useSearchParams();
@@ -27,6 +29,21 @@ const KayitPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Zod Validation
+    try {
+      registerSchema.parse(form);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({ 
+          title: "Doğrulama Hatası", 
+          description: error.errors[0].message, 
+          variant: "destructive" 
+        });
+      }
+      return;
+    }
+
     if (!checkRateLimit("register")) {
       toast({ title: "Hata", description: getRateLimitMessage(), variant: "destructive" });
       return;

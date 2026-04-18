@@ -1,63 +1,168 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Sparkles, Wand2, Info, CheckCircle2, Scissors, Camera, BrainCircuit } from 'lucide-react';
+import { Sparkles, Wand2, Info, CheckCircle2, Scissors, Camera, BrainCircuit, ShieldCheck, ArrowLeft, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { analyzeImageStyle } from '@/lib/ai-service';
+import { SEOHead } from '@/components/SEOHead';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription, 
+  DialogFooter 
+} from '@/components/ui/dialog';
 
 const StyleAdvisor = () => {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [hasConsent, setHasConsent] = useState(false);
+  const [showConsentModal, setShowConsentModal] = useState(true);
+
+  const compressImage = (base64Str: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64Str;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!hasConsent) {
+      setShowConsentModal(true);
+      return;
+    }
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result as string);
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setPreview(compressed);
+      };
       reader.readAsDataURL(selectedFile);
     }
   };
 
   const handleAnalyze = async () => {
-    if (!file) return;
+    if (!preview) return;
     setAnalyzing(true);
+    setResult(null);
     
-    // Simulate AI analysis
-    setTimeout(() => {
-      setResult({
-        faceShape: 'Oval',
-        suggestions: [
-          {
-            title: 'Modern Pompadour',
-            description: 'Yüz hattınızı belirginleştiren, üstü hacimli yanları kısa kesim.',
-            matchScore: 95
-          },
-          {
-            title: 'Low Fade + Textured Top',
-            description: 'Sportif ve bakımı kolay, günlük kullanım için ideal.',
-            matchScore: 88
-          },
-          {
-            title: 'Klasik Yan Ayrım',
-            description: 'Resmi ortamlar ve profesyonel görünüm için vazgeçilmez.',
-            matchScore: 82
-          }
-        ],
-        tips: [
-          'Saçlarınızın üst kısmını hacimlendirmek için deniz tuzu spreyi kullanabilirsiniz.',
-          'Sakalınızı çene hattını takip edecek şekilde kısa tutmanız yüzünüzü daha keskin gösterir.'
-        ]
-      });
+    try {
+      const data = await analyzeImageStyle(preview);
+      
+      if (data.error) {
+        toast.error(data.error);
+        setResult(null);
+      } else {
+        setResult(data);
+        toast.success('Analiz başarıyla tamamlandı!');
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Analiz sırasında bir hata oluştu.');
+    } finally {
       setAnalyzing(false);
-      toast.success('Analiz tamamlandı!');
-    }, 3000);
+    }
+  };
+
+  const handleConsent = () => {
+    setHasConsent(true);
+    setShowConsentModal(false);
+    toast.success('Kullanım onayı alındı. Analize başlayabilirsiniz.');
+  };
+
+  const handleDecline = () => {
+    navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white py-12 px-4 relative overflow-hidden">
-      {/* Background Glows */}
+      <Dialog open={showConsentModal} onOpenChange={(open) => {
+        if (!open && !hasConsent) handleDecline();
+      }}>
+        <DialogContent className="sm:max-w-[500px] bg-[#0f111a] border-white/10 text-white shadow-2xl overflow-hidden p-0">
+          <div className="h-2 bg-primary w-full" />
+          <div className="p-8">
+            <DialogHeader className="items-center text-center mb-6">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 border border-primary/20">
+                <ShieldCheck className="w-8 h-8 text-primary" />
+              </div>
+              <DialogTitle className="text-2xl font-bold font-heading leading-tight">
+                Kişisel Verilerin İşlenmesi ve <br /> Fotoğraf Analiz Onayı
+              </DialogTitle>
+              <DialogDescription className="text-gray-400 text-base pt-2 leading-relaxed">
+                Size en uygun stil önerilerini yapabilmemiz için yükleyeceğiniz fotoğraf yapay zeka tarafından analiz edilecektir.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 mb-8">
+              <div className="flex gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                <ShieldAlert className="w-6 h-6 text-amber-500 shrink-0" />
+                <div className="text-sm text-gray-400 leading-snug">
+                  <strong>KVKK Uyumu:</strong> Fotoğrafınız sadece anlık analiz için kullanılır. İşlem bittikten sonra sistemden kalıcı olarak silinir ve asla kaydedilmez.
+                </div>
+              </div>
+              
+              <ul className="space-y-2 text-sm text-gray-400 px-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
+                  Analiz sadece yüz hatlarınız için yapılır.
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
+                  Verileriniz üçüncü taraflarla paylaşılmaz.
+                </li>
+              </ul>
+            </div>
+
+            <DialogFooter className="flex-col sm:flex-col gap-3">
+              <Button onClick={handleConsent} className="w-full py-6 text-lg font-bold bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-lg shadow-primary/20">
+                Onaylıyorum ve Başlamak İstiyorum
+              </Button>
+              <Button onClick={handleDecline} variant="outline" className="w-full py-6 text-base font-medium border-white/10 hover:bg-white/5 text-gray-400 hover:text-white rounded-xl transition-all flex items-center gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Vazgeç ve Ana Sayfaya Dön
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <SEOHead 
+        title="AI Stil Danışmanı | Yüz Şekline Göre Saç & Sakal Analizi"
+        description="Yapay zeka ile yüz hattı analizi yaptırın. Size en uygun saç kesimi ve sakal modellerini profesyonel AI önerileriyle saniyeler içinde keşfedin."
+        type="website"
+      />
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -z-10 animate-pulse" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] -z-10" />
 
@@ -80,19 +185,9 @@ const StyleAdvisor = () => {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Upload Section */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-6"
-          >
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div className="glass-dark rounded-3xl p-8 border border-white/10 relative group">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-              />
+              <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
               <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-white/10 rounded-2xl group-hover:border-primary/50 transition-all">
                 {preview ? (
                   <img src={preview} alt="Preview" className="w-full max-w-xs aspect-square object-cover rounded-xl shadow-2xl" />
@@ -108,11 +203,7 @@ const StyleAdvisor = () => {
               </div>
             </div>
 
-            <Button
-              onClick={handleAnalyze}
-              disabled={!file || analyzing}
-              className="w-full py-8 text-xl font-bold bg-primary hover:bg-primary/90 rounded-2xl shadow-2xl shadow-primary/20 transition-all flex items-center gap-3"
-            >
+            <Button onClick={handleAnalyze} disabled={!file || analyzing} className="w-full py-8 text-xl font-bold bg-primary hover:bg-primary/90 rounded-2xl shadow-2xl shadow-primary/20 transition-all flex items-center gap-3">
               {analyzing ? (
                 <>
                   <Wand2 className="w-6 h-6 animate-spin" />
@@ -132,28 +223,16 @@ const StyleAdvisor = () => {
             </div>
           </motion.div>
 
-          {/* Result Section */}
           <div className="relative min-h-[500px]">
             <AnimatePresence mode="wait">
               {analyzing ? (
-                <motion.div
-                  key="analyzing"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex flex-col gap-6"
-                >
+                <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6">
                   <div className="h-20 w-full bg-white/5 animate-pulse rounded-2xl" />
                   <div className="h-64 w-full bg-white/5 animate-pulse rounded-2xl" />
                   <div className="h-40 w-full bg-white/5 animate-pulse rounded-2xl" />
                 </motion.div>
               ) : result ? (
-                <motion.div
-                  key="result"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="space-y-8"
-                >
+                <motion.div key="result" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
                   <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-4">
                     <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                     <div>
@@ -165,13 +244,7 @@ const StyleAdvisor = () => {
                   <div className="space-y-4">
                     <h3 className="text-2xl font-bold font-heading">Sana Özel Öneriler</h3>
                     {result.suggestions.map((s: any, i: number) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/30 transition-all group"
-                      >
+                      <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/30 transition-all group">
                         <div className="flex justify-between items-center mb-2">
                           <h4 className="text-lg font-bold flex items-center gap-2">
                             <Scissors className="w-4 h-4 text-primary" />
@@ -200,11 +273,7 @@ const StyleAdvisor = () => {
                   </div>
                 </motion.div>
               ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-white/5 rounded-3xl text-gray-600"
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-white/5 rounded-3xl text-gray-600">
                   <Wand2 className="w-20 h-20 mb-4 opacity-10" />
                   <p className="text-lg">Analiz sonuçlarını burada göreceksiniz.</p>
                 </motion.div>

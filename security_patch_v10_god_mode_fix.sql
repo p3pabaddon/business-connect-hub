@@ -1,12 +1,16 @@
 -- 🛡️ SECURITY PATCH v10: GOD MODE & ADMINISTRATIVE HARDENING
 -- Addresses IDs: 01, 05, 06, 07
 
--- 1. HARDEN PROFILES (STOP PRIVILEGE ESCALATION)
+-- 1. HARDEN PROFILES (STOP PRIVILEGE ESCALATION & DATA LEAKAGE)
 ALTER TABLE IF EXISTS profiles ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
-CREATE POLICY "Public profiles are viewable by everyone" 
-ON profiles FOR SELECT USING (true);
+CREATE POLICY "Profiles are viewable by owner or admin" 
+ON profiles FOR SELECT USING (
+    auth.uid() = id 
+    OR 
+    (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'super_admin', 'hq_staff')
+);
 
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" 

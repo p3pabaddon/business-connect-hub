@@ -23,6 +23,7 @@ import { tr } from "date-fns/locale";
 import { getMyPromoCodes, claimReferral } from "@/lib/api";
 import { StampCard } from "@/components/loyalty/StampCard";
 import { ReferralWidget } from "@/components/loyalty/ReferralWidget";
+import { getCategoryPlaceholder } from "@/lib/utils";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "Bekliyor", variant: "secondary" },
@@ -146,12 +147,20 @@ const ProfilPage = () => {
   const silentReload = async () => {
     if (!user) return;
     try {
-      const { data: aptsRes } = await supabase
-        .from("appointments")
-        .select("*, businesses(name, slug, city)")
-        .eq("customer_id", user.id)
-        .order("appointment_date", { ascending: false });
-      setAppointments(aptsRes || []);
+      const [aptsRes, favsRes] = await Promise.all([
+        supabase
+          .from("appointments")
+          .select("*, businesses(name, slug, city)")
+          .eq("customer_id", user.id)
+          .order("appointment_date", { ascending: false }),
+        supabase
+          .from("favorites")
+          .select("*, businesses(id, name, slug, city, category, rating, review_count, image_url)")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+      ]);
+      setAppointments(aptsRes.data || []);
+      setFavorites(favsRes.data || []);
     } catch (e) { console.error(e); }
   };
 
@@ -362,10 +371,13 @@ const ProfilPage = () => {
                       to={`/isletme/${fav.businesses?.slug}`}
                       className="bg-card border border-border rounded-xl p-4 flex items-center gap-4 hover:border-accent/30 transition-colors"
                     >
-                      <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex-shrink-0 overflow-hidden">
-                        {fav.businesses?.image_url && (
-                          <img src={fav.businesses.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
-                        )}
+                      <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex-shrink-0 appearance-none overflow-hidden">
+                        <img 
+                          src={fav.businesses?.image_url || fav.businesses?.logo || getCategoryPlaceholder(fav.businesses?.category)} 
+                          alt="" 
+                          className="w-full h-full object-cover" 
+                          loading="lazy" 
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm text-foreground truncate">{fav.businesses?.name}</h3>
