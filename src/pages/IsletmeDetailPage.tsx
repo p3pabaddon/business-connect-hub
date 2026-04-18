@@ -21,6 +21,7 @@ import { ReviewAISummary } from "@/components/ReviewAISummary";
 import { supabase } from "@/lib/supabase";
 import { MoveRight, ImageIcon, Sparkles } from "lucide-react";
 import { markReviewHelpful, reportReview } from "@/lib/biz-api";
+import { SocialProofWidget } from "@/components/SocialProofWidget";
 
 interface IsletmeDetailContentProps {
   biz: any;
@@ -570,6 +571,7 @@ export const IsletmeDetailContent = ({
           />
         </>
       )}
+      <SocialProofWidget businessId={biz.id} />
     </main>
   );
 };
