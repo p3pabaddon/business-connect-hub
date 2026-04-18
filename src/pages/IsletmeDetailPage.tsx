@@ -15,6 +15,7 @@ import { getLoyaltyProgram, getCustomerLoyalty, joinLoyaltyProgram } from "@/lib
 import { useAuth } from "@/contexts/AuthContext";
 import { SEOHead } from "@/components/SEOHead";
 import { cn, getCategoryPlaceholder, toTitleCase, hexToHsl } from "@/lib/utils";
+import DOMPurify from "dompurify";
 import { toast } from "sonner";
 import { StampCard } from "@/components/loyalty/StampCard";
 import { ReviewAISummary } from "@/components/ReviewAISummary";
@@ -103,10 +104,10 @@ export const IsletmeDetailContent = ({
       <div className={cn(isPreview && "preview-scoped h-full w-full")}>
         <style dangerouslySetInnerHTML={{ __html: `
           ${selector} {
-            --primary: ${hexToHsl(branding.primary_color)};
-            --accent: ${hexToHsl(branding.secondary_color)};
-            --secondary: ${hexToHsl(branding.secondary_color)};
-            --ring: ${hexToHsl(branding.primary_color)};
+            --primary: ${hexToHsl(branding.primary_color || "#7c3aed")};
+            --accent: ${hexToHsl(branding.secondary_color || "#db2777")};
+            --secondary: ${hexToHsl(branding.secondary_color || "#db2777")};
+            --ring: ${hexToHsl(branding.primary_color || "#7c3aed")};
           }
         `}} />
         {content}

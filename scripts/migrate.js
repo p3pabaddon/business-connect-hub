@@ -4,8 +4,8 @@
  * Uses the Supabase service role key via the REST API
  */
 
-const SUPABASE_URL = 'https://szlkjqamknjiwlwtaxpw.supabase.co';
-const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6bGtqcWFta25qaXdsd3RheHB3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDcwNzM4MywiZXhwIjoyMDkwMjgzMzgzfQ.JPVVZtUTzSKWhGKKHkEK1JDscz6xdctE1NrluDEik1Q';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const SQL = `
 -- ============================================

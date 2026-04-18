@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { SEOHead } from '@/components/SEOHead';
+import DOMPurify from 'dompurify';
 
 const BlogPostPage = () => {
   const { slug } = useParams();
@@ -324,7 +325,7 @@ const BlogPostPage = () => {
               prose-blockquote:border-none prose-blockquote:bg-white/5 prose-blockquote:p-12 prose-blockquote:rounded-[3rem] prose-blockquote:italic prose-blockquote:text-3xl prose-blockquote:font-black prose-blockquote:text-white prose-blockquote:relative
               prose-li:text-gray-400 prose-li:mb-4 prose-strong:text-white prose-strong:font-black
               prose-ol:space-y-6 prose-ul:space-y-6"
-            dangerouslySetInnerHTML={{ __html: post.content }} 
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} 
           />
           
           <div className="mt-32 pt-16 border-t border-white/10 flex items-center justify-between flex-wrap gap-8">
