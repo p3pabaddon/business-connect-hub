@@ -126,7 +126,7 @@ export function PricingSection() {
                 <span className="text-5xl sm:text-6xl font-heading font-black text-foreground group-hover:scale-110 transition-transform duration-500 inline-block">
                   {plan.currency}{plan.price}
                 </span>
-                <span className="text-muted-foreground font-medium text-lg ml-1">/{plan.period}</span>
+                <span className="text-muted-foreground font-medium text-lg ml-1">{plan.period}</span>
               </div>
 
               <div className="space-y-5 mb-12 flex-grow">

@@ -14,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CommandPalette } from "@/components/CommandPalette";
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,13 +33,13 @@ export function Header() {
             <div className="relative h-10 w-10 sm:h-12 sm:w-12 bg-white dark:bg-white/90 rounded-xl shadow-lg border border-black/5 overflow-hidden flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
               <img 
                 src="/logo.png" 
-                alt="Randevu Dünyası" 
+                alt={`${t("common.brand_name_1")} ${t("common.brand_name_2")}`} 
                 className="max-h-full max-w-full object-contain" 
               />
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold tracking-tight text-foreground leading-none">
-                Randevu <span className="text-accent">Dünyası</span>
+                {t("common.brand_name_1")} <span className="text-accent">{t("common.brand_name_2")}</span>
               </span>
             </div>
           </Link>
@@ -51,21 +50,18 @@ export function Header() {
               {t("nav.home")}
             </Link>
             <Link to="/nasil-calisir" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg">
-              Nasıl Çalışır?
+              {t("nav.how_it_works")}
             </Link>
             <Link to="/kesfet" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg flex items-center gap-1">
-              Keşfet <span className="bg-amber-500 text-white text-[8px] px-1 rounded-sm font-bold animate-pulse">YENİ</span>
+              {t("nav.explore")} <span className="bg-amber-500 text-white text-[8px] px-1 rounded-sm font-bold animate-pulse">{t("nav.new")}</span>
             </Link>
             <Link to="/isletmeler" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg flex items-center gap-1">
-              İşletmeler <span className="bg-primary text-white text-[8px] px-1 rounded-sm font-bold">YENİ</span>
+              {t("nav.businesses")} <span className="bg-primary text-white text-[8px] px-1 rounded-sm font-bold">{t("nav.new")}</span>
             </Link>
             
-            <div className="mx-2 hidden lg:block">
-              <CommandPalette />
-            </div>
 
             <Link to="/stil-danismani" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg flex items-center gap-1">
-              Stil Danışmanı <span className="bg-accent text-white text-[8px] px-1 rounded-sm font-bold">AI</span>
+              {t("nav.stylist")} <span className="bg-accent text-white text-[8px] px-1 rounded-sm font-bold">{t("nav.ai")}</span>
             </Link>
 
             {/* Dropdown for secondary links - Blog & Contact */}
@@ -73,12 +69,12 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <button className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all rounded-lg flex items-center gap-1 group">
                   <Menu className="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" />
-                  <span>Daha Fazla</span>
+                  <span>{t("nav.more")}</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48 backdrop-blur-xl bg-white/90 dark:bg-slate-900/90 border-white/10 shadow-2xl">
                 <DropdownMenuItem onClick={() => navigate("/blog")} className="cursor-pointer">
-                  Blog
+                  {t("nav.blog")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/iletisim")} className="cursor-pointer">
                   {t("nav.contact")}
@@ -175,11 +171,11 @@ export function Header() {
           <div className="md:hidden border-t border-border py-6 px-4 space-y-4 bg-background/95 backdrop-blur-2xl animate-in fade-in slide-in-from-top-4 duration-300">
             {[
               { href: "/", label: t("nav.home") },
-              { href: "/nasil-calisir", label: "Nasıl Çalışır?" },
-              { href: "/kesfet", label: "Keşfet" },
-              { href: "/isletmeler", label: "İşletmeler" },
-              { href: "/stil-danismani", label: "Stil Danışmanı" },
-              { href: "/blog", label: "Blog" },
+              { href: "/nasil-calisir", label: t("nav.how_it_works") },
+              { href: "/kesfet", label: t("nav.explore") },
+              { href: "/isletmeler", label: t("nav.businesses") },
+              { href: "/stil-danismani", label: t("nav.stylist") },
+              { href: "/blog", label: t("nav.blog") },
               { href: "/iletisim", label: t("nav.contact") },
               { href: "/hakkimizda", label: t("nav.about") },
             ].map((link) => (

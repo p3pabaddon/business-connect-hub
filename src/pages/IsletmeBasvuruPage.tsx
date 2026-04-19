@@ -256,7 +256,7 @@ const IsletmeBasvuruPage = () => {
                                 <Zap className={cn("w-4 h-4", form.plan === "starter" ? "text-primary" : "text-muted-foreground")} />
                                 <span className="font-bold text-sm">Starter</span>
                               </div>
-                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺800/Ay</span>
+                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">{t("pricing.currency")}{t("pricing.free_price")}{t("pricing.month")}</span>
                               {form.plan === "starter" && (
                                 <div className="absolute top-2 right-2">
                                   <CheckCircle className="w-4 h-4 text-primary" />
@@ -276,7 +276,7 @@ const IsletmeBasvuruPage = () => {
                                 <Crown className={cn("w-4 h-4", (form.plan === "premium" || form.plan === "pro") ? "text-primary" : "text-muted-foreground")} />
                                 <span className="font-bold text-sm">Premium</span>
                               </div>
-                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">₺1200/Ay</span>
+                              <span className="text-[10px] font-medium text-muted-foreground tracking-tight">{t("pricing.currency")}{t("pricing.premium_price")}{t("pricing.month")}</span>
                               {(form.plan === "premium" || form.plan === "pro") && (
                                 <div className="absolute top-2 right-2">
                                   <CheckCircle className="w-4 h-4 text-primary" />
