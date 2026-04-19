@@ -208,16 +208,18 @@ const ProfilPage = () => {
           </div>
 
           <Tabs defaultValue="upcoming" className="space-y-6">
-            <TabsList className="bg-card border border-border flex-wrap auto-cols-auto">
-              <TabsTrigger value="upcoming">Yaklaşan ({upcomingAppointments.length})</TabsTrigger>
-              <TabsTrigger value="applications">Başvurularım ({myBusinesses.length})</TabsTrigger>
-              <TabsTrigger value="notifications">Bildirimler ({waitlistEntries.length + announcements.length})</TabsTrigger>
-              <TabsTrigger value="past">Geçmiş ({pastAppointments.length})</TabsTrigger>
-              <TabsTrigger value="favorites">Favoriler ({favorites.length})</TabsTrigger>
-              <TabsTrigger value="reviews">Yorumlarım ({reviews.length})</TabsTrigger>
-              <TabsTrigger value="loyalty">Ödüller</TabsTrigger>
-              <TabsTrigger value="settings">Ayarlar</TabsTrigger>
-            </TabsList>
+            <div className="w-full overflow-x-auto -mx-1 px-1 no-scrollbar">
+              <TabsList className="bg-card border border-border h-auto inline-flex w-max min-w-full p-1 gap-1">
+                <TabsTrigger value="upcoming" className="px-4 py-2 flex-shrink-0">Yaklaşan ({upcomingAppointments.length})</TabsTrigger>
+                <TabsTrigger value="applications" className="px-4 py-2 flex-shrink-0">Başvurularım ({myBusinesses.length})</TabsTrigger>
+                <TabsTrigger value="notifications" className="px-4 py-2 flex-shrink-0">Bildirimler ({waitlistEntries.length + announcements.length})</TabsTrigger>
+                <TabsTrigger value="past" className="px-4 py-2 flex-shrink-0">Geçmiş ({pastAppointments.length})</TabsTrigger>
+                <TabsTrigger value="favorites" className="px-4 py-2 flex-shrink-0">Favoriler ({favorites.length})</TabsTrigger>
+                <TabsTrigger value="reviews" className="px-4 py-2 flex-shrink-0">Yorumlarım ({reviews.length})</TabsTrigger>
+                <TabsTrigger value="loyalty" className="px-4 py-2 flex-shrink-0">Ödüller</TabsTrigger>
+                <TabsTrigger value="settings" className="px-4 py-2 flex-shrink-0">Ayarlar</TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="upcoming">
               {upcomingAppointments.length === 0 ? (

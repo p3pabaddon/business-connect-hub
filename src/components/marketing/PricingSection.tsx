@@ -163,15 +163,7 @@ export function PricingSection() {
           ))}
         </div>
 
-        {/* Trust badge/Guarantees */}
-        <motion.p 
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="text-center mt-12 text-sm text-muted-foreground font-medium"
-        >
-          {t("pricing.guarantee") || "Tüm fiyatlara KDV dahildir. İstediğiniz zaman iptal edebilirsiniz."}
-        </motion.p>
+
       </div>
     </section>
   );

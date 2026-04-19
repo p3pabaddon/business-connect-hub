@@ -202,31 +202,31 @@ export function Header() {
             >
               {t("nav.business_apply")}
             </Link>
+            {isBusinessOwner && (
+              <Link
+                to="/biz-dashboard-secure-x31p9q8w2"
+                className="block px-4 py-3 text-base font-bold text-primary bg-primary/10 rounded-2xl border border-primary/20 shadow-lg shadow-primary/5 mb-2"
+                onClick={() => setMobileOpen(false)}
+              >
+                <LayoutDashboard className="w-5 h-5 inline mr-2" /> {t("common.dashboard")}
+              </Link>
+            )}
             {user && (
               <>
                 <Link
                   to="/profil"
-                  className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted"
+                  className="block px-4 py-3 text-base font-semibold text-foreground hover:text-accent rounded-2xl hover:bg-accent/5 transition-all border border-transparent hover:border-accent/10"
                   onClick={() => setMobileOpen(false)}
                 >
-                  {t("common.profile")}
+                  <User className="w-5 h-5 inline mr-2" /> {t("common.profile")}
                 </Link>
-                  {isBusinessOwner && (
-                    <Link
-                      to="/biz-dashboard-secure-x31p9q8w2"
-                      className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      {t("common.dashboard")}
-                    </Link>
-                  )}
                   {isAdmin && (
                     <Link
                       to="/admin-secure-panel-v5-x89j2k1m4n5"
-                      className="block px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10 rounded-md"
+                      className="block px-4 py-3 text-base font-semibold text-primary hover:bg-primary/10 rounded-2xl border border-primary/10 mt-2"
                       onClick={() => setMobileOpen(false)}
                     >
-                      <Shield className="w-4 h-4 inline mr-2" /> {t("common.admin_panel")}
+                      <Shield className="w-5 h-5 inline mr-2" /> {t("common.admin_panel")}
                     </Link>
                   )}
               </>
