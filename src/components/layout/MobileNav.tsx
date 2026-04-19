@@ -8,9 +8,9 @@ export function MobileNav() {
 
   const navItems = [
     { icon: Home, label: t("nav.home"), href: "/" },
-    { icon: Compass, label: "Keşfet", href: "/kesfet" },
-    { icon: Search, label: "İşletmeler", href: "/isletmeler" },
-    { icon: MapPin, label: "Harita", href: "/harita" },
+    { icon: Compass, label: t("nav.explore"), href: "/kesfet" },
+    { icon: Search, label: t("nav.businesses"), href: "/isletmeler" },
+    { icon: MapPin, label: t("nav.how_it_works"), href: "/nasil-calisir" },
     { icon: User, label: t("common.profile"), href: "/profil" },
   ];
 
