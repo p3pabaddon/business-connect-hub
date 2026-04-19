@@ -25,7 +25,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { BizAiAdvisor } from "@/components/biz/BizAiAdvisor";
 import { BizNotifications } from "@/components/biz/BizNotifications";
 import { BizPageEditor } from "@/components/biz/BizPageEditor";
-import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2, LayoutDashboard, LogOut, ExternalLink, MessageSquare, Calendar, ShoppingBag, Users, LifeBuoy } from "lucide-react";
+import { Loader2, Bell, Search, UserCircle, Settings, Menu, Building2, LayoutDashboard, LogOut, ExternalLink, MessageSquare, Calendar, ShoppingBag, Users, LifeBuoy, Home } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -278,6 +278,13 @@ export default function BusinessDashboard() {
               className="p-2.5 bg-muted/50 hover:bg-muted border border-border rounded-xl transition-all lg:hidden active:scale-95 shadow-sm"
             >
               <Menu className="w-4 h-4 text-foreground" />
+            </button>
+            <button 
+              onClick={() => navigate("/")}
+              className="p-2.5 bg-muted/50 hover:bg-muted border border-border rounded-xl transition-all lg:hidden active:scale-95 shadow-sm"
+              title="Ana Sayfaya Dön"
+            >
+              <Home className="w-4 h-4 text-foreground" />
             </button>
              <div className="hidden lg:flex items-center gap-6 text-xs font-medium text-muted-foreground">
                 <Logo className="h-9 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setActiveTab("overview")} />

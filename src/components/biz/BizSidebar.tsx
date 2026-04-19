@@ -3,7 +3,7 @@ import {
   BarChart3, Settings, LogOut, 
   ShoppingBag, Star, Megaphone, 
   Menu, X, ShieldCheck, UserCircle, Bell,
-  Target, Gift, MessageSquare, Package, Crown, PieChart, Image as ImageIcon, LifeBuoy, Sparkles, Ticket, Heart, Palette
+  Target, Gift, MessageSquare, Package, Crown, PieChart, Image as ImageIcon, LifeBuoy, Sparkles, Ticket, Heart, Palette, Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,7 +28,16 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
-  const navGroups = [
+  const navGroups: {
+    label: string,
+    items: {
+      id: string,
+      label: string,
+      icon: any,
+      premium?: boolean,
+      customAction?: () => void
+    }[]
+  }[] = [
     {
       label: "Büyüme & CRM",
       items: [
@@ -66,7 +75,14 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
          { id: "page-editor", label: "İşletme Sayfası", icon: Palette, premium: true },
          { id: "reviews", label: "Müşteri Yorumları", icon: MessageSquare },
          { id: "support", label: "Destek Merkezi", icon: LifeBuoy },
+         { id: "style-advisor", label: "AI Stil Danışmanı", icon: Sparkles, customAction: () => navigate("/stil-danismani") },
          { id: "settings", label: "İşletme Ayarı", icon: Settings },
+      ]
+    },
+    {
+      label: "Platform",
+      items: [
+         { id: "home", label: "Ana Sayfaya Dön", icon: Home, customAction: () => navigate("/") },
       ]
     }
   ];
@@ -86,7 +102,7 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
           <X className="w-6 h-6" />
         </button>
 
-        <div className={cn("p-6 flex items-center", !sidebarOpen && "px-3")}>
+        <div className={cn("p-6 flex flex-col gap-6", !sidebarOpen && "px-3")}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 shrink-0">
               <UserCircle className="w-6 h-6 text-primary" />
@@ -98,6 +114,17 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
               </div>
             )}
           </div>
+
+          <button
+            onClick={() => navigate("/")}
+            className={cn(
+              "flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-slate-900 border border-white/5 text-slate-400 hover:text-white hover:bg-slate-800 transition-all group",
+              !sidebarOpen && "px-0 justify-center"
+            )}
+          >
+            <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            {sidebarOpen && <span className="font-medium text-sm">Ana Sayfaya Dön</span>}
+          </button>
         </div>
 
       <nav className={cn(
@@ -114,7 +141,9 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
                   <li key={`${item.id}-${idx}`}>
                     <button
                       onClick={() => {
-                        if (isLocked) {
+                        if (item.customAction) {
+                          item.customAction();
+                        } else if (isLocked) {
                           setActiveTab("premium");
                         } else {
                           setActiveTab(item.id as BizTab);
@@ -138,6 +167,11 @@ export function BizSidebar({ activeTab, setActiveTab, businessName, sidebarOpen,
                           {isLocked && (
                             <div className="bg-amber-500/10 p-1 rounded-md ml-auto">
                               <Crown className="w-3 h-3 text-amber-500" />
+                            </div>
+                          )}
+                          {!isLocked && item.customAction && (
+                            <div className="bg-accent/10 p-1 rounded-md ml-auto">
+                              <Sparkles className="w-3 h-3 text-accent" />
                             </div>
                           )}
                         </div>
