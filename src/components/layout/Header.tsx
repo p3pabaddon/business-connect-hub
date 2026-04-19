@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CommandPalette } from "@/components/CommandPalette";
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -58,6 +59,11 @@ export function Header() {
             <Link to="/isletmeler" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg flex items-center gap-1">
               İşletmeler <span className="bg-primary text-white text-[8px] px-1 rounded-sm font-bold">YENİ</span>
             </Link>
+            
+            <div className="mx-2 hidden lg:block">
+              <CommandPalette />
+            </div>
+
             <Link to="/stil-danismani" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all rounded-lg flex items-center gap-1">
               Stil Danışmanı <span className="bg-accent text-white text-[8px] px-1 rounded-sm font-bold">AI</span>
             </Link>

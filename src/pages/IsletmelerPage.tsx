@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Star, CheckCircle, SlidersHorizontal, Zap, Navigation } from "lucide-react";
+import { Search, MapPin, Star, CheckCircle, SlidersHorizontal, Zap, Navigation, Mic, MicOff } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -15,6 +15,7 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { t } from "@/lib/translations";
 import { SEOHead } from "@/components/SEOHead";
 import { cn, getCategoryPlaceholder, toTitleCase } from "@/lib/utils";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 
 const categories = [
   { value: "all", label: t("isletmeler.all_categories") },
@@ -44,6 +45,11 @@ const IsletmelerPage = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [sortByDistance, setSortByDistance] = useState(false);
+
+  const { isListening, startListening, stopListening } = useVoiceSearch((text) => {
+    setSearchQuery(text);
+    toast.success(`Aranan: "${text}"`);
+  });
 
   // Sync URL with state
   useEffect(() => {
@@ -141,14 +147,23 @@ const IsletmelerPage = () => {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h1 className="text-2xl sm:text-3xl font-heading text-foreground mb-6">{t("isletmeler.title")}</h1>
             <div className="flex flex-col gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <div className="relative group/search">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
                 <Input
                   placeholder={t("hero.search")}
-                  className="pl-10 h-12 rounded-xl shadow-sm border-border/60"
+                  className="pl-10 pr-12 h-14 rounded-2xl shadow-sm border-border/60 focus:border-primary/50 transition-all text-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                <button
+                  onClick={isListening ? stopListening : startListening}
+                  className={cn(
+                    "absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all",
+                    isListening ? "bg-red-500 text-white animate-pulse" : "bg-muted hover:bg-primary/10 text-muted-foreground hover:text-primary"
+                  )}
+                >
+                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
               </div>
 
               <div className="grid grid-cols-1 gap-3">
