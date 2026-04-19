@@ -271,11 +271,11 @@ export default function BusinessDashboard() {
           />
         )}
 
-        <header className="sticky top-0 h-14 lg:h-20 border-b border-border px-3 lg:px-8 flex items-center justify-between bg-background/80 backdrop-blur-xl z-30 transition-all duration-300">
-         <div className="flex items-center gap-2 lg:gap-6 flex-1">
+        <header className="sticky top-0 h-16 md:h-20 border-b border-border px-4 md:px-8 flex items-center justify-between bg-background/80 backdrop-blur-xl z-30 transition-all duration-300">
+         <div className="flex items-center gap-3 md:gap-6 flex-1">
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 bg-muted/50 hover:bg-muted border border-border rounded-lg transition-all lg:hidden active:scale-95 shadow-sm"
+              className="p-2.5 bg-muted/50 hover:bg-muted border border-border rounded-xl transition-all lg:hidden active:scale-95 shadow-sm"
             >
               <Menu className="w-4 h-4 text-foreground" />
             </button>
@@ -291,19 +291,19 @@ export default function BusinessDashboard() {
                 <span className="text-muted-foreground/30 mx-2 text-lg">/</span>
                 <span className="text-primary capitalize font-bold bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">{activeTab}</span>
              </div>
-             <div className="relative flex-1 max-w-[160px] lg:max-w-xs group">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors z-20" />
+             <div className="relative flex-1 max-w-[120px] sm:max-w-xs group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors z-20" />
                 <Input 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-muted/50 border-border pl-8 h-8 text-[9px] lg:h-9 lg:text-xs focus:ring-primary/20 transition-all relative z-10 rounded-lg" 
+                  className="bg-muted/50 border-border pl-9 h-10 text-[10px] md:h-11 md:text-xs focus:ring-primary/20 transition-all relative z-10 rounded-xl" 
                   placeholder="Ara..." 
                 />
                   
                   {searchQuery.length > 1 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="p-2 border-b border-border bg-muted/30">
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Arama Sonuçları</p>
+                    <div className="absolute top-full left-0 right-0 mt-3 bg-card border border-border rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="p-3 border-b border-border bg-muted/30">
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Arama Sonuçları</p>
                       </div>
                       <div className="max-h-[400px] overflow-y-auto">
                         {customers.filter((c: any) => 
@@ -313,14 +313,14 @@ export default function BusinessDashboard() {
                           <div 
                             key={c.phone}
                             onClick={() => { setActiveTab("crm"); setSearchQuery(""); }}
-                            className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left group cursor-pointer"
+                            className="w-full flex items-center gap-3 p-4 hover:bg-muted transition-colors text-left group cursor-pointer"
                           >
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary uppercase">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary uppercase border border-primary/20">
                               {(c.name || "M")[0]}
                             </div>
                             <div>
                               <p className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">{c.name}</p>
-                              <p className="text-[9px] text-muted-foreground font-mono">{c.phone}</p>
+                              <p className="text-[10px] text-muted-foreground font-mono opacity-60 font-bold">{c.phone}</p>
                             </div>
                           </div>
                         ))}
@@ -330,7 +330,7 @@ export default function BusinessDashboard() {
                </div>
            </div>
 
-           <div className="flex items-center gap-2 lg:gap-4">
+           <div className="flex items-center gap-2 md:gap-4">
               <ThemeToggle />
               <button 
                 type="button"
@@ -339,25 +339,25 @@ export default function BusinessDashboard() {
                   e.stopPropagation();
                   setActiveTab("notifications");
                 }}
-                className="relative p-2 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-all duration-200 group flex items-center justify-center cursor-pointer z-[60]"
+                className="relative p-2.5 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-all duration-200 group flex items-center justify-center cursor-pointer z-[60]"
               >
                  <Bell className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors pointer-events-none" />
-                 <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full border-2 border-background pointer-events-none"></span>
+                 <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-background pointer-events-none shadow-sm"></span>
               </button>
 
-              <div className="h-6 w-[1px] bg-border mx-1 lg:mx-2"></div>
+              <div className="hidden md:block h-6 w-[1px] bg-border mx-2"></div>
 
                <button 
                  onClick={() => navigate("/")}
-                 className="flex items-center gap-2 p-1.5 px-3 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group"
+                 className="hidden md:flex items-center gap-2 p-1.5 px-3 bg-muted/50 border border-border rounded-xl hover:bg-muted transition-colors group"
                >
                   <LayoutDashboard className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase hidden lg:block">Panel</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">Panel</span>
                </button>
 
                 <button 
                   onClick={async () => { await signOut(); navigate("/"); }}
-                  className="flex items-center gap-2 p-1 bg-muted/50 border border-border rounded-xl hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors group"
+                  className="hidden md:flex items-center gap-2 p-1 bg-muted/50 border border-border rounded-xl hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/20 group-hover:bg-rose-500/20 group-hover:border-rose-500/20 shadow-sm">
                      <LogOut className="w-4 h-4 text-primary group-hover:text-rose-500" />

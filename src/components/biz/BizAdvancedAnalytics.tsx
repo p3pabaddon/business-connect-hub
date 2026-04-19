@@ -148,70 +148,71 @@ export function BizAdvancedAnalytics({ businessId }: { businessId: string }) {
   );
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700">
+    <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700">
       {/* AI Pulse Section */}
-      <div className="bg-slate-900 border border-white/5 rounded-[3rem] p-10 relative overflow-hidden group shadow-2xl">
-         <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-125 transition-transform duration-1000">
+      <div className="bg-slate-900 border border-white/5 rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 relative overflow-hidden group shadow-2xl">
+         <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-125 transition-transform duration-1000 hidden md:block">
             <Brain className="w-40 h-40 text-primary" />
          </div>
          
-         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <div>
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-primary/20 rounded-2xl border border-primary/30">
-                     <Sparkles className="w-6 h-6 text-primary" />
+         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10 items-center">
+            <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+               <div className="flex items-center gap-3 mb-4 md:mb-6">
+                  <div className="p-2 md:p-3 bg-primary/20 rounded-xl md:rounded-2xl border border-primary/30">
+                     <Sparkles className="w-4 h-4 md:w-6 md:h-6 text-primary" />
                   </div>
-                  <h2 className="text-2xl font-black text-white uppercase tracking-tight italic">AI Analitik Motoru</h2>
+                  <h2 className="text-lg md:text-2xl font-black text-white uppercase tracking-tight italic">AI Analitik Motoru</h2>
                </div>
-               <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-md mb-8">
+               <p className="text-slate-400 text-[10px] md:text-sm font-medium leading-relaxed max-w-md mb-6 md:mb-8">
                   Yapay zeka, son 30 günlük randevu trendlerini ve müşteri geri bildirimlerini analiz ederek işletmeniz için özel bir büyüme stratejisi oluşturur.
                </p>
                <Button 
                 onClick={runAiAnalysis}
                 disabled={analyzing}
-                className="h-14 px-10 rounded-2xl bg-primary text-white font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20"
+                className="w-full sm:w-auto h-12 md:h-14 px-8 md:px-10 rounded-xl md:rounded-2xl bg-primary text-white font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 text-[10px] md:text-sm"
                >
-                  {analyzing ? <Loader2 className="w-5 h-5 animate-spin mr-3" /> : <Zap className="w-5 h-5 mr-3" />}
+                  {analyzing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
                   STRATEJİ OLUŞTUR
                </Button>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-md rounded-[2rem] border border-white/10 p-8 min-h-[200px] flex flex-col justify-center">
+            <div className="bg-white/5 backdrop-blur-md rounded-[1.5rem] md:rounded-[2rem] border border-white/10 p-5 md:p-8 min-h-[120px] md:min-h-[200px] flex flex-col justify-center">
+
                {aiInsight ? (
-                 <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
-                    <div className="flex items-center gap-2 mb-2">
-                       <Activity className="w-4 h-4 text-emerald-400" />
-                       <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em]">SİSTEM ANALİZİ AKTİF</span>
+                 <div className="space-y-3 md:space-y-4 animate-in slide-in-from-right-4 duration-500">
+                    <div className="flex items-center gap-2 mb-1">
+                       <Activity className="w-3 h-3 md:w-4 md:h-4 text-emerald-400" />
+                       <span className="text-[8px] md:text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em]">SİSTEM ANALİZİ AKTİF</span>
                     </div>
-                    <p className="text-slate-200 text-sm font-medium italic leading-relaxed whitespace-pre-wrap">
+                    <p className="text-slate-200 text-xs md:text-sm font-medium italic leading-relaxed whitespace-pre-wrap">
                        "{aiInsight}"
                     </p>
                  </div>
                ) : (
-                 <div className="text-center space-y-4 py-10 opacity-40">
-                    <Target className="w-10 h-10 text-white mx-auto mb-2" />
-                    <p className="text-xs font-black text-white uppercase tracking-widest">Analiz başlatılmaya hazır</p>
+                 <div className="text-center space-y-3 md:space-y-4 py-6 md:py-10 opacity-40">
+                    <Target className="w-8 h-8 md:w-10 md:h-10 text-white mx-auto mb-1" />
+                    <p className="text-[10px] md:text-xs font-black text-white uppercase tracking-widest">Analiz başlatılmaya hazır</p>
                  </div>
                )}
             </div>
          </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
          {/* Growth Area Chart */}
-         <div className="lg:col-span-8 bg-card border border-border p-10 rounded-[3rem] h-[400px]">
-             <div className="flex items-center justify-between mb-10">
-                <div>
-                   <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-1">Randevu Yoğunluğu</h3>
-                   <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">Son 7 günlük trafik analizi</p>
+         <div className="lg:col-span-8 bg-card border border-border p-5 md:p-10 rounded-[2rem] md:rounded-[3rem] h-[320px] md:h-[400px] flex flex-col shadow-sm">
+             <div className="flex flex-col sm:flex-row items-center justify-between mb-6 md:mb-10 gap-3">
+                <div className="text-center sm:text-left">
+                   <h3 className="text-[10px] md:text-sm font-black text-foreground uppercase tracking-widest mb-1">Randevu Yoğunluğu</h3>
+                   <p className="text-[7px] md:text-[10px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">Son 7 günlük trafik analizi</p>
                 </div>
-                <div className="p-3 bg-muted rounded-2xl border border-border">
-                   <TrendingUp className="w-5 h-5 text-primary" />
+                <div className="p-2 md:p-3 bg-muted rounded-xl border border-border">
+                   <TrendingUp className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
                 </div>
              </div>
-             <div className="h-[250px] w-full">
+             <div className="flex-1 w-full -ml-4 sm:ml-0">
                 <ResponsiveContainer width="100%" height="100%">
-                   <AreaChart data={data.dailyData}>
+                   <AreaChart data={data.dailyData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
@@ -219,53 +220,79 @@ export function BizAdvancedAnalytics({ businessId }: { businessId: string }) {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.3} />
-                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '1rem' }}
-                        labelStyle={{ fontSize: '10px', fontWeight: '900', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 8, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }} 
+                        minTickGap={10}
+                        interval="preserveStartEnd"
                       />
-                      <Area type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={4} fill="url(#colorCount)" />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 8, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }} 
+                        width={30}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))', 
+                          border: '1px solid hsl(var(--border))', 
+                          borderRadius: '1rem',
+                          fontSize: '10px',
+                          padding: '8px'
+                        }}
+                        labelStyle={{ fontSize: '9px', fontWeight: '900', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="count" 
+                        stroke="hsl(var(--primary))" 
+                        strokeWidth={2.5} 
+                        fill="url(#colorCount)" 
+                        animationDuration={1500}
+                      />
                    </AreaChart>
                 </ResponsiveContainer>
              </div>
          </div>
 
+
          {/* Stats Cards */}
-         <div className="lg:col-span-4 space-y-8">
-            <div className="bg-card border border-border p-8 rounded-[2.5rem] shadow-sm flex items-center justify-between group">
+         <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 md:gap-8">
+            <div className="bg-card border border-border p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm flex items-center justify-between group">
                <div>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60">Popülerlik</p>
-                  <h4 className="text-3xl font-black text-foreground tracking-tighter">
+                  <p className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60">Popülerlik</p>
+                  <h4 className="text-2xl md:text-3xl font-black text-foreground tracking-tighter">
                      {data.growth > 0 ? '+' : ''}{data.growth}%
                   </h4>
                   <div className={`flex items-center gap-1 mt-2 ${data.growth >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>
                      {data.growth >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                     <span className="text-[10px] font-black uppercase">
+                     <span className="text-[9px] md:text-[10px] font-black uppercase">
                         {data.growth >= 0 ? 'Büyüme Trendi' : 'Düşüş Trendi'}
                      </span>
                   </div>
                </div>
-               <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center border border-border group-hover:border-primary/20 transition-all">
-                  <Activity className="w-7 h-7 text-primary" />
+               <div className="w-12 h-12 md:w-16 md:h-16 bg-muted rounded-xl md:rounded-2xl flex items-center justify-center border border-border group-hover:border-primary/20 transition-all">
+                  <Activity className="w-5 h-5 md:w-7 md:h-7 text-primary" />
                </div>
             </div>
 
-            <div className="bg-card border border-border p-8 rounded-[2.5rem] shadow-sm flex items-center justify-between group">
+            <div className="bg-card border border-border p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm flex items-center justify-between group">
                <div>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60">Müşteri Puanı</p>
-                  <h4 className="text-3xl font-black text-foreground tracking-tighter">
+                  <p className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60">Müşteri Puanı</p>
+                  <h4 className="text-2xl md:text-3xl font-black text-foreground tracking-tighter">
                      {data.reviews.length > 0 
                        ? (data.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / data.reviews.length).toFixed(1) 
                        : '0.0'}
                   </h4>
                   <div className="flex items-center gap-1 mt-2 text-primary">
                      <Sparkles className="w-3 h-3" />
-                     <span className="text-[10px] font-black uppercase">{data.reviews.length} Toplam Yorum</span>
+                     <span className="text-[9px] md:text-[10px] font-black uppercase">{data.reviews.length} Toplam Yorum</span>
                   </div>
                </div>
-               <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center border border-border group-hover:border-primary/20 transition-all">
-                  <PieIcon className="w-7 h-7 text-violet-500" />
+               <div className="w-12 h-12 md:w-16 md:h-16 bg-muted rounded-xl md:rounded-2xl flex items-center justify-center border border-border group-hover:border-primary/20 transition-all">
+                  <PieIcon className="w-5 h-5 md:w-7 md:h-7 text-violet-500" />
                </div>
             </div>
          </div>
